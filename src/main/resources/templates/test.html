@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans">
+
+<div class="max-w-7xl mx-auto min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-md flex w-full">
+
+        <!-- Left form section -->
+        <div class="w-full md:w-1/2 p-8">
+            <h2 class="text-2xl font-bold text-gray-800">
+                Chào mừng <span class="text-green-600">Tv. Min Julin</span><br>
+                <span class="text-green-500">Đến với Smart Recruitment Platform</span>
+            </h2>
+            <p class="mt-2 text-gray-600">Vui lòng điền các thông tin nhà tuyển dụng bên dưới để chúng tôi hỗ trợ bạn tốt hơn:</p>
+
+            <!-- Progress bar -->
+            <div class="flex items-center mt-6 mb-4">
+                <div class="flex-1 h-1 bg-green-500 rounded"></div>
+                <div class="w-4 h-4 border-2 border-green-500 bg-white rounded-full ml-2"></div>
+                <span class="ml-4 text-gray-400 font-medium">Nhu cầu tư vấn</span>
+            </div>
+            <div class="text-sm text-gray-500 mb-4">Thông tin nhà tuyển dụng</div>
+
+            <!-- Form -->
+            <form class="space-y-4">
+                <div>
+                    <label class="block font-semibold text-gray-700">Họ và tên *</label>
+                    <input type="text" value="Tv. Min Julin" class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Giới tính *</label>
+                    <div class="flex items-center space-x-6">
+                        <label class="flex items-center">
+                            <input type="radio" name="gender" class="mr-2"> Nam
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="gender" class="mr-2"> Nữ
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700">Số điện thoại cá nhân *</label>
+                    <input type="tel" placeholder="Nhập số điện thoại cá nhân" class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700">Công ty *</label>
+                    <input type="text" placeholder="Nhập tên công ty" class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <div class="flex space-x-4">
+                    <div class="w-1/2">
+                        <label class="block font-semibold text-gray-700">Địa điểm làm việc *</label>
+                        <select class="w-full border border-gray-300 rounded px-3 py-2 mt-1">
+                            <option>Hải Dương</option>
+                            <option>Hà Nội</option>
+                        </select>
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block font-semibold text-gray-700">Quận/ huyện</label>
+                        <select class="w-full border border-gray-300 rounded px-3 py-2 mt-1">
+                            <option>Tứ Kỳ</option>
+                            <option>Chí Linh</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded">
+                    Lưu và Tiếp tục →
+                </button>
+            </form>
+        </div>
+
+        <!-- Right image section -->
+        <div class="hidden md:block md:w-1/2 bg-green-100 flex items-center justify-center p-8 rounded-r-lg">
+            <img src="https://via.placeholder.com/400x400.png?text=Illustration" alt="Recruitment Illustration" class="max-w-full h-auto">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

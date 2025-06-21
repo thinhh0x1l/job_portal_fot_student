@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Tạo công ty - Nhà tuyển dụng</title>
+    <style>
+        :root {
+            --primary-white: #ffffff;
+            --primary-red: #e63946;
+            --primary-red-dark: #d90429;
+            --text-black: #2b2d42;
+            --text-gray: #8d99ae;
+            --border-light: #edf2f4;
+            --border-dark: #2b2d42;
+            --shadow-color: rgba(43, 45, 66, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--primary-white);
+            color: var(--text-black);
+            min-height: 100vh;
+
+            line-height: 1.6;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: var(--primary-white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px var(--shadow-color);
+            border: 1px solid var(--border-light);
+        }
+
+        .form-header {
+            padding: 25px 30px;
+            border-bottom: 2px solid var(--primary-red);
+            background-color: var(--primary-white);
+        }
+
+        .form-header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            color: var(--text-black);
+            font-weight: 700;
+        }
+
+        .form-header p {
+            color: var(--text-gray);
+            font-size: 15px;
+        }
+
+        .form-content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-black);
+            font-size: 15px;
+        }
+
+        .required:after {
+            content: " *";
+            color: var(--primary-red);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--primary-white);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            color: var(--text-black);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238d99ae' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-position: right 15px center;
+            background-repeat: no-repeat;
+            background-size: 12px;
+            padding-right: 35px;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .file-upload {
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .file-input-label {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 20px;
+            background-color: var(--primary-white);
+            border: 2px dashed var(--border-light);
+            border-radius: 6px;
+            color: var(--text-gray);
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--primary-red);
+            color: var(--text-black);
+            background-color: rgba(230, 57, 70, 0.05);
+        }
+
+        .file-input-label i {
+            margin-right: 10px;
+            color: var(--primary-red);
+        }
+
+        #companyImage {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .image-preview-container {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+            display: block;
+        }
+
+        .remove-image {
+            display: inline-block;
+            margin-top: 10px;
+            color: var(--primary-red);
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .remove-image:hover {
+            text-decoration: underline;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-cancel {
+            background-color: transparent;
+            border: 1px solid var(--border-light);
+            color: var(--text-gray);
+        }
+
+        .btn-cancel:hover {
+            background-color: rgba(43, 45, 66, 0.05);
+            color: var(--text-black);
+            border-color: var(--border-dark);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-red);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-red-dark);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .form-header {
+                padding: 20px;
+            }
+
+            .form-content {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+    <th:block th:replace="~{narbar :: styleNarbar}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{narbar :: narbar}"></th:block>
+
+
+<div class="form-container">
+    <div class="form-header">
+        <h1>Tạo công ty mới</h1>
+        <p>Vui lòng điền đầy đủ thông tin công ty của bạn</p>
+    </div>
+    <div th:if="${message != null}">
+        <h2 th:text="${message}"></h2>
+    </div>
+    <div class="form-content">
+        <form id="companyForm" enctype="multipart/form-data" th:object="${company}"
+              th:action="@{/recruiter/tao-congty}" method="post">
+            <!-- Company Name -->
+            <div class="form-group">
+                <label for="companyName" class="form-label required">Tên công ty</label>
+                <input type="text"  id="companyName" name="companyName"
+                       th:field="*{companyName}" class="form-input" required placeholder="Nhập tên công ty">
+            </div>
+
+            <!-- Tax Code -->
+            <div class="form-group">
+                <label for="taxCode" class="form-label required">Mã số thuế</label>
+                <input type="text" id="taxCode" name="taxCode"
+                       th:field="*{taxCode}" class="form-input" required placeholder="Nhập mã số thuế">
+            </div>
+
+            <!-- Website -->
+            <div class="form-group">
+                <label for="website" class="form-label">Website</label>
+                <input type="url" id="website" name="website"
+                       th:field="*{website}" class="form-input" placeholder="https://congtycuaban.com">
+            </div>
+
+            <!-- Address -->
+            <div class="form-group">
+                <label for="address" class="form-label required">Địa chỉ</label>
+                <input type="text" id="address" name="address"
+                       th:field="*{address}" class="form-input" required placeholder="Nhập địa chỉ công ty">
+            </div>
+
+            <!-- District -->
+            <div class="form-group">
+                <label for="district" class="form-label required">Quận/Huyện</label>
+                <select id="district" th:field="*{district}" name="district" class="form-input form-select" required>
+                    <option value="" disabled selected>Chọn quận/huyện</option>
+                    <option th:each="d : ${districts}"
+                            th:value="${d}"
+                            th:text="${d.displayName}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Company Logo -->
+            <div class="form-group">
+                <label class="form-label">Logo công ty</label>
+                <div class="file-upload">
+                    <label for="companyImage" class="file-input-label">
+                        <i>📁</i> Chọn hình ảnh (PNG, JPG)
+                    </label>
+                    <input type="file" id="companyImage"   name="companyImage" accept="image/*">
+                    <div class="image-preview-container" id="previewContainer">
+                        <img id="imagePreview"  class="image-preview" alt="Preview">
+                        <span class="remove-image" id="removeImage">Xóa ảnh</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Description -->
+            <div class="form-group">
+                <label for="description" class="form-label">Mô tả công ty</label>
+                <textarea id="description" name="description" class="form-input form-textarea" placeholder="Mô tả về công ty, lĩnh vực hoạt động, văn hóa công ty..."></textarea>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-cancel">Hủy bỏ</button>
+                <button type="submit" class="btn btn-submit">Lưu thông tin</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="alertModal">
+    <!-- Modal box -->
+    <div class="bg-white rounded-lg shadow-lg w-[24rem] p-6 text-center">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Thông báo</h2>
+        <p id="notice" class="text-gray-600 mb-6">Bạn đã tạo công ty rồi.</p>
+        <div class="flex justify-center gap-4">
+            <button onclick="continueAction()"
+                    class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
+                Tiếp tục
+            </button>
+            <button onclick="goBack()"
+                    class="px-6 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition">
+                Quay về
+            </button>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{footer :: footer}"></div>
+<script>
+    // Image preview functionality
+    const companyImage = document.getElementById('companyImage');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewContainer = document.getElementById('previewContainer');
+    const removeImageBtn = document.getElementById('removeImage');
+
+    companyImage.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                previewContainer.style.display = 'block';
+            }
+
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Remove image functionality
+    removeImageBtn.addEventListener('click', function() {
+        companyImage.value = '';
+        previewContainer.style.display = 'none';
+    });
+
+    // Form validation and submission
+    document.getElementById('companyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Get form values
+        const companyName = document.getElementById('companyName').value.trim();
+        const taxCode = document.getElementById('taxCode').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const district = document.getElementById('district').value;
+
+        // Basic validation
+        if (!companyName || !taxCode || !address || !district) {
+            alert('Vui lòng điền đầy đủ các trường bắt buộc');
+            return;
+        }
+
+        e.target.submit();
+        document.getElementById('alertModal').classList.remove('hidden');
+        // Reset form after submission
+        this.reset();
+        previewContainer.style.display = 'none';
+    });
+    function continueAction(){
+        document.getElementById('alertModal').classList.add('hidden');
+    }
+    function goBack(){
+        window.location.href="/recruiter/homepage"
+    }
+    // Cancel button functionality
+    document.querySelector('.btn-cancel').addEventListener('click', function() {
+        if (confirm('Bạn có chắc muốn hủy bỏ? Thông tin chưa lưu sẽ bị mất.')) {
+            document.getElementById('companyForm').reset();
+            previewContainer.style.display = 'none';
+        }
+    });
+</script>
+</body>
+</html>

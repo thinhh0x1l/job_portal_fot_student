@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký Nhà Tuyển Dụng | KMA TUYỂN DỤNG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #f59e0b;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .login-container {
+            background: url('https://images.unsplash.com/photo-1521791055366-0d553872125f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1600&q=80') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+
+        }
+        .login-card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class=" from-blue-50 to-gray-100 min-h-screen login-container ">
+<div class="container mx-auto px-4 py-12  ">
+    <div class="max-w-4xl mx-auto  ">
+        <!-- Logo Header -->
+        <div class="text-center mb-8 login-card">
+            <h1 class="text-3xl font-bold text-black-900">KMA TUYỂN DỤNG</h1>
+            <p class="text-gray-600 mt-2">Kết nối nhà tuyển dụng với ứng viên chất lượng</p>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-8 login-card">
+            <!-- Left Side - Benefits -->
+            <div class="md:w-1/3 bg-white p-6 rounded-xl shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Lợi ích khi đăng ký</h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <svg class="h-5 w-5 text-green-500 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-gray-700">Tiếp cận hàng ngàn ứng viên tiềm năng</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="h-5 w-5 text-green-500 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-gray-700">Công cụ quản lý ứng viên hiệu quả</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="h-5 w-5 text-green-500 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-gray-700">Đăng tin tuyển dụng không giới hạn</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="h-5 w-5 text-green-500 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-gray-700">Hỗ trợ tư vấn tuyển dụng 24/7</span>
+                    </li>
+                </ul>
+
+                <!-- Service Notice -->
+                <div class="mt-8 border-l-4 border-red-400 bg-red-50 p-4 rounded-r">
+                    <h3 class="font-medium text-red-800 mb-2">Lưu ý quan trọng</h3>
+                    <p class="text-sm text-red-700">
+                        Mỗi người dùng chỉ được tạo một tài khoản duy nhất. Vi phạm sẽ dẫn đến ngừng cung cấp dịch vụ.
+                    </p>
+                    <div class="mt-3">
+                        <p class="text-sm font-medium text-gray-700">Hỗ trợ khách hàng:</p>
+                        <p class="text-sm text-green-600 font-semibold">(024) 7123799</p>
+                        <p class="text-sm text-green-600 font-semibold">08123 12391929</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Form -->
+            <div class="md:w-2/3 bg-white p-8 rounded-xl shadow-sm">
+                <h3 th:if="${registerSuccess!=null}"
+                    class="text-lg font-semibold text-red-800 mb-4 pb-2 border-b border-red-200" th:text="${registerSuccess}"></h3>
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Đăng ký tài khoản nhà tuyển dụng</h2>
+
+                <!-- Social Login -->
+                <div class="mb-6">
+                    <button class="w-full flex items-center justify-center py-2.5 px-4 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition">
+                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Đăng ký bằng Google
+                    </button>
+                    <div class="flex items-center my-4">
+                        <div class="flex-grow border-t border-gray-300"></div>
+                        <span class="mx-4 text-gray-500 text-sm">hoặc bằng email</span>
+                        <div class="flex-grow border-t border-gray-300"></div>
+                    </div>
+                </div>
+
+                <!-- Registration Form -->
+                <form class="space-y-5" method="post" th:object="${registerRecruiter}" id="registerForm"
+                      enctype="multipart/form-data" th:action="@{/recruiter/dang-ky}">
+                    <!-- Account Section -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Thông tin tài khoản</h3>
+
+                        <!-- Email -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email đăng nhập *</label>
+                            <input type="email" th:field="*{email}" id="register-email"
+                                   placeholder="your@email.com"
+                                   class="w-full form-input border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-200" required>
+                            <span id="email_validation" class="text-red-500 text-xs mt-1"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu *</label>
+                                <input th:field="*{password}" type="password" id="register-password"
+                                       placeholder="Mật khẩu (6-25 ký tự)"
+                                       class="w-full form-input border border-gray-300 rounded-lg px-4 py-2.5 text-sm" required>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nhập lại mật khẩu *</label>
+                                <input id="confirm-password" type="password" placeholder="Xác nhận mật khẩu"
+                                       class="w-full form-input border border-gray-300 rounded-lg px-4 py-2.5 text-sm" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recruiter Info Section -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Thông tin nhà tuyển dụng</h3>
+
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Full Name -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên *</label>
+                                <input th:field="*{fullName}" id="hvt" type="text"
+                                       class="w-full form-input border border-gray-300 rounded-lg px-4 py-2.5 text-sm" required>
+                            </div>
+
+                            <!-- Avatar Upload -->
+                            <div class="flex flex-col items-center space-y-3">
+                                <label class="block text-sm font-medium text-gray-700">Ảnh đại diện *</label>
+
+                                <div class="relative w-32 h-32">
+                                    <img id="avatar-preview"
+                                         th:src="@{/images/user-photos/default/img_2.png}"
+                                         alt="Preview"
+                                         class="w-full h-full rounded-full object-cover border-2 border-gray-300 shadow-md">
+
+                                    <label for="avatar"
+                                           class="absolute bottom-1 right-1 bg-blue-500 text-white rounded-full p-2 cursor-pointer shadow">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                             viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        <input type="file" id="avatar" name="avatar" accept="image/*" class="hidden" required>
+                                    </label>
+                                </div>
+
+                                <div class="text-sm text-gray-500 text-center">
+                                    Chọn ảnh rõ mặt, dung lượng ≤ 2MB
+                                </div>
+                            </div>
+
+
+                            <!-- Phone -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại *</label>
+                                <input type="text" th:field="*{phoneNumber}"
+                                       class="w-full form-input border border-gray-300 rounded-lg px-4 py-2.5 text-sm" required>
+                            </div>
+
+                            <!-- Company -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Công ty *</label>
+                                <input th:field="*{companyName}" type="text"
+                                       class="w-full form-input border border-gray-300 rounded-lg px-4 py-2.5 text-sm" required>
+                            </div>
+
+                            <!-- Location -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Thành phố *</label>
+                                <input class="w-full form-input border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-gray-100"
+                                       value="Thành Phố Hồ Chí Minh" readonly>
+                            </div>
+
+                            <!-- District -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện *</label>
+                                <select th:field="*{district}" id="selectDistrict"
+                                        class="w-full form-input border border-gray-300 rounded-lg px-4 py-2.5 text-sm" required>
+                                    <option value="" disabled selected hidden>Chọn quận/huyện</option>
+                                    <option th:each="d:${district}"
+                                            th:text="${d.displayName}"
+                                            th:value="${d}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="pt-2">
+                        <label class="flex items-start">
+                            <input id="terms" type="checkbox" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" required>
+                            <span class="text-sm text-gray-700">
+                                Tôi đồng ý với <a href="#" class="text-blue-600 hover:underline">Điều khoản dịch vụ</a> và
+                                <a href="#" class="text-blue-600 hover:underline">Chính sách bảo mật</a> của KMA TUYỂN DỤNG
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition duration-200 mt-6">
+                        Hoàn tất đăng ký
+                    </button>
+
+                    <p class="text-center text-sm text-gray-600 mt-4">
+                        Đã có tài khoản?
+                        <a th:href="@{/recruiter/login}" class="text-blue-600 font-medium hover:underline">Đăng nhập ngay</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const firstName = document.getElementById('hvt').value;
+        const email = document.getElementById('register-email').value;
+        const selectDistrict = document.getElementById('selectDistrict').value;
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const email_validation = document.getElementById('email_validation')
+
+        // Reset validation messages
+        email_validation.textContent = '';
+
+        // Email validation
+        let response = await fetch(`/user/api/checkemail`,{
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain"
+            },
+            body: email
+        });
+
+        let isEmailValid = await response.json();
+        if(isEmailValid){
+            email_validation.textContent = "Email này đã được đăng ký. Vui lòng sử dụng email khác.";
+            return;
+        }
+
+        // Password validation
+        if (password !== confirmPassword) {
+            alert('Mật khẩu xác nhận không khớp!');
+            return;
+        }
+
+        if (password.length < 6 || password.length > 25) {
+            alert('Mật khẩu phải có từ 6 đến 25 ký tự');
+            return;
+        }
+
+        // Terms validation
+        if (!document.getElementById('terms').checked) {
+            alert('Vui lòng đồng ý với điều khoản dịch vụ');
+            return;
+        }
+
+        // If all validations pass, submit the form
+        e.target.submit();
+    });
+
+    // Avatar preview
+    document.getElementById("avatar").addEventListener("change", (event) => {
+        const preview = document.getElementById("avatar-preview");
+        const file = event.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ảnh đại diện không được vượt quá 2MB');
+                event.target.value = '';
+                return;
+            }
+            preview.src = URL.createObjectURL(file);
+        }
+    });
+</script>
+</body>
+</html>

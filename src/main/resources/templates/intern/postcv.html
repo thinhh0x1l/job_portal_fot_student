@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng CV thực tập sinh IT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .file-upload {
+            position: relative;
+            display: inline-block;
+        }
+        .file-upload input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .success-message {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <th:block th:replace="~{narbar2 :: styleNarbar}"></th:block>
+</head>
+<body >
+<div th:replace="~{narbar2 :: narbar}"></div>
+<div class="bg-gray-100 min-h-50    vh flex items-center justify-center p-4">
+    <div class="w-full max-w-md ">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-blue-600 py-4 px-6">
+                <h1 class="text-white text-2xl font-bold flex items-center">
+                    <i class="fas fa-file-upload mr-3"></i>
+                    Đăng CV thực tập
+                </h1>
+            </div>
+
+            <!-- Form -->
+            <form id="cvForm" class="p-6 space-y-6" method="post" th:object="${postCv}"
+                  enctype="multipart/form-data" th:action="@{/dang-cv}">
+                <!-- Success Message (hidden by default) -->
+                <div id="successMessage" class="success-message bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                    <span class="block"><i class="fas fa-check-circle mr-2"></i> CV của bạn đã được gửi thành công!</span>
+                </div>
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-heading mr-2 text-blue-500"></i>
+                        Tiêu đề <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="title" name="title" required th:field="*{title}"
+                           placeholder="Nhập tiêu đề CV (VD: Thực tập sinh lập trình Java)"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
+                  focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <!-- Specialization Dropdown -->
+                <div>
+                    <label for="specialization" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-graduation-cap mr-2 text-blue-500"></i>
+                        Chuyên ngành <span class="text-red-500">*</span>
+                    </label>
+                    <select id="specialization" name="specialization" required th:field="*{major}"
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                        <option value="" disabled selected>Chọn chuyên ngành</option>
+                        <option th:each="m :${majors}"
+                                th:value="${m}"
+                                th:text="${m.getLabel()}"
+                        ></option>
+
+                    </select>
+                </div>
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-align-left mr-2 text-blue-500"></i>
+                        Mô tả <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="description" name="description" required
+                              th:field="*{description}"
+                              placeholder="Nhập mô tả về CV hoặc kinh nghiệm của bạn..."
+                              rows="4"
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
+                     focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+                </div>
+                <!-- File Upload -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-file-alt mr-2 text-blue-500"></i>
+                        Tải lên CV <span class="text-red-500">*</span>
+                    </label>
+                    <div class="file-upload mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="cvFile" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                    <span>Chọn file</span>
+                                    <input id="cvFile" name="cvFile" type="file" class="sr-only" accept=".pdf" required>
+                                </label>
+                                <p class="pl-1">hoặc kéo thả vào đây</p>
+                            </div>
+                            <p class="text-xs text-gray-500" id="fileInfo">
+                                Chỉ chấp nhận định dạng PDF dung lượng tối đa 5MB
+                            </p>
+                            <p class="text-xs text-gray-500" id="fileName"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Đăng CV
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer Note -->
+        <p class="mt-4 text-center text-xs text-gray-500">
+            Thông tin của bạn sẽ được bảo mật và chỉ sử dụng cho mục đích tuyển dụng.
+        </p>
+    </div>
+</div>
+<div th:replace="~{narbar2 :: aiChatBot}"></div>
+<div th:replace="~{footer :: footer}"></div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('cvForm');
+        const fileInput = document.getElementById('cvFile');
+        const fileNameDisplay = document.getElementById('fileName');
+        const fileInfo = document.getElementById('fileInfo');
+        const successMessage = document.getElementById('successMessage');
+
+        // Handle file selection
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const fileSize = file.size / 1024 / 1024; // in MB
+                const fileType = file.name.split('.').pop().toLowerCase();
+
+                // Validate file type
+                if (fileType !== 'pdf' && fileType !== 'docx') {
+                    fileNameDisplay.textContent = 'Định dạng file không hợp lệ!';
+                    fileNameDisplay.className = 'text-xs text-red-500';
+                    fileInput.value = '';
+                    return;
+                }
+
+                // Validate file size
+                if (fileSize > 5) {
+                    fileNameDisplay.textContent = 'Dung lượng file vượt quá 5MB!';
+                    fileNameDisplay.className = 'text-xs text-red-500';
+                    fileInput.value = '';
+                    return;
+                }
+
+                fileNameDisplay.textContent = `Đã chọn: ${file.name} (${fileSize.toFixed(2)}MB)`;
+                fileNameDisplay.className = 'text-xs text-green-600';
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Here you would normally send the form data to the server
+            // For this example, we'll just show the success message
+
+            // Hide form and show success message
+            form.style.display = 'none';
+            successMessage.style.display = 'block';
+
+            // Reset form after 3 seconds (for demo purposes)
+            setTimeout(function() {
+                form.reset();
+                form.style.display = 'block';
+                successMessage.style.display = 'none';
+                fileNameDisplay.textContent = '';
+                fileNameDisplay.className = 'text-xs text-gray-500';
+            }, 3000);
+            this.submit();
+        });
+
+        // Drag and drop functionality
+        const dropArea = document.querySelector('.file-upload');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('border-blue-500', 'bg-blue-50');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('border-blue-500', 'bg-blue-50');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+
+            // Trigger change event manually
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+    });
+</script>
+</body>
+</html>

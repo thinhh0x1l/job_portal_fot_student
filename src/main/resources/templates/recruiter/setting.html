@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý tài khoản</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script th:inline="javascript">
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('.tab-link').forEach(el => el.classList.remove('border-l-4', 'border-green-600', 'bg-green-50', 'text-green-600', 'font-medium'));
+            document.getElementById(`link-${tabId}`).classList.add('border-l-4', 'border-green-600', 'bg-green-50', 'text-green-600', 'font-medium');
+            const newUrl = window.location.pathname + '?tab=' + tabId;
+            history.pushState(null, '', newUrl);
+        }
+        document.addEventListener("DOMContentLoaded", () => switchTab([[${tab}]]));
+    </script>
+    <th:block th:replace="~{narbar :: styleNarbar}"></th:block>
+</head>
+<body class="bg-gray-100 font-sans text-sm">
+<th:block th:replace="~{narbar :: narbar}"></th:block>
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+
+
+    <aside class="w-64 bg-white border-r">
+        <div class="p-4 border-b font-bold text-lg">Cài đặt</div>
+        <nav class="p-2 space-y-1">
+            <button id="link-tab1" onclick="switchTab('tab1')" class="tab-link w-full text-left px-4 py-2 rounded">Đổi mật khẩu</button>
+            <button id="link-tab2" onclick="switchTab('tab2')" class="tab-link w-full text-left px-4 py-2 rounded">Thông tin cá nhân</button>
+            <button id="link-tab3" onclick="switchTab('tab3')" class="tab-link w-full text-left px-4 py-2 rounded">Giấy đăng ký doanh nghiệp</button>
+            <button id="link-tab4" onclick="switchTab('tab4')" class="tab-link w-full text-left px-4 py-2 rounded">Thông tin công ty</button>
+            <button id="link-tab5" onclick="switchTab('tab5')" class="tab-link w-full text-left px-4 py-2 rounded">Cài đặt email</button>
+        </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="flex-1 p-8">
+        <!-- Tab 1: Đổi mật khẩu -->
+        <div id="tab1" class="tab-content hidden">
+            <h2 class="text-xl font-semibold mb-6">Thay đổi mật khẩu</h2>
+            <div class="space-y-4 max-w-lg">
+                <input type="password" placeholder="Nhập mật khẩu mới" class="w-full border px-4 py-2 rounded" />
+                <input type="password" placeholder="Nhập lại mật khẩu mới" class="w-full border px-4 py-2 rounded" />
+                <label class="inline-flex items-center">
+                    <input type="checkbox" class="mr-2"> Thoát tất cả các phiên đăng nhập hiện tại
+                </label>
+                <div class="pt-2">
+                    <button class="px-4 py-2 border rounded mr-2">Hủy</button>
+                    <button class="px-4 py-2 bg-green-600 text-white rounded">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Thông tin cá nhân -->
+        <!-- Tab 6: Xác thực tài khoản -->
+        <div id="tab2" class="tab-content hidden">
+            <h2 class="text-xl font-semibold mb-6">Tài khoản xác thực: <span class="text-green-600"
+            th:text="${'Cấp '+(((company.checkInformation!=null&&company.checkInformation)?1:0)
+                                +((company.checkCertificate!=null&&company.checkCertificate)?1:0))+'/3'}">Cấp 1/3</span></h2>
+            <p class="mb-4">Nâng cấp tài khoản lên <span class="text-green-600 font-medium">cấp 2/3</span> để có thể <strong>cấp phép</strong> đăng bài tuyển dụng</p>
+
+            <!-- Progress -->
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                <div class="bg-green-600 h-2.5 rounded-full"
+                     th:style="'width:'
+                      + (${((company.checkInformation!=null&&company.checkInformation)?1:0)}*33
+                       + ${((company.checkCertificate!=null&&company.checkCertificate)?1:0)}*33)+
+                      '%'"></div>
+            </div>
+
+            <!-- Danh sách bước xác thực -->
+            <div class="space-y-4 max-w-xl">
+                <div class="flex items-center bg-gray-50 border-gray-300 justify-between p-4 border rounded">
+                    <div>
+                        <p class="font-medium  text-gray-800">Xác thực số điện thoại</p>
+                    </div>
+                    <button class="text-green-600 hover:underline">→</button>
+                </div>
+                <div th:if="${(company.checkInformation!=null&&company.checkInformation)}"
+                     class="flex items-center justify-between p-4 border rounded bg-green-50 border-green-300">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8.5 8.5a1
+                             1 0 01-1.414 0l-4.5-4.5a1 1 0 011.414-1.414L7.5 12.086l7.793-7.793a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="font-medium text-green-700">Cập nhật thông tin công ty</p>
+                    </div>
+                    <button class="text-green-600 hover:underline">→</button>
+                </div>
+                <a th:href="@{'/recruiter/setting?tab=tab3'}"
+                        th:unless="${(company.checkInformation!=null&&company.checkInformation)}"
+                     class="flex items-center justify-between p-4 border rounded bg-gray-50 border-gray-300">
+                    <div>
+                        <p class="font-medium text-gray-800">Xác thực Giấy đăng ký doanh nghiệp</p>
+                    </div>
+                    <button class="text-green-600 hover:underline">→</button>
+                </a>
+<!--                /////////////////////////////////////////////////////////////////////////////////////////-->
+
+                <div th:if="${(company.checkCertificate!=null&&company.checkCertificate)}" class="flex items-center justify-between p-4 border rounded bg-green-50 border-green-300">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8.5 8.5a1
+                             1 0 01-1.414 0l-4.5-4.5a1 1 0 011.414-1.414L7.5 12.086l7.793-7.793a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="font-medium text-green-700">Xác thực Giấy đăng ký doanh nghiệp</p>
+                    </div>
+                    <button class="text-green-600 hover:underline">→</button>
+                </div>
+                <a th:href="@{'/recruiter/setting?tab=tab4'}"
+                        th:unless="${(company.checkCertificate!=null&&company.checkCertificate)}"
+                     class="flex items-center justify-between p-4 border rounded bg-gray-50 border-gray-300">
+                    <div>
+                        <p class="font-medium text-gray-800">Xác thực Giấy đăng ký doanh nghiệp</p>
+                    </div>
+                    <button class="text-green-600 hover:underline">→</button>
+                </a>
+<!--                /////////////////////////////////////////////////////////////////////////////////////////-->
+            </div>
+
+            <div class="pt-6">
+                <button class="px-4 py-2 border rounded mr-2">Tìm hiểu thêm</button>
+            </div>
+
+            <div class="mt-10 border-t pt-6">
+                <h3 class="text-lg font-medium mb-4" >Cập nhật thông tin cá nhân</h3>
+                <div>
+                    <label for="avatar_tab2" class="block text-sm font-medium text-gray-700 mb-1">Upload Avatar</label>
+
+                    <!-- INPUT FILE -->
+                    <input type="file" id="avatar_tab2" name="avatar"
+                           accept="image/*"
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-indigo-50 file:text-indigo-700
+                  hover:file:bg-indigo-100
+                  transition duration-150" required>
+
+                    <!-- ẢNH PREVIEW -->
+                    <img id="avatar-preview_tab2"
+                         th:src="@{${imageUrl}}"
+                    alt="Preview"
+                    class="mt-3 w-32 h-32 object-cover rounded-full border border-gray-300 mx-auto " />
+                </div>
+
+
+                <div class="grid grid-cols-2 gap-4 max-w-2xl">
+                    <div>
+                        <label class="block mb-1 text-gray-700">Họ và tên</label>
+                        <input class="w-full border px-4 py-2 rounded" th:value="${fullname}" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-gray-700">Giới tính</label>
+                        <select class="w-full border px-4 py-2 rounded">
+                            <option selected>Nam</option>
+                            <option>Nữ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-gray-700">Số điện thoại</label>
+                        <input class="w-full border px-4 py-2 rounded" value="0397764123" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-gray-700">Email</label>
+                        <div class="w-full border px-4 py-2 rounded" th:utext="${'<strong>'+email+'</strong>'}" ></div>
+                    </div>
+                </div>
+                <div class="pt-6">
+                    <button class="px-4 py-2 border rounded mr-2">Hủy</button>
+                    <button class="px-4 py-2 bg-green-600 text-white rounded">Lưu</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Tab 3: Giấy đăng ký doanh nghiệp -->
+        <div id="tab3" class="tab-content hidden">
+
+            <h2 class="text-xl font-semibold mb-4">Thông tin Giấy đăng ký doanh nghiệp</h2>
+            <div id="ttt_tab3" th:classappend="${company.certificate!=null?'hidden':''}">
+                <p class="mb-4">Vui lòng lựa chọn phương thức đăng tải, xem hướng dẫn đăng tại <a href="#" class="text-green-600 underline">Tại đây</a></p>
+
+                <div class="bg-white border rounded p-6 max-w-3xl">
+                    <div class="mb-4">
+                        <label class="flex items-center space-x-2">
+
+                            <span>Giấy đăng ký doanh nghiệp hoặc Giấy tờ tương đương khác</span>
+                        </label>
+                    </div>
+                    <form id="form_tab3"
+                            enctype="multipart/form-data" method="post" th:action="@{'/recruiter/api/upload-certificate'}">
+                        <div class="border p-4 rounded mb-4">
+                            <label class="block mb-2 font-medium">Giấy tờ <span class="text-red-500">*</span></label>
+                            <label class="flex items-center space-x-2 mb-2">
+                                <input type="radio" name="loaigiayto" checked class="form-radio text-green-600">
+                                <span>Giấy phép kinh doanh</span>
+                            </label>
+                            <div class="flex items-center space-x-6">
+                                <div class="flex-1">
+                                    <label class="block border-2 border-dashed border-gray-300 p-4 rounded text-center cursor-pointer">
+                                        <input type="file" id="avatar_tab3" name="avatar" hidden="hidden"
+                                               accept="image/*"
+                                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+                                                                          file:rounded-lg file:border-0
+                                                                          file:text-sm file:font-semibold
+                                                                          file:bg-indigo-50 file:text-indigo-700
+                                                                          hover:file:bg-indigo-100
+                                                                          transition duration-150 hidden" required>
+                                        <p>Chọn hoặc kéo file vào đây</p>
+                                        <p class="text-gray-500 text-sm">Dung lượng tối đa 5MB, định dạng: jpeg, jpg, png, pdf</p>
+                                    </label>
+                                </div>
+                                <div>
+
+                                </div>
+                            </div>
+                            <p class="text-red-500 text-sm mt-2">⚠ Các văn bản đăng tải cần đầy đủ các mặt và không có dấu hiệu chỉnh sửa/chế ảnh thông tin</p>
+                        </div>
+
+                        <img th:src="@{${company.certificate==null?:''}}" id="avatar-preview_tab3" alt="Preview"
+                             class="mt-3   object-cover  border border-gray-300 mx-auto" />
+        <!--                <img id="avatar-preview" src="#" alt="Preview"-->
+        <!--                     class="mt-3 hidden w-32 h-32 object-cover rounded-full border border-gray-300 mx-auto" />-->
+
+                        <div class="pt-4">
+                            <span th:if="${company.certificate!=null}"
+                                    onclick="tt_f_tab3()" class="px-4 py-2 bg-gray-600 text-white rounded">Hủy</span>
+                            <span onclick="submitFom_tab3()"
+                                    class="px-4 py-2 bg-green-600 text-white rounded">Lưu</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+<!--            -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+            <div class="bg-white border rounded-lg p-6 relative "
+                 id="tt_tab3" th:classappend="${company.certificate==null?'hidden':''}">
+                <!-- Nút chỉnh sửa -->
+                <div class="absolute top-4 right-4">
+                    <button class="text-green-600 text-sm flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round"
+                                                         stroke-width="2" d="M11 5h2M5 11h14M11 19h2M4 4l16 16"/></svg>
+                        <span onclick="ttt_f_tab3()">Chỉnh sửa</span>
+                    </button>
+                </div>
+
+                <!-- Tiêu đề -->
+                <div class="text-base font-medium mb-2 flex items-center space-x-2">
+                    <span>Thông tin Giấy đăng ký doanh nghiệp</span>
+                    <span class="text-yellow-600 bg-yellow-100 text-sm px-2 py-0.5 rounded"
+                        th:if="${(company.checkCertificate!= null && !company.checkCertificate)}">
+                        Chờ duyệt
+                    </span>
+                    <span class="text-green-600 bg-green-100 text-sm px-2 py-0.5 rounded"
+                          th:unless="${(company.checkCertificate!= null && !company.checkCertificate)}">
+                        Đã duyệt
+                    </span>
+
+                </div>
+
+                <p class="text-sm text-gray-600 mb-4">
+                    Vui lòng lựa chọn phương thức đăng tải, xem hướng dẫn đăng tại
+                    <a href="#" class="text-green-600 underline">Tại đây</a>
+                </p>
+
+                <!-- Radio options -->
+                <div class="space-y-4">
+                    <!-- Option 1 -->
+                    <div>
+                        <label class="flex items-center space-x-2 mb-2">
+                            <input type="radio" name="loaigiayto" checked class="form-radio text-green-600">
+                            <span class="font-medium">Giấy đăng ký doanh nghiệp hoặc Giấy tờ tương đương khác</span>
+                        </label>
+
+                        <!-- Giấy phép block -->
+                        <div class="border rounded p-4 flex justify-between items-start">
+                            <!-- Tên tài liệu -->
+                            <div class="text-sm space-y-1">
+                                <div class="font-medium mb-1">Giấy tờ <span class="text-red-500">*</span></div>
+                                <a target="_blank"
+                                   th:href="@{'/images/certificate/'+${company.id}+'/'+${company.certificate}}"
+                                        class="flex items-center space-x-2 text-green-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V8.414A2 2 0 0017.414 7L13 2.586A2 2 0 0011.586 2H4z" />
+                                    </svg>
+                                    <span>Giấy phép kinh doanh</span>
+                                </a>
+                            </div>
+
+                            <!-- Ảnh minh họa -->
+                            <div class="text-sm text-center">
+                                <div class="font-medium mb-1">Minh họa</div>
+                                <img src="/path/to/image.png" alt="Minh họa" class="w-40 h-auto border border-gray-300 rounded">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Option 2 -->
+                    <div>
+                        <label class="flex items-center space-x-2">
+                            <input type="radio" name="loaigiayto" class="form-radio text-green-600">
+                            <span class="font-medium">Giấy ủy quyền và Giấy tờ định danh</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Tab 4: Thông tin công ty -->
+        <!-- Tab 44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444: Thông tin công ty -->
+        <!-- Tab 44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444: Thông tin công ty -->
+        <!-- Tab 44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444: Thông tin công ty -->
+        <div id="tab4" class="tab-content ">
+            <h2 class="text-xl font-semibold mb-6">Cập nhật thông tin công ty</h2>
+            <div id="ttt_tab4" class="hidden">
+            <!-- Logo -->
+                <form id="formDes_tab4" enctype="multipart/form-data" method="post"
+                      th:action="@{/recruiter/update-company}">
+                    <div class="flex justify-center mb-6">
+                        <div class="text-center">
+                            <div>
+
+                                <!-- INPUT FILE -->
+                                <input type="file" id="avatar_tab4" name="avatar"
+                                       accept="image/*" hidden="hidden"
+                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+                                          file:rounded-lg file:border-0
+                                          file:text-sm file:font-semibold
+                                          file:bg-indigo-50 file:text-indigo-700
+                                          hover:file:bg-indigo-100
+                                          transition duration-150" >
+
+                                <!-- ẢNH PREVIEW -->
+                                <img id="avatar-preview_tab4"
+                                     th:src="@{'/images/companies/'+${company.id}+'/'+${company.getImageUrl()}}"
+                                     alt="Preview"
+                                     class="mt-3 w-32 h-32 object-cover rounded-full border border-gray-300 mx-auto " />
+                            </div>
+                            <div class="mt-2 text-gray-500 text-sm">Logo công ty</div>
+                        </div>
+                    </div>
+
+                    <!-- Radio lựa chọn -->
+                    <div class="flex space-x-4 mb-4 justify-center">
+                        <label class="inline-flex items-center space-x-2">
+                            <input type="radio" name="type" class="form-radio text-green-600" checked />
+                            <span class="text-gray-700 font-medium">Doanh nghiệp</span>
+                        </label>
+                        <label class="inline-flex items-center space-x-2">
+                            <input type="radio" name="type" class="form-radio text-green-600" />
+                            <span class="text-gray-700 font-medium">Hộ kinh doanh</span>
+                        </label>
+                    </div>
+
+                    <!-- Thông báo -->
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-800 rounded mb-6 text-sm">
+                        <p>Vui lòng nhập đúng Mã số thuế doanh nghiệp trên Giấy phép đăng ký kinh doanh.<br />
+                            Bạn có thể tra cứu Mã số thuế doanh nghiệp <a href="#" class="underline font-medium text-blue-600">Tại đây</a>.</p>
+                    </div>
+
+                <!-- Form -->
+
+                    <div class="grid grid-cols-2 gap-4 max-w-5xl">
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">Mã số thuế <span class="text-red-600">*</span></label>
+                            <input th:value="${company.taxCode==null?'':company.taxCode}" id="taxCode_tab4"
+                                   name="taxCode" required
+                                   class="border px-4 py-2 rounded w-full" />
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">Tên công ty <span class="text-red-600">*</span></label>
+                            <input th:value="${company.companyName}" id="companyName_tab4"
+                                   name="companyName" required
+                                     class="border px-4 py-2 rounded w-full" />
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">Website <span class="text-red-600">*</span></label>
+                            <input th:value="${company.website==null?'':company.website}"  id="website_tab4"
+                                   name="website" required
+                                   placeholder="https://" class="border px-4 py-2 rounded w-full" />
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">Lĩnh vực hoạt động *</label>
+                            <div class="border px-4 py-2 rounded w-full" >
+                                Công nghệ và Học Vấn
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">Quy mô <span class="text-red-600">*</span></label>
+                            <select  class="border px-4 py-2 rounded w-full" required
+                                     id="companySize_tab4" name="companySize">
+                                <option disabled selected
+                                        th:if="${company.companySize == null}">Chọn quy mô</option>
+                                <option th:each="s : ${companySize}"
+                                        th:value="${s}"
+                                        th:text="${s.displayName}"
+                                        th:selected="${company.companySize != null and company.companySize.name() == s.name()}">
+                                </option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">Địa chỉ <span class="text-red-600">*</span></label>
+                            <input th:value="${company.address==null?'':company.address}"
+                                   id="address_tab4" name="address" required
+                                   class="border px-4 py-2 rounded w-full" />
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">Email <span class="text-red-600">*</span></label>
+                            <input th:value="${company.email==null?'':company.email}" id="email_tab4"
+                                   name="email" required
+                                   class="border px-4 py-2 rounded w-full" />
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">Số điện thoại <span class="text-red-600">*</span></label>
+                            <input th:value="${company.numberPhone==null?'':company.numberPhone}"
+                                   id="numberPhone_tab4" name="numberPhone" required
+                                   class="border px-4 py-2 rounded w-full" />
+                        </div>
+<!--                        <div class="col-span-2">-->
+<!--                            <label class="block mb-1 text-gray-700 font-medium">Mô tả công ty </label>-->
+<!--                            <textarea rows="6" readonly class="border px-4 py-2 rounded w-full" th:text="${company.description==null?'':company.description}">-->
+<!--                            </textarea>-->
+<!--                        </div>-->
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Chỉnh sửa mô tả công ty</label>
+                            <div id="editor" th:utext="${company.description==null?'':company.description}" class="bg-white border rounded p-3 min-h-[150px]"></div>
+                            <input hidden="hidden" name="description" id="description">
+                        </div>
+
+                    </div>
+                    <div class="pt-6 flex justify-end space-x-3">
+                        <span onclick="event.stopPropagation();tt_f_tab4()"
+                                class="px-4 py-2 border rounded">Hủy</span>
+                        <span onclick="sendata_tab4(this)"
+                                class="px-4 py-2 bg-green-600 text-white rounded">Lưu</span>
+                    </div>
+
+                </form>
+            </div>
+            <div id="tt_tab4" class="max-w-4xl mx-auto mt-10 bg-white p-6 rounded-lg shadow space-y-6">
+
+                <!-- Header -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-800">Thông tin công ty</h2>
+                    <div class="mt-2 flex items-center justify-between text-sm">
+                        <span class=" font-medium">Yêu cầu cập nhật thông tin công ty
+                            <span class="text-gray-600  bg-gray-100font-semibold" th:if="${company.checkInformation==null}">Hãy cập nhật thông tin ngay</span>
+                            <span class="text-yellow-600 bg-yellow-100 font-semibold" th:if="${company.checkInformation!=null&&
+                                                        !company.checkInformation}">Chờ duyệt</span>
+                            <span class="text-green-600 bg-green-100 font-semibold" th:if="${company.checkInformation!=null&&
+                            company.checkInformation}">Đã duyệt</span>
+                        </span>
+                        <span th:if="${company.dateInformationUpdated!=null}" class="text-gray-500"
+                             th:text="${'Ngày yêu cầu gần nhất: '+company.dateInformationUpdated}"></span>
+                    </div>
+                </div>
+
+                <!-- Thông tin công ty -->
+                <div class="border rounded p-5 bg-gray-50">
+                    <div class="flex justify-between items-center">
+                        <!-- Logo + Tên -->
+                        <div class="flex items-center space-x-4">
+                            <img id=""
+                                 th:src="@{'/images/companies/'+${company.id}+'/'+${company.getImageUrl()}}"
+                                 alt="Preview"
+                                 class="mt-3  w-32 h-32 object-cover rounded-full border border-gray-300 mx-auto">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900" th:text="${company.companyName}">CÔNG TY TNHH GIÁO DỤC BAN MAI HỒNG</h3>
+                                <p class="text-sm text-gray-600" th:text="${company.address==null?'---':company.address}">
+                                    114 Thụy Khuê, Phường Thụy Khuê, Tây Hồ, Hà Nội – 1-9 nhân viên</p>
+                            </div>
+
+
+                        </div>
+                                                    <!-- Nút chỉnh sửa -->
+                        <button onclick="ttt_f_tab4()"
+                                class="text-indigo-600 hover:underline text-sm font-medium">✎ Chỉnh sửa</button>
+                    </div>
+
+                    <!-- Chi tiết -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 mt-6 text-sm text-gray-800">
+                        <div>
+                            <span class="font-medium">Mã số thuế :</span><th:block th:text="${company.taxCode==null?'---':company.taxCode}"></th:block>
+                        </div>
+                        <div>
+                            <span class="font-medium">Website:</span> <th:block th:text="${company.website==null?'---':company.website}"></th:block>
+                        </div>
+                        <div>
+                            <span class="font-medium">Lĩnh vực hoạt động:</span> Công nghệ & Giáo Dục
+                        </div>
+                        <div>
+                            <span class="font-medium">Quy mô:</span> <th:block th:text="${company.companySize==null?'---':company.companySize.displayName}"></th:block>
+                        </div>
+                        <div>
+                            <span class="font-medium">Email: </span> <th:block th:text="${company.email==null?'---':company.email}"></th:block>
+                        </div>
+                        <div>
+                            <span class="font-medium">Số điện thoại:</span> <th:block th:text="${company.numberPhone==null?'---':company.numberPhone}"></th:block>
+                        </div>
+                        <div class="md:col-span-2">
+                            <span class="font-medium">Địa chỉ:</span> <th:block th:text="${company.address==null?'---':company.address}"></th:block>
+                        </div>
+                    </div>
+
+                    <!-- Mô tả công ty -->
+                    <div class="mt-6 text-sm text-gray-700 space-y-3">
+                        <th:block th:utext="${company.description==null?'---':company.description}"></th:block>
+                        <p><strong>Địa chỉ: </strong> <th:block th:text="${company.address==null?'---':company.address}"></th:block><br>
+                            <strong>Fanpage: </strong> facebook.com/ppd.thuykhue<br>
+                            <strong>Điện thoại: </strong> <th:block th:text="${company.numberPhone==null?('---'+rNumberPhone):(company.numberPhone+' '+rNumberPhone)}"></th:block><br>
+                            <strong>Email: </strong><th:block th:text="${company.email==null?'---':company.email}"></th:block></p>
+                        <p><em>Gia nhập đội ngũ PoPoDoo Smart English Thụy Khuê – nơi bạn được phát triển nghề nghiệp...</em></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <!-- Tab 5555555555555555555555555555555555555555555555555555555555555555555555555555: Cài đặt -->
+        <!-- Tab 5555555555555555555555555555555555555555555555555555555555555555555555555555: Cài đặt -->
+        <!-- Tab 5555555555555555555555555555555555555555555555555555555555555555555555555555: Cài đặt -->
+        <div id="tab5" class="tab-content hidden">
+            <h2 class="text-xl font-semibold mb-6">Cài đặt thông báo email</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-700">Thông báo CV ứng tuyển</span>
+                <span class="text-green-600 bg-green-100 px-2 py-1 rounded text-sm">Đang hoạt động</span>
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-600 relative">
+                        <div class="absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full transition peer-checked:translate-x-full"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </main>
+</div>
+<script>
+    document.getElementById("avatar_tab3").addEventListener("change", (event) => {
+        const preview = document.getElementById("avatar-preview_tab3");
+        const file = event.target.files[0];
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove("hidden");
+        }
+    });
+    document.getElementById("avatar_tab2").addEventListener("change", (event) => {
+        const preview = document.getElementById("avatar-preview_tab2");
+        const file = event.target.files[0];
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove("hidden");
+        }
+    });
+    document.getElementById("avatar_tab4").addEventListener("change", (event) => {
+        const preview = document.getElementById("avatar-preview_tab4");
+        const file = event.target.files[0];
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove("hidden");
+        }
+    });
+    const quill = new Quill('#editor', {
+        theme: 'snow'
+    });
+
+    // Khi submit, đồng bộ dữ liệu từ editor về input ẩn
+    const form = document.getElementById('formDes_tab4');
+    form.addEventListener('submit',(e)=>{
+        document.getElementById('description').value = quill.root.innerHTML;
+        console.log(quill.root.innerHTML)
+    })
+
+
+    function tt_f_tab3(){
+        document.getElementById('ttt_tab3').classList.add('hidden')
+        document.getElementById('tt_tab3').classList.remove('hidden')
+    }
+    function ttt_f_tab3(){
+        document.getElementById('tt_tab3').classList.add('hidden')
+        document.getElementById('ttt_tab3').classList.remove('hidden')
+    }
+
+
+    function tt_f_tab4(){
+        document.getElementById('ttt_tab4').classList.add('hidden')
+        document.getElementById('tt_tab4').classList.remove('hidden')
+    }
+    function ttt_f_tab4(){
+        document.getElementById('tt_tab4').classList.add('hidden')
+        document.getElementById('ttt_tab4').classList.remove('hidden')
+    }
+    function submitFom() {
+        form.submit()
+    }
+    async function sendata_tab4() {
+        const form = document.getElementById('formDes_tab4');
+
+        if (!form.checkValidity()) {
+            form.reportValidity(); // Hiển thị lỗi nếu thiếu input required
+            return;
+        }
+
+        // Lấy nội dung Quill Editor
+        const description = quill.root.innerHTML;
+
+        // Lấy các input khác từ form
+        const taxCode = document.getElementById('taxCode_tab4').value;
+        const companyName = document.getElementById('companyName_tab4').value;
+        const website = document.getElementById('website_tab4').value;
+        const address = document.getElementById('address_tab4').value;
+        const email = document.getElementById('email_tab4').value;
+        const numberPhone = document.getElementById('numberPhone_tab4').value;
+        const companySize = document.getElementById('companySize_tab4').value;
+        const avatarFile = document.getElementById('avatar_tab4').files[0]; // file logo
+        if (avatarFile) {
+            // Có file, xử lý như upload, preview, gửi lên server...
+            console.log("Đã chọn file:", avatarFile.name);
+        } else {
+            // Không có file được chọn
+            console.log("Chưa chọn file ảnh đại diện.");
+        }
+        console.log(taxCode)
+        // Tạo formData để gửi file + dữ liệu JSON
+        const formData = new FormData();
+        console.log(formData)
+
+        // Thêm file avatar nếu có
+        if (avatarFile) {
+            formData.append("avatar", avatarFile);
+        }
+
+        // Tạo object dữ liệu
+        const body = {
+            taxCode,
+            companyName,
+            website,
+            address,
+            email,
+            numberPhone,
+            companySize,
+            description
+        };
+        console.log(body)
+        // Đính kèm object JSON vào formData (qua Blob)
+        formData.append("data", new Blob([JSON.stringify(body)], {
+            type: "application/json"
+        }));
+        console.log(formData)
+        try {
+            const response = await fetch("/recruiter/api/update-company", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.reload()
+                // Optional: Hiển thị thông báo / reload / chuyển trang
+            } else {
+                const error = await response.text();
+                console.error("❌ Gửi thất bại:", error);
+            }
+        } catch (err) {
+            console.error("❗ Lỗi khi gửi request:", err);
+        }
+    }
+    async function submitFom_tab3(){
+        const avatarFile = document.getElementById('avatar_tab3').files[0];
+        const formData = new FormData();
+        if (avatarFile) {
+            formData.append("avatar", avatarFile);
+        }
+        try {
+            const response = await fetch("/recruiter/api/upload-certificate", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.reload()
+                // Optional: Hiển thị thông báo / reload / chuyển trang
+            } else {
+                const error = await response.text();
+                console.error("❌ Gửi thất bại:", error);
+            }
+        } catch (err) {
+            console.error("❗ Lỗi khi gửi request:", err);
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Document</title>
+    <th:block th:fragment="narbarStyle">
+        <style>
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            }
+            .sidebar-item-active {
+                background-color: #f3f4f6;
+                border-left: 4px solid #3b82f6;
+                font-weight: 500;
+            }
+
+                 /* Căn chỉnh biểu tượng chuông */
+             .nav-item {
+                 position: relative;
+                 display: inline-block;
+             }
+
+            .notification-badge {
+                position: absolute;
+                top: -0.25rem;
+                right: -0.25rem;
+                background-color: var(--secondary);
+                color: white;
+                border-radius: 50%;
+                width: 1.25rem;
+                height: 1.25rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.7rem;
+                font-weight: 600;
+                border: 2px solid rgba(255, 255, 255, 0.8);
+            }
+
+            .notification-menu {
+                right: 0;
+                left: auto;
+                width: 500px;
+                max-height: 80vh;
+                overflow-y: auto;
+                padding: 0;
+            }
+
+            .notification-header {
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid var(--gray-light);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: sticky;
+                top: 0;
+                background: rgba(255, 255, 255, 0.95);
+                z-index: 1;
+            }
+
+            .notification-title {
+                font-weight: 600;
+                color: var(--dark);
+                font-size: 1.1rem;
+            }
+
+            .mark-all-read {
+                color: var(--primary);
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .mark-all-read:hover {
+                color: var(--primary-dark);
+                text-decoration: underline;
+            }
+
+            .notification-item {
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid var(--gray-light);
+                transition: all 0.2s ease;
+            }
+
+            .notification-item.unread {
+                background-color: rgba(191, 219, 254, 0.3);
+            }
+
+            .notification-item:hover {
+                background-color: rgba(165, 180, 252, 0.3);
+            }
+
+            .notification-content {
+                font-size: 0.9rem;
+                color: var(--dark);
+                line-height: 1.5;
+            }
+
+            .notification-time {
+                font-size: 0.75rem;
+                color: var(--gray);
+                margin-top: 0.25rem;
+                display: block;
+            }
+
+            .notification-footer {
+                padding: 0.75rem;
+                text-align: center;
+                border-top: 1px solid var(--gray-light);
+                position: sticky;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.95);
+            }
+
+
+
+        .chart-container {
+                height: 300px;
+            }
+            @media (max-width: 768px) {
+                .sidebar {
+                    transform: translateX(-100%);
+                }
+                .sidebar-open {
+                    transform: translateX(0);
+                }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+
+<!-- Sidebar -->
+<th:block th:fragment="topbar">
+    <!-- Topbar -->
+    <header class="bg-white shadow-sm">
+        <div class="flex items-center justify-between p-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebarToggle" class="md:hidden text-gray-500">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h1 class="text-xl font-semibold text-gray-800">Quản lý </h1>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button id="searchButton" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full">
+                        <i data-lucide="search"></i>
+                    </button>
+                    <input type="text" id="searchInput" class="hidden absolute right-0 top-full mt-1 w-64 p-2 bg-white border rounded-lg shadow-lg" placeholder="Tìm kiếm...">
+                </div>
+
+                <div class="nav-item relative">
+                    <div class="nav-link notification-toggle cursor-pointer p-2">
+                        <i class="fas fa-bell text-gray-600 text-xl"></i>
+                        <div th:if="${countNotSeen!=0}" th:text="${countNotSeen}"
+                                class="notification-badge absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                            3
+                        </div>
+                    </div>
+
+                    <!-- Dropdown thông báo -->
+                    <div
+                            class="dropdown-menu notification-menu absolute right-0 mt-2 w-[700px] bg-white shadow-lg rounded-md border hidden z-50">
+                        <div class="notification-header flex justify-between items-center px-5 py-3 border-b">
+                            <div class="notification-title font-semibold text-gray-800 text-lg">Thông báo</div>
+                            <div onclick="markAll()"
+                                    class="mark-all-read text-sm text-blue-600 hover:underline cursor-pointer" th:text="${'Đánh dấu tất cả đã đọc ' + '('+countNotSeen+')'}">Đánh dấu đã đọc tất cả</div>
+                        </div>
+
+                        <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                            <div th:each="n : ${notification}" th:classappend="${n.seen ? '' : 'unread'}"
+                                    class="notification-item  px-5 py-4 ">
+                                <a onclick="markOne(this)" th:id="${n.id}"
+                                        th:href="@{${n.url}}" class="flex items-start gap-4">
+                                    <img th:src="@{${n.image+n.sender.imageUrl}}" class="w-10 h-10 rounded-full object-cover" />
+                                    <div class="flex-1">
+                                        <div class="notification-content text-base text-gray-700" th:utext="${n.content}">Bạn có một đơn ứng tuyển mới</div>
+                                        <div class="notification-time text-xs text-gray-400 mt-1" th:text="${p.format(n.created)}">5 phút trước</div>
+                                    </div>
+                                    <div th:unless="${n.seen}" class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="notification-footer p-4 text-center border-t">
+                            <a href="#" class="text-sm text-blue-600 font-medium hover:underline">Xem tất cả</a>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </header>
+    <script>
+        async function markOne(e) {
+            let response = await fetch('/admin/api/mark/' + e.id, {
+                method: 'PUT'
+            });
+        }
+
+         async function markAll(){
+             let response = await fetch('/admin/api/mark', {
+                 method: 'PUT'
+             });
+             location.reload()
+         }
+
+        const toggleBtn = document.querySelector('.notification-toggle');
+        const dropdown = document.querySelector('.notification-menu');
+
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('hidden');
+        });
+
+        window.addEventListener('click', () => {
+            if (!dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        dropdown.addEventListener('click', (e) => {
+            e.stopPropagation(); // click trong dropdown không bị đóng
+        });
+    </script>
+
+
+</th:block>
+<th:block th:fragment="sidebar">
+    <div class="sidebar fixed md:relative w-64 bg-white shadow-lg z-10 transition-transform duration-300 ease-in-out">
+        <div class="flex items-center justify-between p-4 border-b">
+            <div class="flex items-center space-x-2">
+                <img th:src="@{/images/admin/img.png}"
+                        class="w-10 h-10 bg-blue-500 rounded-md flex items-center justify-center text-white font-bold"/>
+                <span class="font-semibold text-lg">Học viện Kỹ thuật Mật mã</span>
+            </div>
+            <button id="sidebarClose" class="md:hidden text-gray-500">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <div class="p-4">
+            <div class="space-y-2">
+                <!-- Main Menu Items -->
+                <a th:href="@{/admin/dashboard}" th:classappend="${s==1?'sidebar-item-active':''}"
+                   class=" flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition">
+                    <i data-lucide="home"></i>
+                    <span>Trang chủ</span>
+                </a>
+
+                <!-- Student Management -->
+                <div class="mt-4">
+                    <button th:classappend="${s==2?'sidebar-item-active':''}"
+                            class="dropdown-btn flex items-center justify-between w-full p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="users"></i>
+                            <span>Quản lý sinh viên</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="transition-transform duration-200"></i>
+                    </button>
+                    <div class="dropdown-content pl-8 mt-1 space-y-1">
+                        <a th:href="@{/admin/manage-student}" class="block p-2 text-sm hover:bg-gray-100 rounded">Danh sách sinh viên</a>
+<!--                        <a href="#" class="block p-2 text-sm hover:bg-gray-100 rounded">Tạo mới sinh viên</a>-->
+<!--                        <a href="#" class="block p-2 text-sm hover:bg-gray-100 rounded">Lịch sử ứng tuyển</a>-->
+                    </div>
+                </div>
+
+                <!-- Teacher Management -->
+                <div class="mt-2">
+                    <button th:classappend="${s==3?'sidebar-item-active':''}"
+                            class="dropdown-btn flex items-center justify-between w-full p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="book-user"></i>
+                            <span>Quản lý giảng viên</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="transition-transform duration-200"></i>
+                    </button>
+                    <div class="dropdown-content pl-8 mt-1 space-y-1 hidden">
+                        <a th:href="@{/admin/manage-lecturer}" class="block p-2 text-sm hover:bg-gray-100 rounded">Danh sách giảng viên</a>
+<!--                        <a href="#" class="block p-2 text-sm hover:bg-gray-100 rounded">Tạo tài khoản</a>-->
+<!--                        <a href="#" class="block p-2 text-sm hover:bg-gray-100 rounded">Phân công hướng dẫn</a>-->
+                    </div>
+                </div>
+
+                <!-- Company Management -->
+                <div class="mt-2">
+                    <button th:classappend="${s==4?'sidebar-item-active':''}"
+                            class="dropdown-btn flex items-center justify-between w-full p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="building-2"></i>
+                            <span>Quản lý nhà tuyển dụng</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="transition-transform duration-200"></i>
+                    </button>
+                    <div class="dropdown-content pl-8 mt-1 space-y-1 hidden">
+                        <a th:href="@{/admin/manage-recruiter/}" class="block p-2 text-sm hover:bg-gray-100 rounded">Danh sách nhà tuyển dụng</a>
+                        <a th:href="@{/admin/manage-company}" class="block p-2 text-sm hover:bg-gray-100 rounded">Danh sách công ty</a>
+                        <a th:href="@{/admin/manage-postjob}" class="block p-2 text-sm hover:bg-gray-100 rounded">Quản lý bài tuyển dụng</a>-->
+                    </div>
+                </div>
+
+                <!-- Job Postings -->
+                <div class="mt-2">
+                    <button th:classappend="${s==5?'sidebar-item-active':''}"
+                            class="dropdown-btn flex items-center justify-between w-full p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="newspaper"></i>
+                            <span>Quản lý chung</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="transition-transform duration-200"></i>
+                    </button>
+                    <div class="dropdown-content pl-8 mt-1 space-y-1 hidden">
+                        <a th:href="@{/admin/manage-tag}" class="block p-2 text-sm hover:bg-gray-100 rounded">Quản lý tags</a>
+                        <a href="#" class="block p-2 text-sm hover:bg-gray-100 rounded">Thống kê bài viết</a>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="mt-2">
+                    <button th:classappend="${s==6?'sidebar-item-active':''}"
+                            class="dropdown-btn flex items-center justify-between w-full p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="flag"></i>
+                            <span>Báo cáo vi phạm</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="transition-transform duration-200"></i>
+                    </button>
+                    <div class="dropdown-content pl-8 mt-1 space-y-1 hidden">
+                        <a href="#" class="block p-2 text-sm hover:bg-gray-100 rounded">Danh sách báo cáo</a>
+                        <a href="#" class="block p-2 text-sm hover:bg-gray-100 rounded">Lịch sử xử lý</a>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span>Thống kê tổng quan</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <i data-lucide="user"></i>
+                </div>
+                <div>
+                    <div class="font-medium">ADMIN</div>
+                    <div class="text-sm text-gray-500">Quản trị viên</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý CV thực tập - Học viện Kỹ thuật Mật mã</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --muted: #64748b;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .dashboard-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab {
+            position: relative;
+            padding: 12px 20px;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .status-badge i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+
+        .urgent-badge {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+
+        .candidate-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .filter-input {
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+
+        .filter-input:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: var(--primary);
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-item {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-item:hover:not(.active) {
+            background-color: #e2e8f0;
+        }
+
+        .pagination-item.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-state {
+            background-color: #f8fafc;
+            border: 1px dashed #e2e8f0;
+            border-radius: 12px;
+        }
+    </style>
+    <th:block th:replace="~{narbar :: styleNarbar}"></th:block>
+</head>
+<body class="min-h-screen">
+<th:block th:replace="~{narbar :: narbar}"></th:block>
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div class="mb-4 md:mb-0">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Quản lý ứng tuyển</h1>
+            <p class="text-slate-600 mt-1">Theo dõi và quản lý hồ sơ ứng viên thực tập</p>
+        </div>
+        <div class="flex items-center">
+            <div class="bg-blue-50 text-blue-800 px-3 py-1.5 rounded-full text-sm font-medium inline-flex items-center">
+                <i class="fas fa-file-alt mr-2"></i>
+                <span th:text="${totalElement + ' hồ sơ'}">0 hồ sơ</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+        <div class="flex overflow-x-auto scrollbar-hide">
+            <button id="tab1" th:classappend="${tab.equals('tab1')?'active':''}" onclick="switchtab(this)"
+                    class="nav-tab flex-shrink-0" data-tab="contenttab1">
+                <i class="fas fa-inbox mr-2"></i> Chờ duyệt
+                <span th:if="${tab1Count > 0}" class="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                    <span th:text="${tab1Count}">0</span>
+                </span>
+            </button>
+            <button id="tab2" th:classappend="${tab.equals('tab2')?'active':''}" onclick="switchtab(this)"
+                    class="nav-tab flex-shrink-0" data-tab="contenttab2">
+                <i class="fas fa-calendar-check mr-2"></i> Phỏng vấn
+                <span th:if="${tab2Count > 0}" class="ml-2 bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">
+                    <span th:text="${tab2Count}">0</span>
+                </span>
+            </button>
+            <button id="tab3" th:classappend="${tab.equals('tab3')?'active':''}" onclick="switchtab(this)"
+                    class="nav-tab flex-shrink-0" data-tab="contenttab3">
+                <i class="fas fa-clipboard-check mr-2"></i> Đã xử lý
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab 1 Content: Pending CVs -->
+    <div id="contenttab1" class="tab-content" th:classappend="${tab.equals('tab1')?'active':''}">
+        <!-- Filter Card -->
+        <div class="dashboard-card p-5 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- Job Filter -->
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Công việc</label>
+                    <select id="job_name_tab1" name="jobId" th:value="${likeId}"
+                            class="filter-input w-full px-3 py-2 border border-slate-300 text-sm">
+                        <option th:selected="${likeId.equals('0')}" value="0">Tất cả công việc</option>
+                        <option th:each="lj:${listJob}"
+                                th:text="${lj.name}"
+                                th:value="${lj.id}"
+                                th:selected="${lj.id.toString().equals(likeId)}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Trạng thái</label>
+                    <select id="status_tab1" name="seen" th:value="${seen}"
+                            class="filter-input w-full px-3 py-2 border border-slate-300 text-sm">
+                        <option th:selected="${seen.equals('01')}" value="01">Tất cả</option>
+                        <option value="11" th:selected="${seen.equals('11')}">Đã xem</option>
+                        <option value="00" th:selected="${seen.equals('00')}">Chưa xem</option>
+                    </select>
+                </div>
+
+                <!-- Urgent Filter -->
+                <div class="md:col-span-2 flex items-end">
+                    <label class="inline-flex items-center h-10">
+                        <input id="urgent_tab1" name="urgent" type="checkbox" th:checked="${urgent}"
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded">
+                        <span class="ml-2 text-sm text-slate-700">Tuyển gấp</span>
+                    </label>
+                </div>
+
+                <!-- Search Input -->
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <input type="text" id="search-cv-tab1" th:value="${nameJob}"
+                               class="filter-input block w-full pl-10 pr-3 py-2 border border-slate-300 text-sm"
+                               placeholder="Tìm theo tên hoặc ID">
+                    </div>
+                </div>
+
+                <!-- Filter Button -->
+                <div class="md:col-span-2 flex items-end">
+                    <button id="btn_search_tab1" onclick="btn_search_tab1(this)"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition flex items-center justify-center">
+                        <i class="fas fa-sliders-h mr-2"></i> Lọc
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CV List -->
+        <div class="space-y-3">
+            <!-- Empty State -->
+            <div th:if="${totalElement == 0}" class="empty-state p-8 text-center rounded-xl">
+                <i class="fas fa-inbox text-4xl text-slate-400 mb-3"></i>
+                <h3 class="text-lg font-medium text-slate-700">Không có hồ sơ nào</h3>
+                <p class="text-slate-500 mt-1">Hiện không có hồ sơ nào chờ duyệt</p>
+            </div>
+
+            <!-- CV Items -->
+            <div th:each="so: ${sendPage}" onclick="clickDetailsTab1(this)" th:id="${'tab1'+so.id}"
+                 class="dashboard-card p-5 cursor-pointer hover:border-blue-500 border border-transparent">
+                <div class="flex flex-col md:flex-row md:items-center">
+                    <!-- Candidate Info -->
+                    <div class="flex items-center mb-4 md:mb-0 md:w-2/5">
+                        <img th:src="@{'/images/user-photos/'+${so.intern.id}+'/'+${so.intern.imageUrl}}"
+                             alt="Candidate" class="candidate-avatar mr-4">
+                        <div>
+                            <p class="text-xs text-slate-500 font-medium mb-1" th:text="${'CV#'+so.id}">CV#12345</p>
+                            <h3 class="font-semibold text-slate-800" th:text="${so.intern.firstName+' '+so.intern.lastName}">Nguyễn Văn A</h3>
+                            <p class="text-xs text-slate-500 truncate max-w-xs" th:text="${so.intern.email}">nguyenvana@example.com</p>
+                        </div>
+                    </div>
+
+                    <!-- Job Info -->
+                    <div class="md:w-2/5 mb-4 md:mb-0">
+                        <div class="flex items-center mb-1">
+                            <h3 class="font-medium text-slate-800" th:text="${so.postJob.name}">Nhân viên lập trình Java</h3>
+                            <span th:if="${so.postJob.urgent}"
+                                  class="urgent-badge ml-2 status-badge bg-red-100 text-red-800">
+                                <i class="fas fa-bolt"></i> Gấp
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="status-badge bg-blue-100 text-blue-800" th:text="${so.postJob.major.getLabel()}">Backend</span>
+                        </div>
+                        <p class="text-xs text-slate-500">
+                            <i class="far fa-clock mr-1"></i>
+                            <span th:text="${so.timeSent}">10/05/2023 14:30</span>
+                        </p>
+                    </div>
+
+                    <!-- Status & Actions -->
+                    <div class="md:w-1/5 flex flex-col items-end">
+                        <div class="mb-3">
+                            <span th:unless="${so.seen}"
+                                  class="status-badge bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-circle"></i> Chưa xem
+                            </span>
+                            <span th:if="${so.seen}"
+                                  class="status-badge bg-green-100 text-green-800">
+                                <i class="fas fa-circle"></i> Đã xem
+                            </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="action-btn border border-slate-300 text-slate-700 hover:bg-slate-50">
+                                Từ chối
+                            </button>
+                            <button class="action-btn bg-blue-600 text-white hover:bg-blue-700">
+                                Phỏng vấn
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${totalElement >0}" class="mt-8 flex flex-col items-center">
+            <div class="flex space-x-2 mb-4">
+                <a th:href="@{'/recruiter/duyet-cv?page=1&tab=tab1'+
+                             ${'&nameJob='+nameJob}+
+                             ${'&seen='+seen}+
+                             ${'&urgent=' + urgent}+
+                             ${'&likeId='+likeId}}"
+                   th:classappend="${currentPage == 1  ? 'opacity-50 cursor-not-allowed' : ''}"
+                   class="pagination-item border border-slate-300 text-slate-600 hover:bg-slate-100">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+
+                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{'/recruiter/duyet-cv?page=' + ${i} +'&tab=tab1'+
+                             ${'&nameJob='+nameJob}+
+                             ${'&seen='+seen}+
+                             ${'&urgent=' + urgent}+
+                             ${'&likeId='+likeId}}"
+                       th:if="${currentPage!=i && i > 0}"
+                       th:text="${i}"
+                       class="pagination-item border border-slate-300 text-slate-600 hover:bg-slate-100">
+                    </a>
+                    <a th:if="${currentPage==i}" th:text="${i}"
+                       class="pagination-item active">
+                    </a>
+                </th:block>
+
+                <a th:href="@{'/recruiter/duyet-cv?page=' + ${totalPages} +'&tab=tab1'+
+                             ${'&nameJob='+nameJob}+
+                             ${'&seen='+seen}+
+                             ${'&urgent=' + urgent}+
+                             ${'&likeId='+likeId}}"
+                   th:classappend="${currentPage == totalPages || totalPages <= 1? 'opacity-50 cursor-not-allowed' : ''}"
+                   class="pagination-item border border-slate-300 text-slate-600 hover:bg-slate-100">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+            <p class="text-sm text-slate-500" th:text="${'Hiển thị '+startCount+' - '+endCount+' của '+totalElement+
+                        ' hồ sơ ('+currentPage+' / '+totalPages+' trang)'}"></p>
+        </div>
+    </div>
+
+    <!-- Tab 2 Content: Interview -->
+    <div id="contenttab2" class="tab-content" th:classappend="${tab.equals('tab2')?'active':''}">
+        <!-- Filter Card -->
+        <div class="dashboard-card p-5 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- Job Filter -->
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Công việc</label>
+                    <select id="job_name_tab2" name="jobId" th:value="${likeId}"
+                            class="filter-input w-full px-3 py-2 border border-slate-300 text-sm">
+                        <option th:selected="${likeId.equals('0')}" value="0">Tất cả công việc</option>
+                        <option th:each="lj:${listJob}"
+                                th:text="${lj.name}"
+                                th:value="${lj.id}"
+                                th:selected="${lj.id.toString().equals(likeId)}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Trạng thái</label>
+                    <select id="status_tab2" name="seen" th:value="${seen}"
+                            class="filter-input w-full px-3 py-2 border border-slate-300 text-sm">
+                        <option th:selected="${seen.equals('01')}" value="01">Tất cả</option>
+                        <option value="11" th:selected="${seen.equals('11')}">Đã xem</option>
+                        <option value="00" th:selected="${seen.equals('00')}">Chưa xem</option>
+                    </select>
+                </div>
+
+                <!-- Urgent Filter -->
+                <div class="md:col-span-2 flex items-end">
+                    <label class="inline-flex items-center h-10">
+                        <input id="urgent_tab2" name="urgent" type="checkbox" th:checked="${urgent}"
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded">
+                        <span class="ml-2 text-sm text-slate-700">Tuyển gấp</span>
+                    </label>
+                </div>
+
+                <!-- Search Input -->
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <input type="number" id="search-cv-tab2" th:value="${nameJob}" min="0"
+                               class="filter-input block w-full pl-10 pr-3 py-2 border border-slate-300 text-sm"
+                               placeholder="Tìm theo ID hồ sơ">
+                    </div>
+                </div>
+
+                <!-- Filter Button -->
+                <div class="md:col-span-2 flex items-end">
+                    <button id="btn_search_tab2" onclick="btn_search_tab2(this)"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition flex items-center justify-center">
+                        <i class="fas fa-sliders-h mr-2"></i> Lọc
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CV List -->
+        <div class="space-y-3">
+            <!-- Empty State -->
+            <div th:if="${totalElement == 0}" class="empty-state p-8 text-center rounded-xl">
+                <i class="fas fa-calendar-check text-4xl text-slate-400 mb-3"></i>
+                <h3 class="text-lg font-medium text-slate-700">Không có lịch phỏng vấn</h3>
+                <p class="text-slate-500 mt-1">Hiện không có ứng viên nào trong danh sách phỏng vấn</p>
+            </div>
+
+            <!-- CV Items -->
+            <div th:each="so: ${sendPage}" onclick="clickDetailsTab1(this)" th:id="${'tab1'+so.id}"
+                 class="dashboard-card p-5 cursor-pointer hover:border-blue-500 border border-transparent">
+                <div class="flex flex-col md:flex-row md:items-center">
+                    <!-- Candidate Info -->
+                    <div class="flex items-center mb-4 md:mb-0 md:w-2/5">
+                        <img th:src="@{'/images/user-photos/'+${so.intern.id}+'/'+${so.intern.imageUrl}}"
+                             alt="Candidate" class="candidate-avatar mr-4">
+                        <div>
+                            <p class="text-xs text-slate-500 font-medium mb-1" th:text="${'CV#'+so.id}">CV#12345</p>
+                            <h3 class="font-semibold text-slate-800" th:text="${so.intern.firstName+' '+so.intern.lastName}">Nguyễn Văn A</h3>
+                            <p class="text-xs text-slate-500 truncate max-w-xs" th:text="${so.intern.email}">nguyenvana@example.com</p>
+                        </div>
+                    </div>
+
+                    <!-- Job Info -->
+                    <div class="md:w-2/5 mb-4 md:mb-0">
+                        <div class="flex items-center mb-1">
+                            <h3 class="font-medium text-slate-800" th:text="${so.postJob.name}">Nhân viên lập trình Java</h3>
+                            <span th:if="${so.postJob.urgent}"
+                                  class="urgent-badge ml-2 status-badge bg-red-100 text-red-800">
+                                <i class="fas fa-bolt"></i> Gấp
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="status-badge bg-blue-100 text-blue-800" th:text="${so.postJob.major.getLabel()}">Backend</span>
+                        </div>
+                        <p class="text-xs text-slate-500">
+                            <i class="far fa-clock mr-1"></i>
+                            <span th:text="${so.timeSent}">10/05/2023 14:30</span>
+                        </p>
+                    </div>
+
+                    <!-- Status & Actions -->
+                    <div class="md:w-1/5 flex flex-col items-end">
+                        <div class="mb-3">
+                            <span th:unless="${so.seen}"
+                                  class="status-badge bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-circle"></i> Chưa xem
+                            </span>
+                            <span th:if="${so.seen}"
+                                  class="status-badge bg-green-100 text-green-800">
+                                <i class="fas fa-circle"></i> Đã xem
+                            </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="action-btn border border-slate-300 text-slate-700 hover:bg-slate-50">
+                                Từ chối
+                            </button>
+                            <button class="action-btn bg-green-600 text-white hover:bg-green-700">
+                                Tuyển dụng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${totalElement >0}" class="mt-8 flex flex-col items-center">
+            <div class="flex space-x-2 mb-4">
+                <a th:href="@{'/recruiter/duyet-cv?page=1&tab=tab2'+
+                             ${'&nameJob='+nameJob}+
+                             ${'&seen='+seen}+
+                             ${'&urgent=' + urgent}+
+                             ${'&likeId='+likeId}}"
+                   th:classappend="${currentPage == 1  ? 'opacity-50 cursor-not-allowed' : ''}"
+                   class="pagination-item border border-slate-300 text-slate-600 hover:bg-slate-100">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+
+                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{'/recruiter/duyet-cv?page=' + ${i} +'&tab=tab2'+
+                             ${'&nameJob='+nameJob}+
+                             ${'&seen='+seen}+
+                             ${'&urgent=' + urgent}+
+                             ${'&likeId='+likeId}}"
+                       th:if="${currentPage!=i && i > 0}"
+                       th:text="${i}"
+                       class="pagination-item border border-slate-300 text-slate-600 hover:bg-slate-100">
+                    </a>
+                    <a th:if="${currentPage==i}" th:text="${i}"
+                       class="pagination-item active">
+                    </a>
+                </th:block>
+
+                <a th:href="@{'/recruiter/duyet-cv?page=' + ${totalPages} +'&tab=tab2'+
+                             ${'&nameJob='+nameJob}+
+                             ${'&seen='+seen}+
+                             ${'&urgent=' + urgent}+
+                             ${'&likeId='+likeId}}"
+                   th:classappend="${currentPage == totalPages || totalPages <= 1? 'opacity-50 cursor-not-allowed' : ''}"
+                   class="pagination-item border border-slate-300 text-slate-600 hover:bg-slate-100">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+            <p class="text-sm text-slate-500" th:text="${'Hiển thị '+startCount+' - '+endCount+' của '+totalElement+
+                        ' hồ sơ ('+currentPage+' / '+totalPages+' trang)'}"></p>
+        </div>
+    </div>
+
+    <!-- Tab 3 Content: Processed CVs -->
+    <div id="contenttab3" class="tab-content" th:classappend="${tab.equals('tab3')?'active':''}">
+        <!-- Filter Card -->
+        <div class="dashboard-card p-5 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- Job Filter -->
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Công việc</label>
+                    <select id="job_name_tab3" name="jobId" th:value="${likeId}"
+                            class="filter-input w-full px-3 py-2 border border-slate-300 text-sm">
+                        <option th:selected="${likeId.equals('0')}" value="0">Tất cả công việc</option>
+                        <option th:each="lj:${listJob}"
+                                th:text="${lj.name}"
+                                th:value="${lj.id}"
+                                th:selected="${lj.id.toString().equals(likeId)}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Trạng thái</label>
+                    <select id="pending_tab3" name="pending" th:value="${pending}"
+                            class="filter-input w-full px-3 py-2 border border-slate-300 text-sm">
+                        <option th:selected="${pending.equals('0')}" value="0">Tất cả</option>
+                        <option value="REJECTED" th:selected="${pending.equals('REJECTED')}">Đã từ chối</option>
+                        <option value="SUCCESS" th:selected="${pending.equals('SUCCESS')}">Chờ phản hồi</option>
+                        <option value="HIRED" th:selected="${pending.equals('HIRED')}">Tuyển thành công</option>
+                    </select>
+                </div>
+
+                <!-- Search Input -->
+                <div class="md:col-span-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <input type="text" id="search-cv-tab3" th:value="${nameJob}"
+                               class="filter-input block w-full pl-10 pr-3 py-2 border border-slate-300 text-sm"
+                               placeholder="Tìm theo tên hoặc ID">
+                    </div>
+                </div>
+
+                <!-- Filter Button -->
+                <div class="md:col-span-2 flex items-end">
+                    <button id="btn_search_tab3" onclick="btn_search_tab3(this)"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition flex items-center justify-center">
+                        <i class="fas fa-sliders-h mr-2"></i> Lọc
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CV List -->
+        <div class="space-y-3">
+            <!-- Empty State -->
+            <div th:if="${totalElement == 0}" class="empty-state p-8 text-center rounded-xl">
+                <i class="fas fa-clipboard-check text-4xl text-slate-400 mb-3"></i>
+                <h3 class="text-lg font-medium text-slate-700">Không có hồ sơ đã xử lý</h3>
+                <p class="text-slate-500 mt-1">Hiện không có hồ sơ nào trong mục này</p>
+            </div>
+
+            <!-- CV Items -->
+            <div th:each="so: ${sendPage}" onclick="clickDetailsTab1(this)" th:id="${'tab1'+so.id}"
+                 class="dashboard-card p-5 cursor-pointer hover:border-blue-500 border border-transparent">
+                <div class="flex flex-col md:flex-row md:items-center">
+                    <!-- Candidate Info -->
+                    <div class="flex items-center mb-4 md:mb-0 md:w-2/5">
+                        <img th:src="@{'/images/user-photos/'+${so.intern.id}+'/'+${so.intern.imageUrl}}"
+                             alt="Candidate" class="candidate-avatar mr-4">
+                        <div>
+                            <p class="text-xs text-slate-500 font-medium mb-1" th:text="${'CV#'+so.id}">CV#12345</p>
+                            <h3 class="font-semibold text-slate-800" th:text="${so.intern.firstName+' '+so.intern.lastName}">Nguyễn Văn A</h3>
+                            <p class="text-xs text-slate-500 truncate max-w-xs" th:text="${so.intern.email}">nguyenvana@example.com</p>
+                        </div>
+                    </div>
+
+                    <!-- Job Info -->
+                    <div class="md:w-2/5 mb-4 md:mb-0">
+                        <div class="flex items-center mb-1">
+                            <h3 class="font-medium text-slate-800" th:text="${so.postJob.name}">Nhân viên lập trình Java</h3>
+                            <span th:if="${so.postJob.urgent}"
+                                  class="urgent-badge ml-2 status-badge bg-red-100 text-red-800">
+                                <i class="fas fa-bolt"></i> Gấp
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="status-badge bg-blue-100 text-blue-800" th:text="${so.postJob.major.getLabel()}">Backend</span>
+                        </div>
+                        <p class="text-xs text-slate-500">
+                            <i class="far fa-clock mr-1"></i>
+                            <span th:text="${so.timeSent}">10/05/2023 14:30</span>
+                        </p>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="md:w-1/5 flex flex-col items-end">
+                        <span th:if="${so.cvStatus.equals(so.cvStatus.SUCCESS)}"
+                              class="status-badge bg-yellow-100 text-yellow-800">
+                            <i class="fas fa-circle"></i> Chờ phản hồi
+                        </span>
+                        <span th:if="${so.cvStatus.equals(so.cvStatus.REJECTED)}"
+                              class="status-badge bg-red-100 text-red-800">
+                            <i class="fas fa-circle"></i> Đã từ chối
+                        </span>
+                        <span th:if="${so.cvStatus.equals(so.cvStatus.HIRED)}"
+                              class="status-badge bg-green-100 text-green-800">
+                            <i class="fas fa-circle"></i> Thành công
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${totalElement >0}" class="mt-8 flex flex-col items-center">
+            <div class="flex space-x-2 mb-4">
+                <a th:href="@{'/recruiter/duyet-cv?page=1&tab=tab3'+
+                             ${'&nameJob='+nameJob}+
+                             ${'&pending='+pending}+
+                             ${'&likeId='+likeId}}"
+                   th:classappend="${currentPage == 1  ? 'opacity-50 cursor-not-allowed' : ''}"
+                   class="pagination-btn border border-gray-300 text-gray-600 hover:bg-gray-100">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+
+                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{'/recruiter/duyet-cv?page=' + ${i} +'&tab=tab3'+
+                             ${'&nameJob='+nameJob}+
+                             ${'&pending='+pending}+
+                             ${'&likeId='+likeId}}"
+                       th:if="${currentPage!=i && i > 0}"
+                       th:text="${i}"
+                       class="pagination-btn border border-gray-300 text-gray-600 hover:bg-gray-100">
+                    </a>
+                    <a th:if="${currentPage==i}" th:text="${i}"
+                       class="pagination-btn active">
+                    </a>
+                </th:block>
+
+                <a th:href="@{'/recruiter/duyet-cv?page=' + ${totalPages} +'&tab=tab3'+
+                             ${'&nameJob='+nameJob}+
+                             ${'&pending='+pending}+
+                             ${'&likeId='+likeId}}"
+                   th:classappend="${currentPage == totalPages || totalPages <= 1? 'opacity-50 cursor-not-allowed' : ''}"
+                   class="pagination-btn border border-gray-300 text-gray-600 hover:bg-gray-100">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </div>
+            <p class="text-sm text-gray-500" th:text="${'Hiển thị '+startCount+' - '+endCount+' của '+totalElement+
+                        ' CV ('+currentPage+' / '+totalPages+' trang)'}"></p>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{footer :: footer}"></th:block>
+<script>
+
+    function switchtab(e){
+        window.location.href='/recruiter/duyet-cv?tab='+e.id
+    }
+
+    ///////// tab1
+    document.getElementById('job_name_tab1').addEventListener('change',(e)=>{
+        console.log(e.target.value)
+        const urgent_tab1= document.getElementById('urgent_tab1').checked?'1':'0'
+        const status_tab1= document.getElementById('status_tab1').value
+         window.location.href='/recruiter/duyet-cv?tab=tab1&likeId='+e.target.value+'&seen='+status_tab1+'&urgent='+urgent_tab1
+    })
+    document.getElementById('status_tab1').addEventListener('change',(e)=>{
+        const urgent_tab1= document.getElementById('urgent_tab1').checked?'1':'0'
+        const job_name_tab1= document.getElementById('job_name_tab1').value
+        window.location.href='/recruiter/duyet-cv?tab=tab1&likeId='+job_name_tab1+'&seen='+e.target.value+'&urgent='+urgent_tab1
+    })
+    function btn_search_tab1(e){
+        const urgent_tab1= document.getElementById('urgent_tab1').checked?'1':'0'
+        const status_tab1= document.getElementById('status_tab1').value
+        const job_name_tab1= document.getElementById('job_name_tab1').value
+        let search_cv_tab1 =document.getElementById('search-cv-tab1').value
+        window.location.href='/recruiter/duyet-cv?tab=tab1&likeId='+job_name_tab1+
+            '&seen='+status_tab1+'&urgent='+urgent_tab1+'&nameJob='+search_cv_tab1
+    }
+    function clickDetailsTab1(e){
+        window.location.href='/recruiter/chitiet-cv/'+ e.id.substring(4)
+    }
+    ///////// tab1
+
+    ///////// tab2
+    document.getElementById('job_name_tab2').addEventListener('change',(e)=>{
+        const urgent_tab1= document.getElementById('urgent_tab2').checked?'1':'0'
+        const status_tab1= document.getElementById('status_tab2').value
+        window.location.href='/recruiter/duyet-cv?tab=tab2&likeId='+e.target.value+'&seen='+status_tab1+'&urgent='+urgent_tab1
+    })
+    document.getElementById('status_tab2').addEventListener('change',(e)=>{
+        const urgent_tab1= document.getElementById('urgent_tab2').checked?'1':'0'
+        const job_name_tab1= document.getElementById('job_name_tab2').value
+        window.location.href='/recruiter/duyet-cv?tab=tab2&likeId='+job_name_tab1+'&seen='+e.target.value+'&urgent='+urgent_tab1
+    })
+    function btn_search_tab2(e){
+        const urgent_tab1= document.getElementById('urgent_tab2').checked?'1':'0'
+        const status_tab1= document.getElementById('status_tab2').value
+        const job_name_tab1= document.getElementById('job_name_tab2').value
+        let search_cv_tab1 =document.getElementById('search-cv-tab2').value
+        window.location.href='/recruiter/duyet-cv?tab=tab2&likeId='+job_name_tab1+
+            '&seen='+status_tab1+'&urgent='+urgent_tab1+'&nameJob='+search_cv_tab1
+    }
+    function clickDetailsTab2(e){
+        window.location.href='/recruiter/chitiet-cv/'+ e.id.substring(4)
+    }
+    ///////// tab2
+
+    ///////// tab3
+    document.getElementById('job_name_tab3').addEventListener('change',(e)=>{
+        // const urgent_tab1= document.getElementById('urgent_tab3').checked?'1':'0'
+        const status_tab1= document.getElementById('pending_tab3').value
+        window.location.href='/recruiter/duyet-cv?tab=tab3&likeId='+e.target.value+'&pending='+status_tab1
+    })
+    document.getElementById('pending_tab3').addEventListener('change',(e)=>{
+        console.log(e.target.value)
+        // const urgent_tab1= document.getElementById('urgent_tab3').checked?'1':'0'
+        const job_name_tab1= document.getElementById('job_name_tab3').value
+        window.location.href='/recruiter/duyet-cv?tab=tab3&likeId='+job_name_tab1+'&pending='+e.target.value
+    })
+    function btn_search_tab3(e){
+        // const urgent_tab1= document.getElementById('urgent_tab3').checked?'1':'0'
+        const status_tab1= document.getElementById('pending_tab3').value
+        const job_name_tab1= document.getElementById('job_name_tab3').value
+        let search_cv_tab1 =document.getElementById('search-cv-tab3').value
+        window.location.href='/recruiter/duyet-cv?tab=tab3&likeId='+job_name_tab1+
+            '&pending='+status_tab1+'&nameJob='+search_cv_tab1
+    }
+    function clickDetailsTab2(e){
+        window.location.href='/recruiter/chitiet-cv/'+ e.id.substring(4)
+    }
+    ///////// tab3
+</script>
+</body>
+</html>

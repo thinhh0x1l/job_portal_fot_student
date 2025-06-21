@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học viện Kỹ thuật Mật mã - Tuyển dụng thực tập IT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        accent: '#dc2626',
+                        highlight: '#fef3c7'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background: linear-gradient(to bottom, #f0f9ff, #ffffff);
+            min-height: 100vh;
+        }
+
+        .urgent-badge {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+            70% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+
+        .highlight-badge {
+            animation: highlightPulse 3s infinite;
+        }
+
+        @keyframes highlightPulse {
+            0% { background-color: #fef3c7; }
+            50% { background-color: #fde68a; }
+            100% { background-color: #fef3c7; }
+        }
+
+        .job-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid transparent;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-left-color: #2563eb;
+        }
+
+        .filter-chip {
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-chip.active {
+            background-color: #2563eb !important;
+            color: white !important;
+        }
+
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .featured-jobs-container {
+            background: linear-gradient(to right, #e0f2fe, #dbeafe);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+    </style>
+    <th:block th:replace="~{narbar2 :: styleNarbar}"></th:block>
+</head>
+<body class="bg-gray-50">
+
+<div th:replace="~{narbar2 :: narbar}"></div>
+
+<!-- Hero Search Section -->
+<section class="py-12 bg-gradient-to-r from-blue-50 to-indigo-50">
+    <div class="container mx-auto px-4 max-w-6xl">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Tìm Công Việc Thực Tập IT Phù Hợp</h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Khám phá hàng trăm cơ hội thực tập tại các công ty công nghệ hàng đầu dành cho sinh viên KMA</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="flex-grow relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-blue-500">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <input id="like" type="text" placeholder="Tìm kiếm việc làm, công ty, kỹ năng..." th:value="${like}"
+                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <button onclick="filterr()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center justify-center transition duration-300 shadow-md">
+                    <i class="fas fa-search mr-2"></i> Tìm kiếm
+                </button>
+            </div>
+
+            <div class="flex flex-wrap gap-3 mb-4">
+                <div class="relative flex-grow md:flex-grow-0">
+                    <select id="filterSelect" th:value="${status.substring(0,1)}"
+                            class="w-full bg-white border border-blue-300 text-gray-700 px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="all" th:selected="${status.substring(0,1).equals('0')}">Tất cả lọc</option>
+                        <option value="location" th:selected="${status.substring(0,1).equals('1')}">Lọc theo địa điểm</option>
+                        <option value="salary" th:selected="${status.substring(0,1).equals('2')}">Lọc theo mức lương</option>
+                        <option value="major" th:selected="${status.substring(0,1).equals('3')}">Lọc theo ngành nghề</option>
+                    </select>
+                </div>
+
+                <label class="inline-flex items-center space-x-2 bg-white border border-blue-300 text-gray-700 px-4 py-3 rounded-lg cursor-pointer filter-chip">
+                    <input th:checked="${urgent == 1}" type="checkbox" id="urgentCheckbox" class="form-checkbox text-blue-600 rounded">
+                    <span class="font-medium">Tuyển gấp</span>
+                </label>
+
+                <button onclick="clearrr()"
+                        class="bg-white border border-blue-300 text-gray-700 px-4 py-3 rounded-lg flex items-center filter-chip hover:bg-gray-50 transition">
+                    <i class="fas fa-sync-alt mr-2"></i> Đặt lại
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filter Sections -->
+<section class="py-6 bg-white">
+    <div class="container mx-auto px-4 max-w-6xl">
+        <div id="locationSection" class="mb-6 fade-in" th:classappend="${status.substring(0,1).equals('1') ?'':' hidden'}">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i> Địa điểm làm việc
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                <span class="filter-chip bg-blue-100 text-blue-800 px-4 py-2 rounded-full cursor-pointer font-medium"
+                      data-value="0" th:classappend="${status.substring(1,status.length()).equals('0') ?' active':''}">Tất cả</span>
+                <span th:each="d:${districts}" th:text="${d.displayName}"
+                      th:attr="data-value=${d.name()}" th:classappend="${status.substring(1,status.length()).equals(d.name()) ?' active':''}"
+                      class="filter-chip bg-blue-100 text-blue-800 px-4 py-2 rounded-full cursor-pointer">
+                </span>
+            </div>
+        </div>
+
+        <div id="salarySection" class="mb-6 fade-in" th:classappend="${status.substring(0,1).equals('2') ?'':' hidden'}">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                <i class="fas fa-money-bill-wave text-green-500 mr-2"></i> Mức lương
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                <span class="filter-chip bg-green-100 text-green-800 px-4 py-2 rounded-full cursor-pointer font-medium"
+                      data-value="0" th:classappend="${status.substring(1,status.length()).equals('0') ?' active':''}">Tất cả</span>
+                <span th:each="s:${salaries}" th:text="${s.label}"
+                      th:attr="data-value=${s.name()}" th:classappend="${status.substring(1,status.length()).equals(s.name()) ?' active':''}"
+                      class="filter-chip bg-green-100 text-green-800 px-4 py-2 rounded-full cursor-pointer">
+                </span>
+            </div>
+        </div>
+
+        <div id="majorSection" class="fade-in" th:classappend="${status.substring(0,1).equals('3') ?'':' hidden'}">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                <i class="fas fa-laptop-code text-purple-500 mr-2"></i> Loại vị trí
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                <span class="filter-chip bg-purple-100 text-purple-800 px-4 py-2 rounded-full cursor-pointer font-medium"
+                      data-value="0" th:classappend="${status.substring(1,status.length()).equals('0') ?' active':''}">Tất cả</span>
+                <span th:each="m:${majors}" th:text="${m.getLabel()}"
+                      th:attr="data-value=${m.name()}" th:classappend="${status.substring(1,status.length()).equals(m.name()) ?' active':''}"
+                      class="filter-chip bg-purple-100 text-purple-800 px-4 py-2 rounded-full cursor-pointer">
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Jobs -->
+<div th:if="${relatedJobs !=null && !relatedJobs.isEmpty()}" class="py-8">
+    <div class="container mx-auto px-4 max-w-6xl">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-star text-yellow-400 mr-2"></i> Việc làm nổi bật
+            </h2>
+            <div class="flex space-x-3">
+                <button id="scrollLeftBtn"
+                        class="w-10 h-10 rounded-full bg-white border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 shadow-sm">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button id="scrollRightBtn"
+                        class="w-10 h-10 rounded-full bg-white border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 shadow-sm">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="jobScroller" class="featured-jobs-container p-4 rounded-xl">
+            <div class="overflow-x-auto scroll-smooth whitespace-nowrap space-x-4 flex px-2 scrollbar-hide">
+                <th:block th:each="j : ${relatedJobs}">
+                    <div id="conditionNoJob1" th:attr="data-id=${j.id}"
+                         th:if="${relatedJobs != null }"
+                         class="job-card w-[320px] bg-white rounded-xl p-5 relative flex-shrink-0 fade-in">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center">
+                                        <img th:src="@{'/images/companies/' + ${j.recruiter.id} + '/' + ${j.recruiter.company.imageUrl}}"
+                                             alt="Company Logo"
+                                             class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex gap-2 mb-1">
+                                            <span th:if="${j.timePost.plusDays(3).isAfter(T(java.time.LocalDateTime).now())}"
+                                                  class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                                                <i class="fas fa-bolt mr-1"></i> MỚI
+                                            </span>
+                                            <span th:if="${j.urgent}"
+                                                  class="urgent-badge bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                                                <i class="fas fa-fire mr-1"></i> GẤP
+                                            </span>
+                                        </div>
+                                        <h3 class="font-bold text-gray-800 text-base" th:text="${j.name}"></h3>
+                                        <p class="text-gray-500 text-sm" th:text="${j.recruiter.company.companyName}"></p>
+                                    </div>
+                                </div>
+                                <button onclick="event.stopPropagation(); favorite(this)" class="text-gray-400 hover:text-red-500">
+                                    <th:block th:if="${favorites != null}" >
+                                        <i th:attr="data-id=${j.id}" th:unless="${favorites.contains(j)}" class="far fa-heart text-xl"></i>
+                                        <i th:attr="data-id=${j.id}" th:if="${favorites.contains(j)}" class="fas fa-heart text-xl text-red-500"></i>
+                                    </th:block>
+                                </button>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3">
+                                <span class="text-green-600 text-sm flex items-center bg-green-50 px-3 py-1 rounded-full">
+                                    <i class="fas fa-money-bill-wave mr-1"></i>
+                                    <span th:text="${j.salary == 0 ?'Thỏa thuận' : j.salary + ' triệu'}"></span>
+                                </span>
+                                <span class="text-blue-600 text-sm flex items-center bg-blue-50 px-3 py-1 rounded-full">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    <span th:text="${j.recruiter.company.district.displayName}"></span>
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between items-center">
+                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium" th:text="${j.major.getLabel()}"></span>
+                                <span class="text-xs text-gray-400" th:text="${p.format(j.timePost)}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Listings -->
+<section class="py-10">
+    <div class="container mx-auto px-4 max-w-6xl">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-briefcase text-blue-500 mr-2"></i> Danh sách việc làm
+                <span class="text-blue-500 ml-2" th:text="'(' + ${totalElement} + ')'"></span>
+            </h2>
+            <div class="text-sm text-gray-500" th:text="${'Trang ' + currentPage + '/' + totalPages}"></div>
+        </div>
+
+        <div id="noJob" class="hidden flex flex-col items-center justify-center py-16 px-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-inner">
+            <div class="bg-white p-6 rounded-xl shadow-md text-center max-w-md">
+                <i class="fas fa-search text-4xl text-blue-500 mb-4"></i>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Không tìm thấy công việc phù hợp</h3>
+                <p class="text-gray-600 mb-4">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm của bạn</p>
+                <button onclick="clearrr()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
+                    <i class="fas fa-sync-alt mr-2"></i> Đặt lại bộ lọc
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="conditionNoJob2"
+                 th:each="j : ${postJobs}" th:attr="data-id=${j.id}"
+                 class="job-card bg-white rounded-xl p-6 fade-in">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-start gap-4">
+                            <div class="w-14 h-14 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center">
+                                <img th:src="@{'/images/companies/' + ${j.recruiter.id} + '/' + ${j.recruiter.company.imageUrl}}"
+                                     alt="Company Logo"
+                                     class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <div class="flex gap-2 mb-1">
+                                    <span th:if="${j.timePost.plusDays(3).isAfter(T(java.time.LocalDateTime).now())}"
+                                          class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                                        <i class="fas fa-bolt mr-1"></i> MỚI
+                                    </span>
+                                    <span th:if="${j.urgent}"
+                                          class="urgent-badge bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                                         <i class="fas fa-fire mr-1"></i> GẤP
+                                    </span>
+                                </div>
+                                <h3 class="font-bold text-gray-800 text-lg" th:text="${j.name}"></h3>
+                                <p class="text-gray-500 text-sm" th:text="${j.recruiter.company.companyName}"></p>
+                            </div>
+                        </div>
+                        <button onclick="event.stopPropagation(); favorite(this)" class="text-gray-400 hover:text-red-500">
+                            <th:block th:if="${favorites != null}" >
+                                <i th:attr="data-id=${j.id}" th:unless="${favorites.contains(j)}" class="far fa-heart text-xl"></i>
+                                <i th:attr="data-id=${j.id}" th:if="${favorites.contains(j)}" class="fas fa-heart text-xl text-red-500"></i>
+                            </th:block>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <span class="text-green-600 text-sm flex items-center bg-green-50 px-3 py-1 rounded-full">
+                            <i class="fas fa-money-bill-wave mr-1"></i>
+                            <span th:text="${j.salary == 0 ?'Thỏa thuận' : j.salary + ' triệu'}"></span>
+                        </span>
+                        <span class="text-blue-600 text-sm flex items-center bg-blue-50 px-3 py-1 rounded-full">
+                            <i class="fas fa-map-marker-alt mr-1"></i>
+                            <span th:text="${j.recruiter.company.district.displayName}"></span>
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium" th:text="${j.major.getLabel()}"></span>
+                        <div class="flex items-center text-gray-500 text-sm">
+                            <i class="far fa-eye mr-1"></i>
+                            <span th:text="${j.view}"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                        <span class="text-xs text-gray-400" th:text="${p.format(j.timePost)}"></span>
+                        <span class="text-blue-600 text-sm font-medium">Xem chi tiết <i class="fas fa-arrow-right ml-1"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${totalElement >0}" class="mt-12 flex flex-col items-center">
+            <div class="flex space-x-2 mb-4">
+                <a th:href="@{'/homepage?page=1'+
+                             ${major.toString().equals('0') ? '' : '&major=' + major + '&status=' + status} +
+                             ${district.toString().equals('0') ? '' : '&district=' + district + '&status=' + status} +
+                             ${salary.toString().equals('0') ? '' : '&salary=' + salary + '&status=' + status} +
+                             ${urgent == 0 ? '' : '&urgent=' + urgent} +
+                             ${like.toString().equals('')  ? '' : '&like=' + like}}"
+                   th:classappend="${currentPage == 1  ? ' opacity-50 cursor-not-allowed' : ' hover:bg-blue-100'}"
+                   class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 flex items-center">
+                    <i class="fas fa-chevron-left mr-1"></i> Đầu
+                </a>
+
+                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{'/homepage?page=' + ${i} +
+                             ${major.toString().equals('0') ? '' : '&major=' + major + '&status=' + status} +
+                             ${district.toString().equals('0') ? '' : '&district=' + district + '&status=' + status} +
+                             ${salary.toString().equals('0') ? '' : '&salary=' + salary + '&status=' + status} +
+                             ${urgent == 0 ? '' : '&urgent=' + urgent} +
+                             ${like.toString().equals('')  ? '' : '&like=' + like}}"
+                       th:if="${currentPage!=i && i > 0}"
+                       th:text="${i}"
+                       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-blue-100">
+                    </a>
+                    <a th:if="${currentPage==i}" th:text="${i}"
+                       class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md"></a>
+                </th:block>
+
+                <a th:href="@{'/homepage?page=' + ${totalPages} +
+                             ${major.toString().equals('0') ? '' : '&major=' + major + '&status=' + status} +
+                             ${district.toString().equals('0') ? '' : '&district=' + district + '&status=' + status} +
+                             ${salary.toString().equals('0') ? '' : '&salary=' + salary + '&status=' + status} +
+                             ${urgent == 0 ? '' : '&urgent=' + urgent} +
+                             ${like.toString().equals('')  ? '' : '&like=' + like}}"
+                   th:classappend="${currentPage == totalPages || totalPages <= 1? ' opacity-50 cursor-not-allowed' : ' hover:bg-blue-100'}"
+                   class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 flex items-center">
+                    Cuối <i class="fas fa-chevron-right ml-1"></i>
+                </a>
+            </div>
+            <p th:text="${'Hiển thị '+startCount+' - '+endCount+' của '+totalElement+
+                        ' việc làm'}"
+               class="text-gray-500 text-sm"></p>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Add click event to job cards
+        document.querySelectorAll('.job-card').forEach(card => {
+            card.addEventListener('click', async function() {
+                await fetch(`/recruiter/api/increaseView`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.dataset.id)
+                });
+                window.location.href = '/tim-viec/' + this.dataset.id;
+            });
+        });
+
+        // Favorite functionality
+        document.querySelectorAll('.fa-heart').forEach(icon => {
+            icon.addEventListener('click', function() {
+                const isFavorite = this.classList.contains('fas');
+
+                if (!isFavorite) {
+                    this.classList.remove('far');
+                    this.classList.add('fas', 'text-red-500');
+                    fetch(`/intern/api/likeJob`, {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.dataset.id)
+                    });
+                } else {
+                    this.classList.remove('fas', 'text-red-500');
+                    this.classList.add('far');
+                    fetch(`/intern/api/likeJob`, {
+                        method: "DELETE",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.dataset.id)
+                    });
+                }
+            });
+        });
+
+        // Filter chip functionality
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Filter select change
+        document.getElementById('filterSelect').addEventListener('change', function() {
+            const selectedValue = this.value;
+
+            document.getElementById('locationSection').classList.add('hidden');
+            document.getElementById('salarySection').classList.add('hidden');
+            document.getElementById('majorSection').classList.add('hidden');
+
+            if (selectedValue === 'location') {
+                document.getElementById('locationSection').classList.remove('hidden');
+            } else if (selectedValue === 'salary') {
+                document.getElementById('salarySection').classList.remove('hidden');
+            } else if (selectedValue === 'major') {
+                document.getElementById('majorSection').classList.remove('hidden');
+            }
+        });
+
+        // Location filter
+        document.getElementById('locationSection').addEventListener('click', function(e) {
+            if (e.target.classList.contains('filter-chip')) {
+                const value = e.target.getAttribute('data-value');
+                let like = document.getElementById('like').value;
+                const encodedKeyword = encodeURIComponent(like);
+                let urgentParam = document.getElementById('urgentCheckbox').checked ? '&urgent=1' : '';
+
+                window.location.href = "/homepage?district=" + value + "&status=1" + value + urgentParam + '&like=' + encodedKeyword;
+            }
+        });
+
+        // Salary filter
+        document.getElementById('salarySection').addEventListener('click', function(e) {
+            if (e.target.classList.contains('filter-chip')) {
+                const value = e.target.getAttribute('data-value');
+                let like = document.getElementById('like').value;
+                const encodedKeyword = encodeURIComponent(like);
+                let urgentParam = document.getElementById('urgentCheckbox').checked ? '&urgent=1' : '';
+
+                window.location.href = "/homepage?salary=" + value + "&status=2" + value + urgentParam + '&like=' + encodedKeyword;
+            }
+        });
+
+        // Major filter
+        document.getElementById('majorSection').addEventListener('click', function(e) {
+            if (e.target.classList.contains('filter-chip')) {
+                const value = e.target.getAttribute('data-value');
+                let like = document.getElementById('like').value;
+                const encodedKeyword = encodeURIComponent(like);
+                let urgentParam = document.getElementById('urgentCheckbox').checked ? '&urgent=1' : '';
+
+                window.location.href = "/homepage?major=" + value + "&status=3" + value + urgentParam + '&like=' + encodedKeyword;
+            }
+        });
+
+        // Featured jobs scrolling
+        const scroller = document.getElementById('jobScroller');
+        const scrollAmount = 340;
+
+        document.getElementById('scrollLeftBtn').addEventListener('click', () => {
+            scroller.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        });
+
+        document.getElementById('scrollRightBtn').addEventListener('click', () => {
+            scroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        });
+
+        // Show no jobs message if needed
+        if (!document.getElementById('conditionNoJob2')) {
+            document.getElementById('noJob').classList.remove('hidden');
+        }
+    });
+
+    function filterr() {
+        let like = document.getElementById('like').value;
+        const encodedKeyword = encodeURIComponent(like);
+        const uri = window.location.search;
+        let urgentParam = document.getElementById('urgentCheckbox').checked ? 'urgent=1&' : '';
+
+        if (!uri || !uri.includes('status')) {
+            window.location.href = window.location.pathname + `?${urgentParam}like=` + encodedKeyword;
+        } else {
+            if (uri.includes('urgent')) {
+                window.location.href = window.location.href.split('&urgent=')[0] + `&${urgentParam}like=` + encodedKeyword;
+            } else {
+                window.location.href = window.location.href.split('&like=')[0] + `&${urgentParam}like=` + encodedKeyword;
+            }
+        }
+    }
+
+    function clearrr() {
+        window.location.href = '/homepage';
+    }
+</script>
+</body>
+</html>

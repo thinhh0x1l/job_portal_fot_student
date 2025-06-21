@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý CV thực tập - Học viện Kỹ thuật Mật mã</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2c3e50',
+                        secondary: '#3498db',
+                        accent: '#e74c3c',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .urgent-badge {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+        .fake-disabled {
+            pointer-events: none;  /* Ngăn tương tác */
+            background-color: #ccc;
+            color: #666;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-btn.active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .cv-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .job-tag {
+            transition: all 0.2s ease;
+        }
+        .job-tag:hover {
+            background-color: #e0f2fe;
+        }
+    </style>
+    <th:block th:replace="~{narbar2 :: styleNarbar}"></th:block>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<th:block th:replace="~{narbar2 :: narbar}"></th:block>
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-6">
+    <!-- Tabs Navigation -->
+    <div  class="border-b border-gray-200 mb-6">
+        <input hidden id="tab" th:value="${tab}">
+        <div class="flex space-x-8">
+            <button id="tab2" th:classappend="${tab.equals('tab2')?'active':''}" onclick="switchtab(this)"
+                  data-tab="contenttab2">
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Tab Content: Phỏng vấn -->
+    <div id="contenttab2" class="tab-content" th:classappend="${tab.equals('tab2')?'active':''}">
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+
+                <!-- Chọn công việc -->
+                <div class="md:col-span-2">
+                    <select id="job_name_tab2" name="jobId" th:value="${w}"
+                            class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+                        <option th:selected="${week.isEmpty()}" value="">Tất cả các tuần</option>
+                        <option th:each="w : ${weeks}"
+                                th:text="${w.label()}"
+                                th:value="${w}"
+                                th:selected="${w.name().equals(week)}"
+                        ></option>
+                    </select>
+                </div>
+
+                <!-- Trạng thái đã xem -->
+                <div class="md:col-span-2">
+                    <select id="status_tab2" name="seen" th:value="${status}"
+                            class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+                        <option th:selected="${status.isEmpty()}" value="">Tất cả</option>
+                        <option th:each="t : ${taskStatus}"
+                                th:text="${t.getLabel()}"
+                                th:value="${t}"
+                                th:selected="${t.name().equals(status)}"
+                        ></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-medium text-gray-800">Danh sách CV cần duyệt</h2>
+            <span class="text-sm text-gray-600" th:text="${'Số lượng Nhiệm vụ: '+totalElement1}"></span>
+        </div>
+
+        <!-- CV Cards -->
+        <div class="grid grid-cols-1 gap-4">
+            <!-- CV Card 1 -->
+            <div th:each="so:${sendPage1}" onclick="nhiemvuDetail(this)" th:id="${'tab1'+so.id}"
+                 class="cv-card bg-white rounded-lg shadow-sm p-4  border-2 border-black-500 transition-all duration-200">
+                <div class="flex flex-col md:flex-row md:items-center">
+                    <div class="flex items-center mb-4 md:mb-0 md:w-1/4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                            <img th:src="@{'/images/user-photos/'+${so.intern.id}+'/'+${so.intern.imageUrl}}"
+                                 alt="User Avatar" class="avatar">
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium" th:text="${so.weeks.label()}">CV123</p>
+                            <h3 class="font-medium text-gray-800" th:text="${so.intern.firstName+' '+so.intern.lastName}">Nguyễn Văn A</h3>
+                            <p class="text-xs text-gray-500" th:text="${so.intern.email}">nguyenvana@example.com</p>
+                        </div>
+                    </div>
+                    <div class="md:w-1/4 mb-4 md:mb-0">
+                        <h3 class="font-medium text-gray-800" th:text="${so.name}">Nguyễn Văn A</h3>
+                        <p class="text-sm text-gray-500">Thời gian hêt hạn:</p>
+                        <p class="text-sm font-medium" th:text="${#temporals.format(so.endTime, 'EEEE, dd/MM/yyyy HH:mm', viLocale)}" >10/05/2023 14:30</p>
+                    </div>
+                    <div class="md:w-1/4 mb-4 md:mb-0">
+
+                        <a  class="job-tag inline-block px-3 py-1 bg-blue-50 text-blue-700 rounded-full
+                        text-sm font-medium" th:text="${(so.points==null?'Chưa có điểm':'Điểm: '+so.points)}">Backend Java</a>
+                    </div>
+                    <div class="md:w-1/4 flex flex-col md:flex-row md:items-center md:justify-end space-y-2 md:space-y-0 md:space-x-3">
+                        <!--                            <span  th:unless="${so.seen}"-->
+                        <!--                                   class="inline-flex items-center px-2.5 py-0.5 rounded-full-->
+                        <!--                            text-xs font-medium bg-yellow-100 text-yellow-800">Chưa xem</span>-->
+                        <span th:if="${so.taskStatus.equals(so.taskStatus.CHUA_HOAN_THANH)}"
+                              class="text-xl  px-3 py-1 bg-yellow-100 text-yellow-800 text-sm "
+                        >Chưa Hoàn Thành</span>
+                        <span th:if="${so.taskStatus.equals(so.taskStatus.HOAN_THANH_TRE)}"
+                              class="text-xl  px-3 py-1 bg-gray-300 text-gray-800 text-sm  "
+                        >Hoàn Thành Trễ</span>
+                        <span th:if="${so.taskStatus.equals(so.taskStatus.DA_HOAN_THANH )}"
+                              class=" text-xl px-3 py-1 bg-green-100 text-green-800 text-sm  "
+                        >Đã Hoàn Thành</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${totalElement1 >0}" class="mt-10 flex flex-col items-center">
+        <div class="flex space-x-2 mb-2">
+            <a th:href="@{'/nhiem-vu?page=1'+
+                            ${'&week='+week}+
+                            ${'&status='+status}}"
+               th:classappend="${currentPage1 == 1  ? '  fake-disabled' : ' '}"
+               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+
+            <th:block th:each="i : ${#numbers.sequence(1, totalPages1)}">
+                <a th:href="@{'/nhiem-vu?page=' + ${i} +
+                              ${'&week='+week}+
+                            ${'&status='+status}}"
+                   th:if="${currentPage1!=i && i > 0}"
+                   th:text="${i}"
+                   class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100">
+                </a>
+                <a th:if="${currentPage1==i}" th:text="${i}"
+                   class="px-4 py-2 bg-secondary text-white rounded-lg"></a>
+            </th:block>
+
+            <a th:href="@{'/nhiem-vu?page=' + ${totalPages1} +
+                              ${'&week='+week}+
+                            ${'&status='+status}}"
+               th:classappend="${currentPage1 == totalPages1 || totalPages1 <= 1? '  fake-disabled' : ' '}"
+               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+        <p th:text="${'Hiển thị '+startCount1+' - '+endCount1+' của '+totalElement1+
+                        ' việc làm ('+currentPage1+' / '+totalPages1+' trang)'}"
+           class="text-gray-500 text-sm"></p>
+    </div>
+
+
+</main>
+
+
+<div th:replace="~{narbar2 :: aiChatBot}"></div>
+<div th:replace="~{footer :: footer}"></div>
+<script defer>
+
+
+
+    ///////// tab2
+    document.getElementById('job_name_tab2').addEventListener('change',(e)=>{
+        const status_tab1= document.getElementById('status_tab2').value
+        window.location.href='/nhiem-vu?week='+e.target.value+'&status='+status_tab1
+    })
+    document.getElementById('status_tab2').addEventListener('change',(e)=>{
+        const job_name_tab1= document.getElementById('job_name_tab2').value
+        window.location.href='/nhiem-vu?week='+job_name_tab1+'&status='+e.target.value
+    })
+    function nhiemvuDetail(e){
+        window.location.href='/nhiem-vu/'+e.id.substring(4)
+    }
+
+
+
+
+
+</script>
+</body>
+</html>

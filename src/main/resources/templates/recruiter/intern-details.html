@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intern Task Management | Employer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .urgent-badge {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+    </style>
+    <th:block th:replace="~{narbar :: styleNarbar}"></th:block>
+</head>
+<body class="bg-gray-50">
+<div th:replace="~{narbar :: narbar}"></div>
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 py-6 max-w-7xl">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div class="flex items-center gap-4">
+            <button onclick="backe()" class="p-2 rounded-lg bg-white shadow-sm hover:bg-gray-50 transition-colors">
+                <i class="fas fa-arrow-left text-gray-600"></i>
+            </button>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Quản lý Nhiệm vụ Thực tập sinh</h1>
+                <p class="text-gray-500 text-sm">Theo dõi và đánh giá tiến độ công việc</p>
+            </div>
+        </div>
+        <button onclick="taoTask()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+            <i class="fas fa-plus"></i>
+            <span>Tạo Nhiệm vụ mới</span>
+        </button>
+    </div>
+
+    <!-- Intern Profile Card -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+        <div class="p-6 flex flex-col md:flex-row items-center gap-6">
+            <!-- Avatar -->
+            <div class="relative">
+                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                    <img th:src="@{'/images/user-photos/'+${intern.id}+'/'+${intern.imageUrl}}" alt="Intern Avatar" class="w-full h-full object-cover">
+                </div>
+                <div class="absolute -bottom-2 -right-2 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-white">
+                    <i class="fas fa-user-graduate mr-1"></i>
+                    <span>Intern</span>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 text-center md:text-left">
+                <h2 class="text-xl font-bold text-gray-800" th:text="${intern.firstName +' ' +intern.lastName}"></h2>
+                <p class="text-gray-600 mb-2" th:text="${intern.email}"></p>
+
+                <div class="flex flex-wrap justify-center md:justify-start gap-4 mt-3">
+                    <div class="bg-blue-50 px-3 py-1 rounded-full flex items-center gap-2">
+                        <span class="text-blue-800 font-medium">Tổng nhiệm vụ:</span>
+                        <span class="font-bold" th:text="${totalTasks}"></span>
+                    </div>
+
+                    <div class="bg-green-50 px-3 py-1 rounded-full flex items-center gap-2">
+                        <span class="text-green-800 font-medium">Hoàn thành:</span>
+                        <span class="font-bold" th:text="${taskCompleted}"></span>
+                    </div>
+
+                    <div class="bg-purple-50 px-3 py-1 rounded-full flex items-center gap-2">
+                        <span class="text-purple-800 font-medium">Tổng điểm:</span>
+                        <span class="font-bold" th:text="${#numbers.formatDecimal(pointSum, 1, 2)}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Tasks Sections -->
+    <div th:each="entry:${map}" class="mb-8">
+        <!-- Week Header -->
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-calendar-week text-blue-500"></i>
+                <span th:text="${'Tuần ' + entry.getKey().substring(4)}+'        |------------------------------------------------------------------------------------------'"></span>
+            </h3>
+
+            <div class="bg-blue-50 px-3 py-1 rounded-full flex items-center gap-2">
+                <span class="text-blue-800 font-medium">Điểm tuần:</span>
+                <span class="font-bold" th:text="${#numbers.formatDecimal(point[entry.getKey()], 1, 2)}"></span>
+            </div>
+<!--            th:onclick="|sendTaskForLec(${intern.id},${})|"-->
+            <div
+                    class="bg-green-50 px-3 py-1 rounded-full flex items-center gap-2">
+                <span class="text-green-800 font-medium"  >Gửi thông báo cho GVHD</span>
+                <span class="font-bold"></span>
+            </div>
+        </div>
+
+        <!-- Tasks Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div th:each="t : ${entry.value}" class="task-card bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden transition-all duration-200">
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-medium text-gray-800 truncate" th:text="${t.name}"></h4>
+                        <span th:if="${t.points != null}" class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span th:text="${t.points}"></span>/10
+                        </span>
+                        <span th:if="${t.points == null && t.report != null}" class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            <i class="fas fa-clock mr-1"></i>
+                            Chờ đánh giá
+                        </span>
+                        <span th:if="${t.report == null}" class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            <i class="fas fa-hourglass-half mr-1"></i>
+                            Đang thực hiện
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between items-center mt-4">
+                        <a target="_blank" onclick="event.stopPropagation()"
+                           th:href="@{'/recruiter/nhiem-vu/'+${t.id}}"
+                           class="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                            <i class="fas fa-eye"></i>
+                            <span>Xem chi tiết</span>
+                        </a>
+
+                        <button th:if="${t.report != null && t.points == null}"
+                                onclick="openModalReview()"
+                                class="text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1 rounded-full flex items-center gap-1">
+                            <i class="fas fa-star"></i>
+                            <span>Đánh giá</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completion Section -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden mt-8">
+        <div class="p-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Tổng kết thực tập</h3>
+                    <p class="text-gray-500 text-sm">Hoàn thành đánh giá cho thực tập sinh</p>
+                </div>
+
+                <button id="tuyenDung" onclick="openModalReview()"
+                        th:classappend="${map.size()== 10 && intern.status.name()!=
+                        'COMPLETED'?'bg-green-600 hover:bg-green-700 text-white'
+                        :'bg-gray-200 text-gray-500 cursor-not-allowed'}"
+                        th:disabled="${map.size()!= 10 || intern.status.name()=='COMPLETED' }"
+                        class="px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span th:text="${intern.status.name()=='COMPLETED'?'Đã hoàn thành thực tập':'Hoàn thành thực tập'}"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Evaluation Modal -->
+<form method="post">
+    <div id="modalReview" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Đánh giá nhiệm vụ</h3>
+                    <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Điểm đánh giá</label>
+                        <div class="relative">
+                            <input type="number" min="0" max="10" step="0.1" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <span class="text-gray-500">/10</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nhận xét</label>
+                        <textarea rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Ví dụ: - Hoàn thành xuất sắc nhiệm vụ
+- Có sáng tạo trong cách giải quyết vấn đề" required></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="closeModalReview()" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                        Hủy bỏ
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                        Lưu đánh giá
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Create Task Modal -->
+<form id="formF">
+    <div id="modalAddTask" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Tạo nhiệm vụ mới</h3>
+                    <button id="dong" onclick="dongg()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- File Upload -->
+                    <div class="border-2 border-dashed border-blue-200 rounded-xl p-6 bg-blue-50/50 hover:bg-blue-50 transition-colors">
+                        <div class="text-center">
+                            <i class="fas fa-file-upload text-3xl text-blue-500 mb-3"></i>
+                            <p class="font-medium text-gray-800">Tải lên tài liệu hướng dẫn</p>
+                            <p class="text-sm text-gray-500 mb-4">Chấp nhận PDF hoặc DOCX (tối đa 5MB)</p>
+
+                            <label for="upload-cv" class="cursor-pointer inline-block px-4 py-2 bg-white border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+                                <i class="fas fa-cloud-upload-alt mr-2"></i>
+                                Chọn file
+                            </label>
+                            <input id="upload-cv" name="cvFile" type="file" class="sr-only" accept=".pdf,.docx" required>
+                            <p class="text-xs mt-2 text-gray-500" id="fileName"></p>
+                        </div>
+                    </div>
+
+                    <!-- Task Details -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhiệm vụ <span class="text-red-500">*</span></label>
+                            <input type="text" id="taskName" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tuần thực tập <span class="text-red-500">*</span></label>
+                                <select id="filterSelect" th:value="${w}"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                    <option th:value="${w}"
+                                            th:each="w : ${weeks}"
+                                            th:text="${w.label()}"
+                                    ></option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Hạn hoàn thành <span class="text-red-500">*</span></label>
+                                <input type="datetime-local" id="expiredAt" name="expiredAt" required
+                                       th:min="${minDateTime}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="dongg()" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                        Đóng
+                    </button>
+                    <button type="button" onclick="sendata()" class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        Tạo nhiệm vụ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input hidden id="internId" th:value="${intern.id}">
+</form>
+
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadButton();
+
+        // File upload handling
+        const fileInput = document.getElementById('upload-cv');
+        const fileNameDisplay = document.getElementById('fileName');
+
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const fileSize = file.size / 1024 / 1024; // in MB
+                const fileType = file.name.split('.').pop().toLowerCase();
+
+                // Validate file type
+                if (fileType !== 'pdf' && fileType !== 'docx') {
+                    fileNameDisplay.textContent = 'Chỉ chấp nhận file PDF hoặc DOCX!';
+                    fileNameDisplay.className = 'text-xs text-red-500';
+                    fileInput.value = '';
+                    return;
+                }
+
+                // Validate file size
+                if (fileSize > 5) {
+                    fileNameDisplay.textContent = 'File vượt quá 5MB!';
+                    fileNameDisplay.className = 'text-xs text-red-500';
+                    fileInput.value = '';
+                    return;
+                }
+
+                fileNameDisplay.textContent = `File: ${file.name} (${fileSize.toFixed(1)}MB)`;
+                fileNameDisplay.className = 'text-xs text-green-600';
+            }
+        });
+
+        // Modal close buttons
+        document.getElementById('closeModalBtn').addEventListener('click', closeModalReview);
+    });
+
+    async function sendata() {
+        const form = document.getElementById('formF');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const expiredAt = document.getElementById("expiredAt").value;
+        const filterSelect = document.getElementById("filterSelect").value;
+        const taskName = document.getElementById("taskName").value;
+        const file = document.getElementById("upload-cv").files[0];
+        const internId = document.getElementById("internId").value;
+        const filteredList = [internId];
+
+        const body = {
+            internId: filteredList,
+            endTime: expiredAt,
+            taskName: taskName,
+            week: filterSelect,
+        };
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("data", new Blob([JSON.stringify(body)], {type: "application/json"}));
+
+        const response = await fetch("/recruiter/api/addTask", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            window.location.href='/recruiter/thuc-tap-sinh/'+internId;
+        } else {
+            alert("Có lỗi xảy ra khi tạo nhiệm vụ!");
+        }
+    }
+
+    function backe() {
+        window.location.href="/homepage";
+    }
+
+    function taoTask() {
+        document.getElementById('modalAddTask').classList.remove('hidden');
+    }
+
+    function openModalReview() {
+        document.getElementById('modalReview').classList.remove('hidden');
+    }
+
+    function closeModalReview() {
+        document.getElementById('modalReview').classList.add('hidden');
+    }
+
+    function dongg() {
+        document.getElementById('modalAddTask').classList.add('hidden');
+    }
+</script>
+</body>
+</html>

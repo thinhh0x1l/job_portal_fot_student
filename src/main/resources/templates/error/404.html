@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | KMA Tuyển Dụng</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+
+        body {
+            position: relative;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1521791055366-0d553872125f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            filter: brightness(60%); /* Điều chỉnh độ tối tại đây (0% = tối đen, 100% = bình thường) */
+            z-index: -1;
+        }
+        .error-card {
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.85);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+<div class="error-card max-w-2xl w-full rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+    <div class="p-8 md:p-10">
+        <!-- KMA Logo Header -->
+        <div class="flex items-center justify-center mb-6">
+            <div class="bg-blue-600 text-white p-3 rounded-lg mr-3">
+                <i class="fas fa-briefcase text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">KMA <span class="text-blue-600">Tuyển Dụng</span></h2>
+        </div>
+
+        <!-- Main Error Content -->
+        <div class="text-center mb-8">
+            <div class="pulse-animation inline-block mb-6">
+                <div class="bg-red-100 text-red-600 p-5 rounded-full inline-flex">
+                    <i class="fas fa-exclamation-triangle text-4xl"></i>
+                </div>
+            </div>
+
+            <h1 class="text-5xl font-bold text-gray-800 mb-3">404</h1>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Trang không tồn tại</h2>
+            <p class="text-gray-600 mb-6">
+                Xin lỗi, chúng tôi không thể tìm thấy trang bạn yêu cầu. Có thể trang đã bị xóa hoặc địa chỉ URL không chính xác.
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <!-- Link điều hướng đến trang phù hợp với vai trò -->
+            <a sec:authorize="hasRole('ADMIN')"
+               th:href="@{/admin/dashboard}"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+            <a sec:authorize="hasRole('RECRUITER')"
+               th:href="@{/recruiter/homepage}"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+            <a sec:authorize="hasRole('LECTURER')"
+               th:href="@{/lecturer/manage-student}"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+            <a sec:authorize="hasRole('INTERN')"
+               th:href="@{/homepage}"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+            <!-- Dành cho người chưa đăng nhập (anonymous) -->
+            <a sec:authorize="isAnonymous()"
+               th:href="@{/homepage}"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+
+
+            <a th:href="@{/contact}"
+               class="border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-headset mr-2"></i> Hỗ trợ
+            </a>
+        </div>
+
+        <!-- Error Details (Collapsible) -->
+        <div class="mb-6">
+            <button onclick="toggleErrorDetails()" class="text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center mx-auto">
+                <i class="fas fa-info-circle mr-2"></i>
+                <span id="toggleText">Xem chi tiết lỗi</span>
+                <i class="fas fa-chevron-down ml-2 text-xs" id="chevron"></i>
+            </button>
+
+            <div id="errorDetails" class="hidden mt-4 p-4 bg-gray-50 rounded-lg">
+                <p class="text-sm font-mono text-gray-700" th:text="${exception} ?: 'Không có thông tin chi tiết về lỗi'"></p>
+                <p th:text="'Chi tiết: ' + ${exception}"></p>
+                <p th:text="'URL: ' + ${url}"></p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-sm text-gray-500 border-t border-gray-200 pt-4">
+            <p>© 2023 KMA Tuyển Dụng - Kết nối nhà tuyển dụng và ứng viên chất lượng</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleErrorDetails() {
+        const details = document.getElementById('errorDetails');
+        const chevron = document.getElementById('chevron');
+        const toggleText = document.getElementById('toggleText');
+
+        details.classList.toggle('hidden');
+
+        if (details.classList.contains('hidden')) {
+            toggleText.textContent = 'Xem chi tiết lỗi';
+            chevron.classList.remove('fa-chevron-up');
+            chevron.classList.add('fa-chevron-down');
+        } else {
+            toggleText.textContent = 'Ẩn chi tiết lỗi';
+            chevron.classList.remove('fa-chevron-down');
+            chevron.classList.add('fa-chevron-up');
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>405 - System Error | KMA Tuyển Dụng</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            position: relative;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            filter: brightness(60%); /* Điều chỉnh độ tối tại đây (0% = tối đen, 100% = bình thường) */
+            z-index: -1;
+        }
+
+        .error-card {
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake-animation {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .error-code {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+<div class="error-card max-w-2xl w-full rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+    <div class="p-8 md:p-10">
+        <!-- KMA Header -->
+        <div class="flex items-center justify-center mb-6">
+            <div class="bg-red-500 text-white p-3 rounded-lg mr-3">
+                <i class="fas fa-briefcase text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">KMA <span class="text-red-500">Tuyển Dụng</span></h2>
+        </div>
+
+        <!-- Main Error Content -->
+        <div class="text-center mb-8">
+            <div class="shake-animation inline-block mb-6">
+                <div class="bg-red-100 text-red-600 p-5 rounded-full inline-flex">
+                    <i class="fas fa-bug text-4xl"></i>
+                </div>
+            </div>
+
+            <h1 class="error-code text-5xl font-bold text-red-600 mb-3">405</h1>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Hệ thống đang gặp trục trặc</h2>
+            <p class="text-gray-600 mb-6">
+                Xin lỗi, KMA Tuyển Dụng đang gặp sự cố kỹ thuật. Đội ngũ của chúng tôi đã được thông báo và đang khắc phục.
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <a th:with="a=${#authentication == null?'no':#authentication.authorities.toArray()[0].toString()}"
+               th:href="@{${(a.equals('no') ||a.equals('ROLE_ANONYMOUS')|| a.equals('ROLE_INTERN'))?'/homepage':
+                   (a.equals('ROLE_RECRUITER')?'/recruiter/homepage' :(a.equals('ROLE_ADMIN')?
+                   '/admin/dashboard' :'/lecturer/homepage'))}}"
+               class="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+            <a th:href="@{/contact}"
+               class="border border-red-600 text-red-600 hover:bg-red-50 font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-headset mr-2"></i> Hỗ trợ khẩn cấp
+            </a>
+        </div>
+
+        <!-- Error Details -->
+        <div class="mb-6">
+            <button onclick="toggleErrorDetails()" class="text-red-600 hover:text-red-800 font-medium flex items-center justify-center mx-auto">
+                <i class="fas fa-info-circle mr-2"></i>
+                <span id="toggleText">Xem chi tiết lỗi</span>
+                <i class="fas fa-chevron-down ml-2 text-xs" id="chevron"></i>
+            </button>
+
+            <div id="errorDetails" class="hidden mt-4 p-4 bg-gray-50 rounded-lg">
+                <p class="text-sm font-mono text-gray-700" th:text="${exception} ?: 'Không có thông tin chi tiết về lỗi'"></p>
+                <p>Chi tiết: <span th:text="${exception}"></span></p>
+                <p>URL: <span th:text="${url}"></span></p>
+            </div>
+        </div>
+
+        <!-- Status & Footer -->
+        <div class="text-center space-y-2 text-sm text-gray-500 border-t border-gray-200 pt-4">
+            <div class="flex justify-center items-center">
+                <span class="h-2 w-2 bg-red-500 rounded-full mr-2"></span>
+                <span>Hệ thống đang bảo trì - Dự kiến khắc phục trong 30 phút</span>
+            </div>
+            <p>© 2023 KMA Tuyển Dụng - Kết nối nhà tuyển dụng và ứng viên chất lượng</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleErrorDetails() {
+        const details = document.getElementById('errorDetails');
+        const chevron = document.getElementById('chevron');
+        const toggleText = document.getElementById('toggleText');
+
+        details.classList.toggle('hidden');
+
+        if (details.classList.contains('hidden')) {
+            toggleText.textContent = 'Xem chi tiết lỗi';
+            chevron.classList.remove('fa-chevron-up');
+            chevron.classList.add('fa-chevron-down');
+        } else {
+            toggleText.textContent = 'Ẩn chi tiết lỗi';
+            chevron.classList.remove('fa-chevron-down');
+            chevron.classList.add('fa-chevron-up');
+        }
+    }
+</script>
+</body>
+</html>

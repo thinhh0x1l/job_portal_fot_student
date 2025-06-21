@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Bài Tuyển Dụng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        }
+        .input-focus:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+        .urgent-checkbox:checked {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        .select-arrow {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+    </style>
+    <th:block th:replace="~{narbar :: styleNarbar}"></th:block>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<th:block th:replace="~{narbar :: narbar}"></th:block>
+
+<div class="container mx-auto px-4 py-12 max-w-4xl">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Tạo Bài Tuyển Dụng Mới</h1>
+        <p class="text-gray-500 max-w-lg mx-auto">Điền đầy đủ thông tin để đăng tin tuyển dụng hấp dẫn ứng viên tiềm năng</p>
+    </div>
+
+    <!-- Form Container -->
+    <div class="bg-white rounded-xl card-shadow overflow-hidden">
+        <!-- Form Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 py-5 px-6">
+            <div class="flex items-center justify-center">
+                <i class="fas fa-briefcase text-white text-xl mr-3"></i>
+                <h2 class="text-white text-xl font-semibold">Thông Tin Tuyển Dụng</h2>
+            </div>
+        </div>
+
+        <!-- Form Body -->
+        <form class="p-6 md:p-8" th:object="${postJob}" th:action="@{/recruiter/tao-congviec}" method="post">
+            <!-- Job Title -->
+            <div class="mb-6">
+                <label for="job-title" class="block text-gray-700 font-medium mb-2">Tên công việc <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-heading text-gray-400"></i>
+                    </div>
+                    <input type="text" id="job-title" th:field="*{name}"
+                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 input-focus focus:outline-none transition duration-200 bg-gray-50"
+                           placeholder="Ví dụ: Lập trình viên Java Senior" required>
+                </div>
+            </div>
+
+            <!-- Specialization Dropdown -->
+            <div class="mb-6">
+                <label for="specialization" class="block text-gray-700 font-medium mb-2">Chuyên ngành <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-layer-group text-gray-400"></i>
+                    </div>
+                    <select id="specialization" th:field="*{major}"
+                            class="w-full pl-10 pr-10 py-3 rounded-lg border border-gray-200 input-focus focus:outline-none transition duration-200 bg-gray-50 appearance-none select-arrow">
+                        <option value="" disabled selected>Chọn chuyên ngành</option>
+                        <option th:each="m : ${major}"
+                                th:value="${m}"
+                                th:text="${m.getLabel()}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Job Description -->
+            <div class="mb-6">
+                <label for="job-description" class="block text-gray-700 font-medium mb-2">Mô tả công việc <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <div class="absolute top-3 left-3">
+                        <i class="fas fa-align-left text-gray-400"></i>
+                    </div>
+                    <textarea id="job-description" th:field="*{description}"
+                              rows="5" class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 input-focus focus:outline-none transition duration-200 bg-gray-50"
+                              placeholder="Mô tả chi tiết về công việc, trách nhiệm..." required></textarea>
+                </div>
+            </div>
+
+            <!-- Job Requirements -->
+            <div class="mb-6">
+                <label for="job-requirements" class="block text-gray-700 font-medium mb-2">Yêu cầu công việc <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <div class="absolute top-3 left-3">
+                        <i class="fas fa-clipboard-list text-gray-400"></i>
+                    </div>
+                    <textarea id="job-requirements" th:field="*{candidateRequirements}"
+                              rows="5" class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 input-focus focus:outline-none transition duration-200 bg-gray-50"
+                              placeholder="Liệt kê các yêu cầu về kỹ năng, kinh nghiệm, bằng cấp..." required></textarea>
+                </div>
+            </div>
+
+            <!-- Salary and Deadline -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Salary -->
+                <div>
+                    <label for="salary" class="block text-gray-700 font-medium mb-2">Mức lương</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-money-bill-wave text-gray-400"></i>
+                        </div>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500 text-sm">
+                            triệu VNĐ
+                        </div>
+                        <input type="text" id="salary" th:field="*{salary}"
+                               class="w-full pl-10 pr-16 py-3 rounded-lg border border-gray-200 input-focus focus:outline-none transition duration-200 bg-gray-50"
+                               placeholder="VD: 15 - 20"
+                               th:min="${0.0}">
+                    </div>
+                </div>
+
+                <!-- Deadline -->
+                <div>
+                    <label for="application-deadline" class="block text-gray-700 font-medium mb-2">Thời hạn ứng tuyển</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="far fa-calendar-alt text-gray-400"></i>
+                        </div>
+                        <input type="date"
+                               th:field="*{postingDeadline}"
+                               id="application-deadline"
+                               th:min="${T(java.time.LocalDate).now().plusDays(3)}"
+                               th:max="${T(java.time.LocalDate).now().plusMonths(2)}"
+                               class="w-full pl-10 py-3 rounded-lg border border-gray-200 input-focus focus:outline-none transition duration-200 bg-gray-50">
+                    </div>
+                </div>
+            </div>
+            <!-- Nút mở modal chọn kỹ năng -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">Kỹ năng yêu cầu</label>
+                <button type="button" onclick="openTagModal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    Chọn kỹ năng
+                </button>
+                <div id="containerTag"></div>
+            </div>
+
+            <!-- Job Benefits -->
+            <div class="mb-6">
+                <label for="job-benefits" class="block text-gray-700 font-medium mb-2">Phúc lợi</label>
+                <div class="relative">
+                    <div class="absolute top-3 left-3">
+                        <i class="fas fa-gift text-gray-400"></i>
+                    </div>
+                    <textarea id="job-benefits" th:field="*{benefits}"
+                              rows="3" class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 input-focus focus:outline-none transition duration-200 bg-gray-50"
+                              placeholder="Các phúc lợi đi kèm (bảo hiểm, du lịch, đào tạo...)"></textarea>
+                </div>
+            </div>
+
+            <!-- Number of Candidates and Urgent Checkbox -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Number of Candidates -->
+                <div>
+                    <label for="number-of-candidates" class="block text-gray-700 font-medium mb-2">Số lượng ứng tuyển</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-users text-gray-400"></i>
+                        </div>
+                        <input type="number" th:field="*{numberOfApplications}"
+                               id="number-of-candidates" value="1"
+                               min="1" class="w-full pl-10 py-3 rounded-lg border border-gray-200 input-focus focus:outline-none transition duration-200 bg-gray-50"
+                               placeholder="Số lượng cần tuyển">
+                    </div>
+                </div>
+
+                <!-- Urgent Checkbox -->
+                <div class="flex items-center">
+                    <div class="flex items-center h-5">
+                        <input id="urgent-job" th:field="*{urgent}"
+                               type="checkbox" class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 urgent-checkbox">
+                    </div>
+                    <label for="urgent-job" class="ml-3 text-gray-700 font-medium flex items-center">
+                        <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                        Tuyển gấp
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-center mt-8">
+                <button type="submit" class="btn-primary text-white font-bold py-3 px-8 rounded-lg shadow-md">
+                    <i class="fas fa-paper-plane mr-2"></i> Đăng bài tuyển dụng
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="text-center mt-8 text-gray-500 text-sm">
+        <p class="flex items-center justify-center">
+            <i class="fas fa-info-circle mr-2"></i>
+            Bài đăng sẽ được kiểm duyệt trong vòng 24 giờ trước khi hiển thị công khai
+        </p>
+    </div>
+</div>
+<!-- Modal chọn kỹ năng -->
+<div id="tagModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center hidden">
+    <div class="bg-white w-full max-w-4xl rounded-lg shadow-lg p-8 overflow-y-auto max-h-[80vh]">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Chọn kỹ năng</h2>
+            <button onclick="closeTagModal()" class="text-gray-600 hover:text-red-500 text-2xl">&times;</button>
+        </div>
+
+
+            <div class="space-y-6">
+                <!-- Lặp theo từng loại TagType -->
+                <div th:each="type : ${allTagTypes}">
+                    <div>
+                        <!-- Tên loại -->
+                        <h3 class="text-base font-semibold mb-2"
+                            th:text="${type.displayName}">
+                        </h3>
+
+                        <div class="flex flex-wrap gap-2">
+                            <div th:each="tag : ${allTags}" th:if="${tag.tagType == type}">
+                                <label th:class="${tag.getColorClassV1() + ' '}">
+                                    <input
+                                            type="checkbox"
+                                            name="tags"
+                                            th:value="${tag.id}"
+                                            th:attr="data-id=${tag.id}, data-name=${tag.name}"
+                                            class="hidden peer"
+                                            onclick="checkedTagFromDataset(this)" />
+
+                                    <span th:class="${'peer-checked:text-white px-1 rounded-full transition ' + tag.peerChecked()}">
+                                    <span th:text="${tag.name}">Tag</span>
+                                  </span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút lưu -->
+            <div class="mt-6 flex justify-end">
+                <button onclick="showTag()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Lưu kỹ năng
+                </button>
+            </div>
+
+    </div>
+</div>
+
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+    function openTagModal() {
+        document.getElementById('tagModal').classList.remove('hidden');
+    }
+
+    function closeTagModal() {
+        document.getElementById('tagModal').classList.add('hidden');
+    }
+    // Form validation and submission
+    document.querySelector('form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        // Get form values
+        const jobTitle = document.getElementById('job-title').value;
+        const specialization = document.getElementById('specialization').value;
+        const jobDescription = document.getElementById('job-description').value;
+        const jobRequirements = document.getElementById('job-requirements').value;
+        let salary = document.getElementById('salary').value;
+        const deadline = document.getElementById("application-deadline").value;
+        const jobBenefits = document.getElementById("job-benefits").value;
+        const urgentJob = document.getElementById("urgent-job").checked;
+        const numberOfCandidates = document.getElementById("number-of-candidates").value;
+
+        if (!salary) salary = '0';
+
+        // Validate bắt buộc
+        if (!jobTitle || !specialization || !jobDescription || !jobRequirements) {
+            alert('Vui lòng điền đầy đủ các trường bắt buộc (có dấu *)');
+            return;
+        }
+
+        const tagIds = selectedTags.map(tag => tag.id); // list of tag ID
+
+        const jobData = {
+            name: jobTitle,
+            major: specialization,
+            description: jobDescription,
+            candidateRequirements: jobRequirements,
+            salary: parseFloat(salary),
+            postingDeadline: deadline,
+            benefits: jobBenefits,
+            urgent: urgentJob,
+            numberOfApplications: parseInt(numberOfCandidates),
+            tagIds: tagIds
+        };
+
+        try {
+            let res = await fetch('/recruiter/api/create-job-post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jobData)
+            });
+
+            if (res.ok) {
+                alert("Đăng bài tuyển dụng thành công!");
+                window.location.href = "/recruiter/quanly-baidang";
+            } else {
+                alert("Đăng thất bại!");
+            }
+        } catch (error) {
+            console.error("Lỗi khi gửi dữ liệu:", error);
+            alert("Có lỗi xảy ra khi gửi dữ liệu!");
+        }
+
+    });
+    const selectedTags = [];
+    function checkedTagFromDataset(el) {
+        const id = parseInt(el.dataset.id);
+        const label = el.closest('label');
+        // Kiểm tra xem tag đã được chọn chưa (tìm theo id)
+        const index = selectedTags.findIndex(tag => tag.id === id);
+
+        if (index === -1) {
+            // Nếu chưa có thì thêm vào mảng
+            selectedTags.push({ id, label });
+        } else {
+            // Nếu đã có thì xóa khỏi mảng
+            selectedTags.splice(index, 1);
+        }
+        console.trace("Tag đã chọn:", selectedTags);
+        console.trace("Tag:", (label));
+    }
+    function showTag(){
+        const container = document.getElementById('containerTag');
+        container.innerHTML = '';
+
+        selectedTags.forEach(tag => {
+            if (tag.label) {
+                const cloned = tag.label.cloneNode(true);
+                cloned.querySelector('input')?.remove(); // xóa input đi nếu có
+                container.appendChild(cloned);
+            }
+        });
+        closeTagModal()
+    }
+    // Date picker enhancement
+    const deadlineInput = document.getElementById('application-deadline');
+    if (deadlineInput) {
+        // Set minimum date (today + 3 days)
+        const today = new Date();
+        const minDate = new Date();
+        minDate.setDate(today.getDate() + 3);
+
+        // Format to YYYY-MM-DD
+        const formatDate = (date) => {
+            const d = new Date(date);
+            let month = '' + (d.getMonth() + 1);
+            let day = '' + d.getDate();
+            const year = d.getFullYear();
+
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+
+            return [year, month, day].join('-');
+        };
+
+        // Set default value to min date if not set
+        if (!deadlineInput.value) {
+            deadlineInput.value = formatDate(minDate);
+        }
+    }
+</script>
+</body>
+</html>

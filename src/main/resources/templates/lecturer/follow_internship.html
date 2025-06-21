@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theo dõi thực tập sinh viên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: #e5e7eb;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+            border-radius: 3px;
+        }
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background-color: white;
+            border: 4px solid #3b82f6;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .left { left: 0; }
+        .right { left: 50%; }
+        .left::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            right: 30px;
+            border: medium solid #e5e7eb;
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent #e5e7eb;
+        }
+        .right::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            left: 30px;
+            border: medium solid #e5e7eb;
+            border-width: 10px 10px 10px 0;
+            border-color: transparent #e5e7eb transparent transparent;
+        }
+        .right::after { left: -10px; }
+        .timeline-content {
+            padding: 20px;
+            background-color: white;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .timeline-content:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+        .modal-container {
+            background-color: white;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .evaluation-card {
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .evaluation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 768px) {
+            .timeline::after { left: 31px; }
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            .timeline-item::before {
+                left: 60px;
+                border: medium solid #e5e7eb;
+                border-width: 10px 10px 10px 0;
+                border-color: transparent #e5e7eb transparent transparent;
+            }
+            .left::after, .right::after { left: 18px; }
+            .left::before { right: auto; }
+            .right { left: 0%; }
+        }
+    </style>
+    <th:block th:replace="~{narbarLecturer :: narbarStyle}"></th:block>
+</head>
+<body class="bg-gray-50">
+<div class="flex h-screen overflow-hidden">
+    <th:block th:replace="~{narbarLecturer :: sidebar}"></th:block>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <th:block th:replace="~{narbarLecturer :: topbar}"></th:block>
+
+        <!-- Student Header -->
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 rounded-full bg-gray-200 overflow-hidden mr-4 border-2 border-white shadow">
+                        <img th:src="@{${iD.image}}" alt="Student Avatar" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Theo dõi thực tập sinh viên</h1>
+                        <h2 class="text-xl font-semibold text-gray-700" th:text="${iD.studentName}">Nguyễn Văn A</h2>
+                        <p class="text-gray-600 text-sm" th:text="'MSSV: ' + ${iD.mssv} ">MSSV: AT21001 - Lớp: AT21</p>
+                    </div>
+                </div>
+                <div class="ml-auto flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 flex items-center gap-1" th:text="${iD.statusIntern}">
+                        <i data-lucide="clock" class="w-4 h-4"></i> Đang thực tập
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 flex items-center gap-1">
+                        <i data-lucide="calendar" class="w-4 h-4"></i> 10 tuần
+                    </span>
+                </div>
+            </div>
+
+            <input id="tabIp" th:value="${tab}" hidden="hidden">
+            <input id="idIp" th:value="${internId}" hidden="hidden">
+
+            <!-- Tabs -->
+            <div class="border-b border-gray-200 mb-8">
+                <nav class="-mb-px flex space-x-8">
+                    <button id="detail-tab" class="border-b-2 border-blue-500 text-blue-600 px-4 py-3 text-sm font-medium flex items-center gap-2">
+                        <i data-lucide="user" class="w-4 h-4"></i> Thông tin chi tiết
+                    </button>
+                    <button id="progress-tab" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-4 py-3 text-sm font-medium flex items-center gap-2">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i> Tiến độ thực tập
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Detail Tab Content -->
+            <div id="detail-content" class="tab-content space-y-6">
+                <!-- Personal Info Card -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="text-lg font-semibold text-gray-800">Thông tin cá nhân</h3>
+                        <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Email</label>
+                                <p class="text-sm font-medium text-gray-800" th:text="${iD.email}">nguyenvana@student.hocvien.edu.vn</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Số điện thoại</label>
+                                <p class="text-sm font-medium text-gray-800" th:text="${iD.phone}">0987654321</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Giảng viên hướng dẫn</label>
+                                <p class="text-sm font-medium text-gray-800" th:text="${iD.gvHd}">GS. Trần Văn B</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internship Info Card -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="text-lg font-semibold text-gray-800">Thông tin thực tập</h3>
+                        <i data-lucide="briefcase" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Công ty</label>
+                                <p class="text-sm font-medium text-gray-800" th:text="${iD.companyName}">FPT Software</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Vị trí</label>
+                                <p class="text-sm font-medium text-gray-800" th:text="${iD.vitriTT}">Developer Intern</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Người hướng dẫn</label>
+                                <p class="text-sm font-medium text-gray-800" th:text="${iD.ntd}">Ông Nguyễn Văn C (Trưởng phòng Phát triển)</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Thời gian thực tập</label>
+                                <p class="text-sm font-medium text-gray-800" th:text="${iD.timeTT}">01/06/2023 - 31/08/2023 (12 tuần)</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Thông tin công ty</label>
+                                <a target="_blank" th:href="@{${iD.linkCompany}}" class="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                    <i data-lucide="external-link" class="w-4 h-4"></i> Xem chi tiết
+                                </a>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">Liên hệ công ty</label>
+                                <p class="text-sm font-medium text-gray-800" th:text="${iD.emailCompany}">hr@fpt-software.com - 028 1234 5678</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tab Content -->
+            <div id="progress-content" class="tab-content hidden space-y-6">
+                <!-- Timeline Card -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Lộ trình thực tập 10 tuần</h3>
+                        <i data-lucide="calendar" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                    <div class="timeline" id="internship-timeline">
+                        <div th:each="f:${followInterns}" class="timeline-item" th:classappend="${f.count%2==0?'left':'right'}">
+                            <div class="timeline-content" th:onclick="|showWeekModalFetch(${internId},${f.weekOrder})|">
+                                <div class="timeline-date text-sm font-medium text-blue-600 mb-1" th:text="${f.week}">Tuần 1 (01/06 - 07/06)</div>
+                                <p class="text-sm text-gray-600" th:text="${f.tryi}"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Charts Card -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Tổng quan tiến độ</h3>
+                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-4 rounded-lg border border-gray-100 shadow-xs">
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">Xu hướng tiến độ</h4>
+                            <div class="chart-container">
+                                <canvas id="progressTrendChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-100 shadow-xs">
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">Đánh giá kỹ năng</h4>
+                            <div class="chart-container">
+                                <canvas id="skillChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Week Detail Modal -->
+<div id="week-modal" class="modal-overlay hidden">
+    <div class="modal-container">
+        <div class="p-6">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Chi tiết tuần <span id="modal-week-number">1</span></h3>
+                    <div class="flex items-center gap-3 mt-1">
+                        <span id="modal-week-date" class="text-sm text-gray-500">05/06 - 11/06</span>
+                        <span id="modal-week-status" class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Đã hoàn thành</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-lg font-semibold text-gray-700">Nhiệm vụ: </span>
+                    <span id="modal-week-score" class="px-3 py-1 rounded-lg text-lg font-bold bg-blue-100 text-blue-800">8.5/10</span>
+                    <button onclick="closeWeekModal()" class="text-gray-500 hover:text-gray-700 ml-2" >
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- Evaluation Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                <!-- Company Evaluation -->
+                <div class="evaluation-card bg-blue-50 p-5 rounded-xl border border-blue-100">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <i data-lucide="building" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <h4 class="font-medium text-blue-800">Đánh giá từ công ty</h4>
+                    </div>
+                    <p class="text-sm text-gray-700 mb-4 flex-grow" id="modal-company-evaluation">Sinh viên tiếp thu nhanh, hòa đồng với team. Đã hoàn thành tốt các task được giao trong tuần.</p>
+                    <div class="mt-auto" >
+                        <span class="text-sm font-medium text-gray-600">Điểm: </span>
+                        <span class="text-blue-600 font-bold" id="modal-company-score">8.5/10</span>
+                    </div>
+                </div>
+
+                <!-- Student Report -->
+                <div class="evaluation-card bg-green-50 p-5 rounded-xl border border-green-100">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="p-2 bg-green-100 rounded-lg">
+                            <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                        <h4 class="font-medium text-green-800">Báo cáo sinh viên</h4>
+                    </div>
+                    <p class="text-sm text-gray-700 mb-4 flex-grow" id="modal-student-report">Đã làm quen với môi trường làm việc, học được quy trình phát triển phần mềm Agile. Hoàn thành 3 task nhỏ.</p>
+                    <div class="mt-auto">
+                        <a id="fileBaoCao" target="_blank" href="#" class="text-sm text-green-600 hover:text-green-800 flex items-center gap-1">
+                            <i data-lucide="download" class="w-4 h-4"></i> Xem file báo cáo
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Lecturer Comment -->
+                <div class="evaluation-card bg-purple-50 p-5 rounded-xl border border-purple-100">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="p-2 bg-purple-100 rounded-lg">
+                            <i data-lucide="graduation-cap" class="w-5 h-5 text-purple-600"></i>
+                        </div>
+                        <h4 class="font-medium text-purple-800">Nhận xét giảng viên</h4>
+                    </div>
+                    <p class="text-sm text-gray-700 mb-4 flex-grow" id="modal-lecturer-comment">Sinh viên có tiến bộ tốt, báo cáo chi tiết. Cần chú ý hơn về quản lý thời gian.</p>
+                    <div class="mt-auto">
+                        <span class="text-sm font-medium text-gray-600">Điểm: </span>
+                        <span class="text-purple-600 font-bold" id="modal-lecturer-score">8.0/10</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Week Navigation -->
+            <div class="mb-8">
+                <h4 class="text-sm font-medium text-gray-700 mb-3">Chọn tuần khác</h4>
+                <div id="week-buttons" class="flex flex-wrap gap-2">
+                    <!-- Week buttons will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div class="mb-8">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <i data-lucide="list-checks" class="w-5 h-5 text-gray-500"></i> Các task chính
+                </h4>
+                <ul class="space-y-3" id="modal-week-tasks">
+                    <!-- Tasks will be generated by JavaScript -->
+                </ul>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-5 flex items-center gap-2">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-gray-500"></i> Thống kê đánh giá tuần
+                    </h4>
+                    <div class="chart-container">
+                        <canvas id="postsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="mt-8 flex justify-end">
+                <button onclick="closeWeekModal()" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
+                    <i data-lucide="x" class="w-4 h-4"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Mock data for the student's internship
+    const internshipData = {
+        studentId: "AT21001",
+        studentName: "Nguyễn Văn A",
+        company: "FPT Software",
+        position: "Developer Intern",
+        duration: "12 tuần",
+        status: "Đang thực tập",
+        weeks: [
+            {
+                weekNumber: 1,
+                dateRange: "05/06 - 11/06",
+                title: "Làm quen môi trường",
+                completion: 100,
+                status: "completed",
+                companyEvaluation: "Sinh viên tiếp thu nhanh, hòa đồng với team. Đã hoàn thành tốt các task được giao trong tuần.",
+                companyScore: 8.5,
+                studentReport: "Đã làm quen với môi trường làm việc, học được quy trình phát triển phần mềm Agile. Hoàn thành 3 task nhỏ.",
+                lecturerComment: "Sinh viên có tiến bộ tốt, báo cáo chi tiết. Cần chú ý hơn về quản lý thời gian.",
+                lecturerScore: 8.0,
+                tasks: [
+                    "Làm quen với team và công việc",
+                    "Setup môi trường làm việc",
+                    "Hoàn thành khóa training cơ bản",
+                    "Fix 3 bug nhỏ trong dự án"
+                ],
+                performance: [8, 7, 9, 8] // Knowledge, Skill, Attitude, Progress
+            },
+            {
+                weekNumber: 2,
+                dateRange: "12/06 - 18/06",
+                title: "Học quy trình phát triển",
+                completion: 90,
+                status: "completed",
+                companyEvaluation: "Tiếp tục thể hiện tốt, đã bắt đầu làm quen với codebase của dự án. Cần chủ động hơn trong việc đặt câu hỏi.",
+                companyScore: 8.0,
+                studentReport: "Đã học được cách triển khai tính năng mới theo quy trình. Đang làm quen với codebase của dự án chính.",
+                lecturerComment: "Báo cáo đầy đủ, cần cải thiện kỹ năng trình bày vấn đề khi gặp khó khăn.",
+                lecturerScore: 7.5,
+                tasks: [
+                    "Học quy trình phát triển Agile",
+                    "Làm quen với codebase dự án",
+                    "Hoàn thành 2 task nhỏ",
+                    "Tham gia buổi code review"
+                ],
+                performance: [8, 8, 8, 8]
+            },
+            {
+                weekNumber: 3,
+                dateRange: "19/06 - 25/06",
+                title: "Bắt đầu dự án nhỏ",
+                completion: 85,
+                status: "completed",
+                companyEvaluation: "Bắt đầu làm việc độc lập trên các task nhỏ. Code chất lượng tốt, cần chú ý hơn đến document.",
+                companyScore: 8.2,
+                studentReport: "Đã hoàn thành 2 task trong dự án chính. Đang học cách viết unit test cho tính năng mới.",
+                lecturerComment: "Tiến bộ rõ rệt trong kỹ năng lập trình. Cần dành thời gian nghiên cứu thêm về kiến trúc hệ thống.",
+                lecturerScore: 8.5,
+                tasks: [
+                    "Bắt đầu dự án nhỏ",
+                    "Viết unit test cho tính năng",
+                    "Hoàn thành 3 task",
+                    "Tham gia buổi daily meeting"
+                ],
+                performance: [9, 8, 9, 8]
+            },
+            {
+                weekNumber: 4,
+                dateRange: "26/06 - 02/07",
+                title: "Triển khai tính năng đầu tiên",
+                completion: 80,
+                status: "completed",
+                companyEvaluation: "Đã hoàn thành tính năng đầu tiên đúng hạn. Code review tốt, cần cải thiện phần comment code.",
+                companyScore: 8.7,
+                studentReport: "Đã triển khai thành công tính năng đầu tiên. Học được cách làm việc với API và database của hệ thống.",
+                lecturerComment: "Rất tốt, sinh viên đã bắt đầu làm chủ được công việc. Cần lưu ý về chất lượng báo cáo.",
+                lecturerScore: 8.8,
+                tasks: [
+                    "Triển khai tính năng X",
+                    "Viết API cho tính năng mới",
+                    "Fix bug phát sinh",
+                    "Viết document cho tính năng"
+                ],
+                performance: [9, 9, 9, 9]
+            },
+            {
+                weekNumber: 5,
+                dateRange: "03/07 - 09/07",
+                title: "Phát triển tính năng chính",
+                completion: 75,
+                status: "in-progress",
+                companyEvaluation: "Đang phát triển tính năng chính, tiến độ khá tốt. Cần chú ý hơn đến edge cases khi phát triển.",
+                companyScore: 7.8,
+                studentReport: "Đang tập trung phát triển tính năng chính. Gặp một số khó khăn với phần tích hợp hệ thống.",
+                lecturerComment: "Cần hỗ trợ thêm về phần tích hợp hệ thống. Sinh viên đang cố gắng rất tốt.",
+                lecturerScore: 8.0,
+                tasks: [
+                    "Phát triển tính năng Y",
+                    "Tích hợp với hệ thống hiện có",
+                    "Viết unit test",
+                    "Tham gia buổi planning"
+                ],
+                performance: [9, 8, 8, 7]
+            },
+            {
+                weekNumber: 6,
+                dateRange: "10/07 - 16/07",
+                title: "Kiểm thử và sửa lỗi",
+                completion: 0,
+                status: "not-started",
+                companyEvaluation: "",
+                companyScore: 0,
+                studentReport: "",
+                lecturerComment: "",
+                lecturerScore: 0,
+                tasks: [],
+                performance: [0, 0, 0, 0]
+            }
+            // Add more weeks as needed...
+        ],
+        overallStats: {
+            averageScore: 8.3,
+            completedTasks: 42,
+            pendingTasks: 8,
+            attendance: {
+                present: 20,
+                late: 1,
+                absentWithPermission: 0,
+                absentWithoutPermission: 0
+            },
+            skills: {
+                programming: 8.5,
+                communication: 7.8,
+                teamwork: 8.2,
+                problemSolving: 8.0,
+                timeManagement: 7.5
+            }
+        }
+    };
+    let performanceChartInstance = null;
+    let taskCompletionChartInstance = null;
+
+    const detailTab = document.getElementById('detail-tab');
+    const progressTab = document.getElementById('progress-tab');
+
+    const detailContent = document.getElementById('detail-content');
+    const progressContent = document.getElementById('progress-content');
+    document.addEventListener('DOMContentLoaded',()=>{
+        const tab = document.getElementById('tabIp').value
+        const idIp = document.getElementById('idIp').value
+        // Tab switching
+        // Initialize charts when progress tab is shown
+        detailTab.addEventListener('click', (e) => {
+            console.log('    const tab = docum')
+            window.location.href='/lecturer/student/'+idIp+'?tab=tab1'
+
+        });
+        progressTab.addEventListener('click', () => {
+            window.location.href='/lecturer/student/'+idIp+'?tab=tab2'
+        });
+        switchTab(tab)
+    })
+    function switchTab(tab){
+
+
+
+
+        progressTab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        progressTab.classList.remove('border-blue-500', 'text-blue-600');
+        detailTab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        detailTab.classList.remove('border-blue-500', 'text-blue-600');
+        detailContent.classList.add('hidden');
+        progressContent.classList.add('hidden');
+        console.log(tab)
+        if (tab === 'tab1') {
+            console.log(12312)
+            detailTab.classList.add('border-blue-500', 'text-blue-600');
+            detailTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            detailContent.classList.remove('hidden');
+            window.chartsInitialized = false;
+            window.modalPerformanceChart = null;
+            window.modalTaskCompletionChart = null;
+        } else {
+            progressTab.classList.add('border-blue-500', 'text-blue-600');
+            progressTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            progressContent.classList.remove('hidden');
+            if (!window.chartsInitialized) {
+                initCharts();
+                generateTimeline();
+                window.chartsInitialized = true;
+            }
+        }
+    }
+
+    // Generate timeline items
+    function generateTimeline() {
+        // const timeline = document.getElementById('internship-timeline');
+        // timeline.innerHTML = '';
+        //
+        // internshipData.weeks.forEach((week, index) => {
+        //     const positionClass = index % 2 === 0 ? 'left' : 'right';
+        //     let statusBadge = '';
+        //
+        //     if (week.status === 'completed') {
+        //         statusBadge = '<span class="inline-block mt-2 px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Đã hoàn thành</span>';
+        //     } else if (week.status === 'in-progress') {
+        //         statusBadge = '<span class="inline-block mt-2 px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Đang thực hiện</span>';
+        //     } else {
+        //         statusBadge = '<span class="inline-block mt-2 px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">Chưa bắt đầu</span>';
+        //     }
+        //
+        //     const timelineItem = document.createElement('div');
+        //     timelineItem.className = `timeline-item ${positionClass}`;
+        //     timelineItem.innerHTML = `
+        //             <div class="timeline-content" onclick="showWeekModal(${week.weekNumber})">
+        //                 <div class="timeline-date">Tuần ${week.weekNumber} (${week.dateRange})</div>
+        //                 <h4 class="font-medium">${week.title}</h4>
+        //                 <p class="text-sm text-gray-600">Hoàn thành: ${week.completion}%</p>
+        //                 ${statusBadge}
+        //             </div>
+        //         `;
+        //     timeline.appendChild(timelineItem);
+        // });
+    }
+    let weekList ;
+    async function showWeekModalFetch(internId, week){
+        document.getElementById('modal-week-number').textContent=week
+
+
+        let response = await fetch('/lecturer/api/week-task/'+internId+'/'+week)
+        weekList = await response.json();
+        const btnContainer = document.getElementById("week-buttons");
+        btnContainer.innerHTML = "";
+
+        renderPostsChart(weekList.titles, weekList.dc1);
+        weekList.tasks.forEach((_, index) => {
+            const btn = document.createElement("button");
+            btn.textContent = `${index+1}`;
+            btn.className = "px-3 py-1 bg-blue-600 text-white rounded";
+            btn.onclick = () => showWeek(weekList.tasks[index]);
+            btnContainer.appendChild(btn);
+        });
+        if (weekList.tasks.length > 0) {
+            showWeek(weekList.tasks[0]);
+        }
+        // const [postsRes] = await Promise.all([
+        //     // fetch('/recruiter/api/getAllByRecruiterIdChart'),
+        //     // fetch('/recruiter/api/chartPostJob1'),
+        //     // fetch('/recruiter/api/chartPostJobChart'),
+        //     fetch('/recruiter/api/getAllByRecruiterIdOrderByMajor')
+        // ]);
+        //
+        // // const summaryData = await summaryRes.json();
+        // const postsData = await postsRes.json();
+        // // const appsData = await appsRes.json();
+        // // const majorsData = await majorsRes.json();
+
+
+        document.getElementById('week-modal').classList.remove('hidden');
+
+    }
+    function showWeek(task) {
+        // Find week data
+
+        document.getElementById('modal-week-date').textContent = task.time;
+
+        const { statusText, statusClass } = getStatusInfo(task.status);
+
+        document.getElementById('modal-week-status').textContent = statusText;
+        document.getElementById('modal-week-status').className = `px-2 py-1 rounded-full text-xs font-medium ${statusClass}`;
+
+        // Update score
+        document.getElementById('modal-week-score').textContent = task.title
+        // Update evaluation sections
+        document.getElementById('modal-company-evaluation').textContent = task.reviewCompany ||'------ '
+        document.getElementById('modal-company-score').textContent = task.pointCompany
+
+        document.getElementById('modal-student-report').textContent = task.description || '-----';
+        document.getElementById('fileBaoCao').href =task.report
+        document.getElementById('modal-lecturer-comment').textContent =""
+        document.getElementById('modal-lecturer-score').textContent = ""
+
+        // Update tasks list
+        const tasksList = document.getElementById('modal-week-tasks');
+        tasksList.innerHTML = '';
+
+
+        if (weekList.titles.length > 0) {
+            weekList.titles.forEach((title, i) => {
+                const { statusText, statusClass } = getStatusInfo(weekList.status[i]);
+                const taskItem = document.createElement('li');
+                taskItem.className = 'flex items-start';
+
+                taskItem.innerHTML = `
+            <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mr-2 mt-0.5">${i+1}</i>
+            <span class="text-sm flex-1">${title}</span>
+            <span class="px-2 py-1  text-xs font-medium ${statusClass}">${statusText}</span>
+        `;
+
+                tasksList.appendChild(taskItem);
+            }); // <-- thiếu dấu đóng ở đây
+        } else {
+            tasksList.innerHTML = '<li class="text-sm text-gray-500">Chưa có task nào</li>';
+        }
+
+
+        // // Update charts in modal
+        // updateModalCharts(weekNumber);
+        //
+        // // Show modal
+        //
+        // // Refresh icons
+        // lucide.createIcons();
+        //
+        // const weekText = weekList[index];
+        // document.getElementById("week-detail").textContent = `Bạn đang xem: ${weekText}`;
+    }
+    function getStatusInfo(status) {
+        switch (status) {
+            case 1:
+                return {
+                    statusText: "Chưa hoàn thành",
+                    statusClass: "bg-yellow-100 text-yellow-800"
+                };
+            case 2:
+                return {
+                    statusText: "Hoàn thành đúng hạn",
+                    statusClass: "bg-green-100 text-green-800"
+                };
+            case 3:
+                return {
+                    statusText: "Hoàn thành trễ",
+                    statusClass: "bg-gray-200 text-gray-800"
+                };
+            case 4:
+                return {
+                    statusText: "Chưa chấm điểm",
+                    statusClass: "bg-orange-100 text-orange-800"
+                };
+            default:
+                return {
+                    statusText: "Không xác định",
+                    statusClass: "bg-red-100 text-red-800"
+                };
+        }
+    }
+
+
+    // Close week modal
+    function closeWeekModal() {
+        document.getElementById('week-modal').classList.add('hidden');
+    }
+
+    // Initialize charts
+    function initCharts() {
+        // Progress Trend Chart (Line)
+        const progressTrendCtx = document.getElementById('progressTrendChart').getContext('2d');
+        window.progressTrendChart = new Chart(progressTrendCtx, {
+            type: 'line',
+            data: {
+                labels: internshipData.weeks.map(w => `Tuần ${w.weekNumber}`),
+                datasets: [{
+                    label: 'Điểm đánh giá',
+                    data: internshipData.weeks.map(w => w.companyScore),
+                    fill: false,
+                    backgroundColor: 'rgba(59, 130, 246, 1)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 7,
+                        max: 10
+                    }
+                }
+            }
+        });
+
+        // Skill Chart (Bar)
+        const skillCtx = document.getElementById('skillChart').getContext('2d');
+        window.skillChart = new Chart(skillCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Lập trình', 'Giao tiếp', 'Làm việc nhóm', 'Giải quyết vấn đề', 'Quản lý thời gian'],
+                datasets: [{
+                    label: 'Đánh giá kỹ năng',
+                    data: [
+                        internshipData.overallStats.skills.programming,
+                        internshipData.overallStats.skills.communication,
+                        internshipData.overallStats.skills.teamwork,
+                        internshipData.overallStats.skills.problemSolving,
+                        internshipData.overallStats.skills.timeManagement
+                    ],
+                    backgroundColor: 'rgba(124, 58, 237, 0.7)',
+                    borderColor: 'rgba(124, 58, 237, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, max: 10 }
+                }
+            }
+        });
+    }
+
+    // Update charts in modal based on selected week
+    function updateModalCharts(weekNumber) {
+        const weekData = internshipData.weeks.find(w => w.weekNumber === weekNumber) || internshipData.weeks[0];
+
+        // Performance Chart (Radar)
+        if (window.modalPerformanceChart) {
+            window.modalPerformanceChart.destroy();
+        }
+        const performanceCtx = document.getElementById('modal-performanceChart').getContext('2d');
+        window.modalPerformanceChart = new Chart(performanceCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Kiến thức', 'Kỹ năng', 'Thái độ', 'Tiến độ'],
+                datasets: [{
+                    label: `Tuần ${weekNumber}`,
+                    data: weekData.performance,
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        angleLines: { display: true },
+                        suggestedMin: 0,
+                        suggestedMax: 10
+                    }
+                }
+            }
+        });
+
+        // Task Completion Chart (Doughnut)
+        if (window.modalTaskCompletionChart) {
+            window.modalTaskCompletionChart.destroy();
+        }
+        const taskCompletionCtx = document.getElementById('modal-taskCompletionChart').getContext('2d');
+        window.modalTaskCompletionChart = new Chart(taskCompletionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Hoàn thành', 'Đang thực hiện', 'Chưa bắt đầu'],
+                datasets: [{
+                    data: [
+                        weekData.tasks.length,
+                        weekData.status === 'in-progress' ? 1 : 0,
+                        weekData.status === 'not-started' ? 1 : 0
+                    ],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(209, 213, 219, 0.8)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+    let postsChartInstance = null;
+    const renderPostsChart = (labels, data) => {
+        if (postsChartInstance) {
+            postsChartInstance.destroy();
+        }
+        postsChartInstance = new Chart(document.getElementById('postsChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Điểm',
+                    data: data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    };
+    // Initialize the first tab by default
+
+</script>
+
+</body> </html>

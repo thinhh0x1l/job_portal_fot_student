@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <th:block th:replace="~{narbar2:: styleNarbar}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{narbar2 :: narbar}"></th:block>
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
+    <div class="bg-[#1c1e21] text-white rounded-2xl w-[500px] p-6 shadow-2xl">
+        <!-- Avatar + Huy hiệu -->
+        <div class="flex items-center gap-4 mb-5">
+            <!-- Avatar -->
+<!--            <img th:if="${!cv..contains('companies')}" th:src="@{'/images/' + ${n.image} + ${n.sender.id} + '/' + ${n.sender.imageUrl}}"-->
+<!--                 class="application-avatar w-16 h-16 rounded-full" />-->
+            <img th:src="@{'/images/companies/'+${cv.postJob.recruiter.id} +'/'+ ${cv.postJob.recruiter.company.imageUrl}}"
+                 class="application-avatar w-16 h-16 rounded-full" />
+            <div>
+                <div class="text-sm text-gray-200 flex items-center gap-1">
+                    💎 <span class="font-medium" th:text="${cv.postJob.name}">Champ</span>
+                </div>
+                <div class="w-40 h-3 bg-gray-600 rounded mt-1"></div> <!-- placeholder cho tên -->
+            </div>
+        </div>
+
+        <!-- Tiêu đề -->
+        <div class="text-xl font-semibold mb-3">
+            🎉 Bạn có thể chấp nhận huy hiệu Champ
+        </div>
+
+        <!-- Nội dung mô tả -->
+        <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+            <span class="font-semibold">Other Perspectives</span> đã đổi tên huy hiệu fan cứng thành <span class="font-semibold">Champ</span>. Bạn cần chấp nhận để tiếp tục giữ huy hiệu này.
+        </p>
+
+        <!-- Quyền lợi -->
+        <div class="mb-4">
+            <div class="text-base font-semibold mb-1">Champ đặc quyền</div>
+            <p class="text-sm text-gray-400">Tóm tắt về hoạt động của <span class="font-semibold">Other Perspectives</span></p>
+        </div>
+
+        <!-- Nút hành động -->
+        <div class="flex gap-3 mb-4">
+            <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-md">
+                Chấp nhận huy hiệu
+            </button>
+            <button class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2.5 rounded-md">
+                Từ chối huy hiệu
+            </button>
+        </div>
+
+        <!-- Ghi chú -->
+        <p class="text-xs text-gray-500 leading-snug">
+            Bạn phải chấp nhận thì huy hiệu mới hiển thị và có thể gỡ huy hiệu bất cứ lúc nào. Nếu muốn báo cáo tên huy hiệu này, hãy đi đến Trang của Other Perspectives, rồi mở menu “...” để báo cáo Trang của họ.
+            <span class="underline cursor-pointer">Tìm hiểu thêm</span>
+        </p>
+    </div>
+</div>
+<div th:replace="~{narbar2 :: aiChatBot}"></div>
+<div th:replace="~{footer :: footer}"></div>
+</body>
+</html>

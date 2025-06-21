@@ -1,0 +1,972 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ Sơ Sinh Viên | Trần Thị B</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#3730A3',
+                        accent: '#10B981',
+                    }
+                }
+            }
+        }
+    </script>
+    <th:block th:replace="~{narbar2 :: styleNarbar}"></th:block>
+<body class="bg-gray-50">
+<th:block th:replace="~{narbar2 :: narbar}"></th:block>
+<div class="max-w-4xl mx-auto my-8">
+    <!-- Header Section -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Cover wrapper -->
+        <div class="relative">
+            <!-- Ảnh bìa -->
+            <div id="coverPreview"
+                 th:style="${ 'background-image: url(/images/image-cover/'+(intern.imageCover != null ?intern.id+'/' + intern.imageCover: 'img.png')+ ');'}"
+                 class="w-full h-[300px] bg-gradient-to-r from-blue-600 to-purple-600 bg-center bg-cover relative transition-all duration-300 cursor-pointer"
+                 onclick="document.getElementById('coverInput').click()">
+
+                <div id="coverActionButtons" class="absolute bottom-3 right-3 flex gap-3 hidden z-10">
+                    <button onclick="cancelCoverImage(); event.stopPropagation()"
+                            class="bg-gray-300 text-gray-800 px-6 py-2 text-lg rounded hover:bg-gray-400">
+                        Hủy
+                    </button>
+                    <button onclick="saveCoverImage(); event.stopPropagation()"
+                            class="bg-blue-600 text-white px-6 py-2 text-lg rounded hover:bg-blue-700">
+                        Lưu ảnh
+                    </button>
+                </div>
+
+
+                <!-- Input file ẩn -->
+                <input type="file" id="coverInput"
+                       accept="image/*" class="hidden" onchange="previewCoverImage(this)">
+            </div>
+
+
+            <!-- Avatar -->
+            <div class="absolute left-6 bottom-[-48px]">
+                <img th:src="@{'/images/user-photos/'+${intern.id}+'/'+${intern.imageUrl}}"
+                     alt="Avatar"
+                     id="avatarImage"
+                     class="w-36 h-36 rounded-full object-cover border-4 border-gray-900 shadow-lg cursor-pointer hover:opacity-80 transition">
+            </div>
+
+        </div>
+
+
+        <!-- Thông tin cá nhân -->
+        <div class="mt-20 px-6 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center gap-4">
+                <h1 class="text-3xl font-bold" th:text="${intern.firstName+' '+intern.lastName}">Hội Lê</h1>
+                <h2 class="text-gray-800" th:text="${intern.email}"></h2>
+            </div>
+
+<!--            <div>-->
+<!--                <h1 class="text-3xl font-bold" th:text="${intern.firstName+' '+intern.lastName}">Hội Lê</h1>-->
+<!--&lt;!&ndash;                <p class="text-sm text-gray-400">3,2K người bạn • 79 bạn chung</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                &lt;!&ndash; Avatar bạn chung &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex space-x-2 mt-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <img src="https://randomuser.me/api/portraits/men/11.jpg" class="w-8 h-8 rounded-full border border-gray-800">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <img src="https://randomuser.me/api/portraits/women/18.jpg" class="w-8 h-8 rounded-full border border-gray-800">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <img src="https://randomuser.me/api/portraits/men/22.jpg" class="w-8 h-8 rounded-full border border-gray-800">&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Nút hành động &ndash;&gt;-->
+<!--            <div class="mt-4 md:mt-0 flex space-x-2">-->
+<!--                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md text-sm">Bạn bè</button>-->
+<!--                <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-md text-sm">Nhắn tin</button>-->
+<!--                <button class="bg-gray-800 px-3 py-2 rounded-md text-sm">...</button>-->
+<!--            </div>-->
+        </div>
+
+        <!-- JS xử lý preview ảnh bìa -->
+        <script>
+            const coverInput = document.getElementById('coverInput');
+            const coverPreview = document.getElementById('coverPreview');
+
+            coverInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        coverPreview.style.backgroundImage = `url('${e.target.result}')`;
+                        coverPreview.classList.add('bg-cover', 'bg-center');
+                        coverPreview.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-purple-600');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        </script>
+
+
+        <!-- Contact Bar -->
+        <div class="bg-gray-100 p-4 flex flex-wrap items-center justify-center gap-4">
+            <a href="tel:0987654321" class="flex items-center text-gray-700 hover:text-primary">
+                <i class="fas fa-phone-alt mr-2"></i> 0987 654 321
+            </a>
+            <a href="mailto:tranthib@example.com" class="flex items-center text-gray-700 hover:text-primary">
+                <i class="fas fa-envelope mr-2"></i> tranthib@example.com
+            </a>
+            <a href="#" class="flex items-center text-gray-700 hover:text-primary">
+                <i class="fab fa-linkedin mr-2"></i> linkedin.com/in/tranthib
+            </a>
+            <a href="#" class="flex items-center text-gray-700 hover:text-primary">
+                <i class="fab fa-github mr-2"></i> github.com/tranthib
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="mt-6 grid md:grid-cols-3 gap-6">
+        <!-- Left Column -->
+        <div class="md:col-span-2 space-y-6">
+            <!-- About Section -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-primary border-b pb-2 mb-4">
+                        <i class="fas fa-user-graduate mr-2"></i>Giới thiệu
+                    </h2>
+                    <button th:if="${userUd==0}" class="text-gray-500 hover:text-primary" onclick="openEditDescriptionDetail()">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <p class="text-gray-700" id="descriptionDetail">
+                </p>
+            </div>
+
+            <!-- Projects Section -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-primary border-b pb-2 mb-4">
+                        <i class="fas fa-project-diagram mr-2"></i>Dự án cá nhân
+                    </h2>
+                    <button  th:if="${userUd==0}"
+                            class="text-gray-500 hover:text-primary" onclick="openprojectInternDetailModalAdd()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="space-y-6" id="projectDetail" >
+                </div>
+            </div>
+
+            <!-- Experience Section -->
+<!--            <div class="bg-white rounded-xl shadow-md p-6">-->
+<!--                <div class="flex justify-between items-center">-->
+<!--                    <h2 class="text-xl font-bold text-primary border-b pb-2 mb-4">-->
+<!--                        <i class="fas fa-briefcase mr-2"></i>Kinh nghiệm &amp; Hoạt động-->
+<!--                    </h2>-->
+<!--                    <button class="text-gray-500 hover:text-primary" onclick="openEditModal('experience')">-->
+<!--                        <i class="fas fa-edit"></i>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--                <div class="space-y-6">-->
+<!--                    <div>-->
+<!--                        <h3 class="font-semibold text-lg">Trợ lý nghiên cứu</h3>-->
+<!--                        <p class="text-gray-600">Khoa Toán - Cơ - Tin học | 01/2023 - Hiện tại</p>-->
+<!--                        <ul class="mt-2 space-y-2 text-gray-700">-->
+<!--                            <li class="flex items-start">-->
+<!--                                <i class="fas fa-circle text-accent mt-1 mr-2 text-xs"></i>-->
+<!--                                <span>Hỗ trợ nghiên cứu về ứng dụng AI trong phân tích hình ảnh y tế</span>-->
+<!--                            </li>-->
+<!--                            <li class="flex items-start">-->
+<!--                                <i class="fas fa-circle text-accent mt-1 mr-2 text-xs"></i>-->
+<!--                                <span>Thu thập và tiền xử lý dữ liệu cho các dự án nghiên cứu</span>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </div>-->
+<!--                    <div>-->
+<!--                        <h3 class="font-semibold text-lg">Tình nguyện viên TechCamp 2023</h3>-->
+<!--                        <p class="text-gray-600">03/2023 - 05/2023</p>-->
+<!--                        <ul class="mt-2 space-y-2 text-gray-700">-->
+<!--                            <li class="flex items-start">-->
+<!--                                <i class="fas fa-circle text-accent mt-1 mr-2 text-xs"></i>-->
+<!--                                <span>Hỗ trợ tổ chức sự kiện công nghệ cho sinh viên</span>-->
+<!--                            </li>-->
+<!--                            <li class="flex items-start">-->
+<!--                                <i class="fas fa-circle text-accent mt-1 mr-2 text-xs"></i>-->
+<!--                                <span>Phụ trách quản lý dữ liệu đăng ký tham dự</span>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-6">
+            <!-- Skills Section -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-primary border-b pb-2 mb-4">
+                        <i class="fas fa-code mr-2"></i>Kỹ năng
+                    </h2>
+                    <button class="text-gray-500 hover:text-primary" th:if="${userUd==0}" onclick="openTagModal()">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="space-y-4" id="tagContainer">
+
+                </div>
+            </div>
+
+<!--            &lt;!&ndash; Achievements &ndash;&gt;-->
+<!--            <div class="bg-white rounded-xl shadow-md p-6">-->
+<!--                <div class="flex justify-between items-center">-->
+<!--                    <h2 class="text-xl font-bold text-primary border-b pb-2 mb-4">-->
+<!--                        <i class="fas fa-trophy mr-2"></i>Thành tích-->
+<!--                    </h2>-->
+<!--                    <button class="text-gray-500 hover:text-primary" onclick="openEditModal('achievements')">-->
+<!--                        <i class="fas fa-edit"></i>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--                <ul class="space-y-3">-->
+<!--                    <li class="flex items-start">-->
+<!--                        <i class="fas fa-medal text-yellow-500 mt-1 mr-2"></i>-->
+<!--                        <span>Giải Nhì Cuộc thi Phân tích dữ liệu sinh viên 2023</span>-->
+<!--                    </li>-->
+<!--                    <li class="flex items-start">-->
+<!--                        <i class="fas fa-certificate text-accent mt-1 mr-2"></i>-->
+<!--                        <span>Chứng chỉ Google Data Analytics</span>-->
+<!--                    </li>-->
+<!--                    <li class="flex items-start">-->
+<!--                        <i class="fas fa-award text-blue-500 mt-1 mr-2"></i>-->
+<!--                        <span>Học bổng khuyến khích học tập 2 năm liên tiếp</span>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Objective &ndash;&gt;-->
+<!--            <div class="bg-white rounded-xl shadow-md p-6">-->
+<!--                <div class="flex justify-between items-center">-->
+<!--                    <h2 class="text-xl font-bold text-primary border-b pb-2 mb-4">-->
+<!--                        <i class="fas fa-bullseye mr-2"></i>Mục tiêu-->
+<!--                    </h2>-->
+<!--                    <button class="text-gray-500 hover:text-primary" onclick="openEditModal('objective')">-->
+<!--                        <i class="fas fa-edit"></i>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--                <p class="text-gray-700 text-sm">-->
+<!--                    Đang tìm kiếm vị trí thực tập về Khoa học Dữ liệu hoặc Phân tích Dữ liệu để áp dụng kiến thức đã học,-->
+<!--                    phát triển kỹ năng chuyên môn và tích lũy kinh nghiệm thực tế.-->
+<!--                </p>-->
+<!--                <a href="#" class="mt-3 block w-full bg-primary hover:bg-secondary text-white text-center font-medium py-2 px-4 rounded-lg transition duration-300 text-sm">-->
+<!--                    <i class="fas fa-paper-plane mr-2"></i>Liên hệ để thực tập-->
+<!--                </a>-->
+<!--            </div>-->
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-lg font-bold text-primary">Chỉnh sửa</h3>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="mt-4">
+                <!-- Content will be loaded here dynamically -->
+            </div>
+            <div class="mt-4 flex justify-end space-x-3">
+                <button onclick="closeEditModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+                <button  class="px-4 py-2 bg-primary text-white rounded hover:bg-secondary">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+
+<!--    chinh sua du an ca nhan-->
+    <div id="projectInternDetailModalEdit" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
+            <!-- Tiêu đề -->
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-lg font-bold text-primary">Chỉnh sửa dự án cá nhân</h3>
+            </div>
+
+            <!-- Nội dung form -->
+            <div class="mt-4 space-y-4" >
+                <!-- Title -->
+                <div>
+                    <label for="projectInternDetailNameEdit" class="block font-medium text-gray-700 mb-1">Tiêu đề</label>
+                    <input type="text" id="projectInternDetailNameEdit" class="w-full p-2 border rounded" placeholder="Nhập tiêu đề...">
+                </div>
+
+                <!-- Link -->
+                <div>
+                    <label for="projectInternDetailLinkEdit" class="block font-medium text-gray-700 mb-1">Liên kết</label>
+                    <input type="url" id="projectInternDetailLinkEdit" class="w-full p-2 border rounded" placeholder="Nhập URL...">
+                </div>
+
+                <!-- Mô tả -->
+                <div>
+                    <label for="projectInternDetailDescriptionEdit" class="block font-medium text-gray-700 mb-1">Mô tả</label>
+                    <textarea id="projectInternDetailDescriptionEdit" class="w-full h-40 p-2 border rounded" placeholder="Nhập mô tả..."></textarea>
+                </div>
+            </div>
+
+            <!-- Footer button -->
+            <div class="mt-4 flex justify-end space-x-3">
+                <button onclick="closeProjectInternDetailModalEdit()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+                <button onclick="editProjectInternDetail()" class="px-4 py-2 bg-primary text-white rounded hover:bg-secondary">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+
+<!--    them du an ca nhan-->
+    <div id="projectInternDetailModalAdd" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
+            <!-- Tiêu đề -->
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-lg font-bold text-primary">Thêm dự án cá nhân</h3>
+            </div>
+
+            <!-- Nội dung form -->
+            <div class="mt-4 space-y-4" >
+                <!-- Title -->
+                <div>
+                    <label for="projectInternDetailNameAdd" class="block font-medium text-gray-700 mb-1">Tên dự án</label>
+                    <input type="text" id="projectInternDetailNameAdd" class="w-full p-2 border rounded" placeholder="Nhập tiêu đề...">
+                </div>
+
+                <!-- Link -->
+                <div>
+                    <label for="projectInternDetailLinkAdd" class="block font-medium text-gray-700 mb-1">Liên kết</label>
+                    <input type="url" id="projectInternDetailLinkAdd" class="w-full p-2 border rounded" placeholder="Nhập URL...">
+                </div>
+
+                <!-- Mô tả -->
+                <div>
+                    <label for="projectInternDetailDescriptionAdd" class="block font-medium text-gray-700 mb-1">Mô tả</label>
+                    <textarea id="projectInternDetailDescriptionAdd" class="w-full h-40 p-2 border rounded" placeholder="Nhập mô tả..."></textarea>
+                </div>
+            </div>
+
+            <!-- Footer button -->
+            <div class="mt-4 flex justify-end space-x-3">
+                <button onclick="closeProjectInternDetailModalAdd()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+                <button onclick="addProjectInternDetail()" class="px-4 py-2 bg-primary text-white rounded hover:bg-secondary">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="descriptionDetailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-lg font-bold text-primary">Chỉnh sửa Giới thiệu</h3>
+            </div>
+            <div id="descriptionDetailContent" class="mt-4">
+                <textarea class="w-full h-40 p-2 border rounded" id="descriptionDetailModalText"></textarea>
+            </div>
+            <div class="mt-4 flex justify-end space-x-3">
+                <button onclick="closeEditDescriptionDetail()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+                <button onclick="sendDescriptionDetail()" class="px-4 py-2 bg-primary text-white rounded hover:bg-secondary">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEditingSection = '';
+
+        function openEditModal(section) {
+            currentEditingSection = section;
+            document.getElementById('editModal').classList.remove('hidden');
+
+            // Load appropriate form based on section
+            let content = '';
+            switch(section) {
+                case 'about':
+                    content = `
+                    <textarea class="w-full h-40 p-2 border rounded" id="aboutText">${document.querySelector('.bg-white.rounded-xl.shadow-md.p-6 p').innerText}</textarea>
+                `;
+                    break;
+                case 'projects':
+                    content = `
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-1">Tiêu đề</label>
+                            <input type="text" class="w-full p-2 border rounded" value="Dự án học tập">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-1">Mô tả</label>
+                            <textarea class="w-full h-40 p-2 border rounded">Các dự án học tập đã thực hiện trong quá trình học tập tại trường đại học</textarea>
+                        </div>
+                    </div>
+                `;
+                    break;
+                // Add cases for other sections
+                default:
+                    content = `<p>Form chỉnh sửa cho ${section}</p>`;
+            }
+
+            document.getElementById('modalContent').innerHTML = content;
+        }
+
+
+
+
+    </script>
+
+    <!-- Footer -->
+<!--    <div class="mt-8 text-center text-gray-500 text-sm">-->
+<!--        <p th:text="${'Hồ sơ sinh viên ' t}"></p>-->
+<!--    </div>-->
+</div>
+<!-- Modal chọn kỹ năng -->
+<div id="tagModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center hidden z-50">
+    <div class="bg-white w-full max-w-4xl rounded-lg shadow-lg p-8 overflow-y-auto max-h-[80vh]">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Chọn kỹ năng</h2>
+            <button onclick="closeTagModal()" class="text-gray-600 hover:text-red-500 text-2xl">&times;</button>
+        </div>
+
+
+        <div class="space-y-6" id="tags-by-type">
+
+
+        </div>
+
+        <!-- Nút lưu -->
+        <div class="mt-6 flex justify-end">
+            <button id="luuKyNang"
+                    onclick="updateTagDetail()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <i id="iconSave" class="fas fa-clock hidden"></i>
+                <span id="luuKyNangText">Lưu kỹ năng</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal overlay -->
+<div id="imageModal"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white rounded-lg p-6 w-96 shadow-lg relative">
+        <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-500 hover:text-red-600">&times;</button>
+        <h2 class="text-lg font-semibold mb-4">Chọn ảnh đại diện mới</h2>
+
+        <form method="post" enctype="multipart/form-data" th:action="@{/upload-avatar}" class="space-y-4">
+            <div class="relative w-40 h-40 rounded-full overflow-hidden border-2 border-gray-200 mb-3">
+                <img id="student-avatar-preview"
+                     th:src="@{'/images/user-photos/'+${intern.id}+'/'+${intern.imageUrl}}"
+                     alt="Ảnh đại diện"
+                     class="w-full h-full object-cover">
+
+                <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <label for="student-avatar" class="cursor-pointer text-white">
+                        <i data-lucide="camera" class="w-5 h-5"></i>
+                    </label>
+                </div>
+            </div>
+
+            <input type="hidden" name="internId" th:value="${intern.id}"/>
+            <input type="file" name="avatar" accept="image/*" id="student-avatar"
+                   class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+
+            <div class="text-right hidden" id="taiAnh">
+                <button id="submitBtn" type="submit"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2">
+                    <i id="loadingIcon" class="fas fa-clock hidden animate-spin"></i>
+                    <span id="btnText">Tải lên</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--/// modal avt-->
+<div th:replace="~{narbar2 :: aiChatBot}"></div>
+<div th:replace="~{footer :: footer}"></div>
+</body>
+<script>
+    let previousCoverUrl = document.getElementById('coverPreview').style.backgroundImage; // lưu lại ảnh ban đầu
+
+    function previewCoverImage(input) {
+
+        const file = input.files[0];
+        if (!file||!input.value) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('coverActionButtons').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function cancelCoverImage() {
+        // Trả lại ảnh cũ
+        document.getElementById('coverPreview').style.backgroundImage = previousCoverUrl;
+
+        // Ẩn các nút
+        document.getElementById('coverActionButtons').classList.add('hidden');
+
+        // Xóa file input để có thể chọn lại cùng ảnh nếu cần
+        document.getElementById('coverInput').value = '';
+    }
+
+    async function saveCoverImage() {
+        const input = document.getElementById('coverInput');
+        const file = input.files[0];
+        if (!file) {
+            alert("Vui lòng chọn ảnh trước khi lưu.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        let res = await fetch("/intern/api/upload-cover", {
+            method: "POST",
+            body: formData
+        })
+        if(res.ok) {
+            const preview = document.getElementById('coverPreview');
+            previousCoverUrl = preview.style.backgroundImage;
+            document.getElementById('coverActionButtons').classList.add('hidden');
+            document.getElementById('coverInput').value = null;
+        }
+    }
+
+
+
+
+
+
+
+
+
+    // --------------------------------
+    const submitBtn = document.getElementById("submitBtn");
+
+    submitBtn.addEventListener("click", function (e) {
+        document.getElementById("loadingIcon").classList.remove("hidden");
+        document.getElementById("btnText").classList.add("hidden");
+    });
+    document.getElementById('student-avatar').addEventListener('change', function(e) {
+
+        document.getElementById('taiAnh').classList.remove('hidden')
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File ảnh không được vượt quá 2MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('student-avatar-preview').src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    const avatarImage = document.getElementById('avatarImage');
+    const imageModal = document.getElementById('imageModal');
+
+    avatarImage.addEventListener('click', () => {
+        if(id)
+            return
+        imageModal.classList.remove('hidden');
+    });
+
+    function closeModal() {
+        imageModal.classList.add('hidden');
+    }
+    let id = null;
+    let idDetail
+    document.addEventListener('DOMContentLoaded',()=>{
+        setId()
+        descriptionDetail(id)
+        projectInternDetail(id)
+        tagDetail(id)
+    })
+    async function descriptionDetail(id){
+        let res=await fetch('/intern/api/descriptionDetail'+id)
+        if(res.ok){
+            document.getElementById('descriptionDetail').innerHTML=await res.text()
+        }
+    }
+    function openEditDescriptionDetail(){
+        document.getElementById('descriptionDetailModalText').innerHTML = document.getElementById("descriptionDetail").innerText;
+        document.getElementById('descriptionDetailModal').classList.remove('hidden')
+
+    }
+
+    function closeEditDescriptionDetail() {
+        document.getElementById('descriptionDetailModal').classList.add('hidden');
+    }
+    async function sendDescriptionDetail() {
+        const data = {
+            internId: id,
+            description: document.getElementById('descriptionDetailModalText').value
+        };
+
+        let res = await fetch("/intern/api/updateDescriptionDetail", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+        if(res.ok) {
+            await descriptionDetail(id)
+            closeEditDescriptionDetail();
+        }
+    }
+
+
+
+    let selectedTags=[]
+
+
+    function closeProjectInternDetailModalAdd(){
+        document.getElementById('projectInternDetailModalAdd').classList.add('hidden')
+    }
+
+    function openprojectInternDetailModalAdd(){
+        document.getElementById('projectInternDetailModalAdd').classList.remove('hidden')
+    }
+    async function addProjectInternDetail(){
+        const data = {
+            projectId: null, // có thể null nếu là tạo mới
+            projectName: document.getElementById('projectInternDetailNameAdd').value,
+            projectDescription: document.getElementById('projectInternDetailDescriptionAdd').value,
+            linkGit: document.getElementById('projectInternDetailLinkAdd').value
+        };
+
+       let res = await fetch("/intern/api/updateProjectInternDetail", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+        if(res.ok){
+            document.getElementById('projectInternDetailNameAdd').value=''
+            document.getElementById('projectInternDetailDescriptionAdd').value=''
+            document.getElementById('projectInternDetailLinkAdd').value=''
+            await projectInternDetail(id)
+            closeProjectInternDetailModalAdd()
+        }
+    }
+    async function projectInternDetail(id){
+        let res=await fetch('/intern/api/projectInternDetail'+id)
+        if(res.ok){
+           let data = await res.json()
+            let html = ''
+
+            data.forEach(p =>{
+                const lines = p.description.split('\n'); // tách từng dòng
+
+                html+=
+                    `
+                    <div class="project-item">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-lg">${p.name}</h3>
+                                <a href="${p.linkGit}" target="_blank"
+                                   class="text-blue-600 hover:underline hover:text-blue-800 transition duration-200 inline-block">
+                                    ${p.linkGit}
+                                </a>
+
+                            </div>
+                             <div>
+                                     ${!id?`
+                                      <button class="text-gray-500 hover:text-blue-600 ml-2" onclick="editProject(${p.id})" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                      </button>`:''}
+                                   ${!id?`
+                                 <button class="text-gray-500 hover:text-red-600 ml-2" onclick="deleteProject(${p.id})" title="Xoá">
+                                    <i class="fas fa-trash"></i>
+                                </button>`:''}
+                            </div>
+                        </div>
+                        <ul class="mt-2 space-y-2 text-gray-700">`;
+                                        lines.forEach(line => {
+                                            html += `
+                              <li class="flex items-start">
+                                  <i class="fas fa-circle text-accent mt-1 mr-2 text-xs"></i>
+                                  <span>${line}</span>
+                              </li>
+                          `;
+                                        });
+
+                        // kết thúc ul và div
+                                        html += `
+                            </ul>
+                        </div>
+                        `;
+
+            })
+            document.getElementById('projectDetail').innerHTML=html
+        }
+    }
+
+    async function tagDetail (id) {
+        let res = await fetch('/intern/api/tagDetail'+id)
+        let data =await res.json()
+
+        const displayNameMap = {
+            "programmingLanguage": "Ngôn ngữ lập trình",
+            "backend": "Backend",
+            "frontend": "Frontend",
+            "database": "Database",
+            "order": "Order"
+            // thêm các key khác nếu cần
+        };
+        const container = document.getElementById('tagContainer');
+        container.innerHTML=''
+        let html = '';
+
+        for (const [typeName, tags] of Object.entries(data)) {
+            const displayName = displayNameMap[typeName] || typeName;
+            if (tags.length > 0) {
+                html += `
+                <div>
+                    <h3 class="text-base font-semibold mb-2">${displayName}</h3>
+                    <div class="flex flex-wrap gap-2">
+                `;
+
+                        tags.forEach(tag => {
+                            html += `
+                        <label class="${tag.className}">
+                                <input
+                                type="checkbox"
+                                name="tags1"
+                                value="${tag.id}"
+                                data-id="${tag.id}"
+                                data-name="${tag.name}"
+                                class="hidden peer"
+                                onclick="checkedTagFromDataset(this)"
+
+                                />
+                            <span>${tag.name}</span>
+                        </label>
+                    `;
+                        });
+
+                        html += `
+                    </div>
+                </div>
+                    `;
+            }
+        }
+
+        container.innerHTML = html;
+        document.querySelectorAll('input[name="tags1"]').forEach(el => {
+            checkedTagFromDataset(el);
+        });
+
+    }
+    async function renderTagsByType() {
+        const res = await fetch('/recruiter/api/get-all-tags-to-update'); // bạn cần endpoint trả về dạng group theo tagType
+        const data = await res.json(); // giả sử dạng: { "Backend": [...], "Frontend": [...], ... }
+        const displayNameMap = {
+            "programmingLanguage": "Ngôn ngữ lập trình",
+            "backend": "Backend",
+            "frontend": "Frontend",
+            "database": "Database",
+            "order": "Order"
+            // thêm các key khác nếu cần
+        };
+        const container = document.getElementById('tags-by-type');
+        let html = '';
+
+        for (const [typeName, tags] of Object.entries(data)) {
+            const displayName = displayNameMap[typeName] || typeName;
+            html += `
+            <div>
+                <h3 class="text-base font-semibold mb-2">${displayName }</h3>
+                <div class="flex flex-wrap gap-2">
+        `;
+            tags.forEach(tag => {
+                const isChecked = selectTagShow.some(t => t.id === tag.id);
+                html += `
+                <label class="${tag.className}">
+                    <input
+                        type="checkbox"
+                        name="tags"
+                        value="${tag.id}"
+                        data-id="${tag.id}"
+                        data-name="${tag.name}"
+                        class="hidden peer"
+                        onclick="checkedTagFromDataset1(this)"
+                        ${isChecked ? 'checked' : ''}
+                    />
+                    <span class="${tag.checked}">
+                        <span>${tag.name}</span>
+                    </span>
+                </label>
+            `;
+            });
+
+            html += `</div></div>`;
+        }
+        container.innerHTML = html;
+    }
+    const btn = document.getElementById('luuKyNang');
+    const icon = document.getElementById('iconSave');
+    const text = document.getElementById('luuKyNangText');
+    async function updateTagDetail() {
+        icon.classList.add('animate-spin');
+        icon.classList.remove('hidden');
+        btn.disabled = true;
+        text.classList.add('hidden')
+        const tagIds = selectTagShow.map(tag => tag.id);
+        const data = {
+            tagIds: tagIds
+        };
+
+        try {
+            let response = await fetch('/intern/api/tagDetail', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                selectTagShow =[]
+                selectedTags=[]
+
+                await tagDetail(id)
+                icon.classList.remove('animate-spin');
+                btn.disabled = false;
+                text.classList.remove('hidden')
+                icon.classList.add('hidden');
+                closeTagModal()
+
+            } else {
+                alert('Cập nhật không thành công. Vui lòng thử lại.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+        }
+    }
+    let selectTagShow = []
+    function checkedTagFromDataset(el) {
+        const id = parseInt(el.dataset.id);
+        console.log(123)
+        const label = el.closest('label');
+        // Kiểm tra xem tag đã được chọn chưa (tìm theo id)
+        const index = selectTagShow.findIndex(tag => tag.id === id);
+        if (index === -1) {
+            // Nếu chưa có thì thêm vào mảng
+            selectTagShow.push({ id, label });
+        }
+        else {
+            // Nếu đã có thì xóa khỏi mảng
+            selectTagShow.splice(index, 1);
+        }
+    }
+    function checkedTagFromDataset1(el) {
+        const id = parseInt(el.dataset.id);
+        const label = el.closest('label');
+       selectTagShow
+        console.log(selectTagShow)
+        console.log(selectTagShow)
+        // Kiểm tra xem tag đã được chọn chưa (tìm theo id)
+        const index = selectTagShow.findIndex(tag => tag.id === id);
+
+        if (index === -1) {
+            // Nếu chưa có thì thêm vào mảng
+            selectTagShow.push({ id, label });
+        } else {
+            // Nếu đã có thì xóa khỏi mảng
+            selectTagShow.splice(index, 1);
+        }
+
+    }
+
+    function closeProjectInternDetailModalEdit() {
+        document.getElementById('projectInternDetailModalEdit').classList.add('hidden')
+    }
+
+    let idProject = null
+
+    async function editProject(id) {
+        let res = await fetch('/intern/api/projectInternDetail/' + id)
+        idProject = id
+        if (res.ok) {
+            let data = await res.json()
+            document.getElementById('projectInternDetailNameEdit').value = data.name
+            document.getElementById('projectInternDetailLinkEdit').value = data.linkGit
+            document.getElementById('projectInternDetailDescriptionEdit').value = data.description
+            document.getElementById('projectInternDetailModalEdit').classList.remove('hidden')
+        }
+    }
+    async function editProjectInternDetail(){
+        const data = {
+            projectId: Number(idProject), // có thể null nếu là tạo mới
+            projectName: document.getElementById('projectInternDetailNameEdit').value,
+            projectDescription: document.getElementById('projectInternDetailDescriptionEdit').value,
+            linkGit: document.getElementById('projectInternDetailLinkEdit').value
+        };
+
+        let res = await fetch("/intern/api/updateProjectInternDetail", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+        if(res.ok){
+            await projectInternDetail(id)
+            closeProjectInternDetailModalEdit()
+        }
+    }
+
+
+    async function deleteProject(idi){
+        let res = await fetch("/intern/api/projectInternDetail/"+idi, {
+            method: "DELETE",
+        })
+        if(res.ok){
+            await projectInternDetail(id)
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function setId(){
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get("userId");
+        id= userId?'?id='+userId:''
+        console.log(userId);
+    }
+
+    async function openTagModal() {
+        await renderTagsByType()
+        document.getElementById('tagModal').classList.remove('hidden');
+    }
+    function closeTagModal() {
+
+        document.getElementById('tagModal').classList.add('hidden');
+    }
+
+
+</script>
+</html>

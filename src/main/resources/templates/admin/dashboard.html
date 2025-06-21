@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý Thực tập | Học viện Kỹ thuật Mật mã</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+
+
+
+        .chart-container {
+            height: 300px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar-open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <th:block th:replace="~{narbarAdmin :: narbarStyle}"></th:block>
+</head>
+<body class="bg-gray-50">
+<div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <th:block th:replace="~{narbarAdmin :: sidebar}"></th:block>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <!-- Topbar -->
+        <th:block th:replace="~{narbarAdmin :: topbar}"></th:block>
+
+        <!-- Content -->
+        <main class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Summary Cards -->
+                <div class="card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-gray-500 font-medium">Số sinh viên</h3>
+                            <p class="text-3xl font-bold mt-2"></p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
+                            <i data-lucide="users"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-blue-500 font-medium flex items-center">
+                        <span>+5.2% so với tháng trước</span>
+                        <i data-lucide="arrow-up-right" class="w-4 h-4 ml-1"></i>
+                    </div>
+                </div>
+
+                <div class="card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-gray-500 font-medium">Số giảng viên</h3>
+                            <p class="text-3xl font-bold mt-2">32</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500">
+                            <i data-lucide="book-user"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-green-500 font-medium flex items-center">
+                        <span>+1 giảng viên mới</span>
+                    </div>
+                </div>
+
+                <div class="card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-gray-500 font-medium">Công ty đối tác</h3>
+                            <p class="text-3xl font-bold mt-2">127</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-500">
+                            <i data-lucide="building-2"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-yellow-500 font-medium flex items-center">
+                        <span>5 công ty chờ duyệt</span>
+                    </div>
+                </div>
+
+                <div class="card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-gray-500 font-medium">Bài tuyển dụng</h3>
+                            <p class="text-3xl font-bold mt-2">78</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+                            <i data-lucide="newspaper"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-red-500 font-medium flex items-center">
+                        <span>15 bài mới chờ duyệt</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="card bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4">Thống kê ứng tuyển theo tháng</h3>
+                    <div class="chart-container">
+                        <div class="mb-4">
+                            <label><input type="checkbox" id="toggleApply" checked> Số lượt ứng tuyển</label>
+                            <label><input type="checkbox" id="toggleSuccess" checked> Ứng tuyển thành công</label>
+                            <label><input type="checkbox" id="togglePending" checked> Chưa duyệt</label>
+                        </div>
+                        <canvas id="applicationsChart" style="height: 400px;"></canvas>
+                    </div>
+                </div>
+
+                <div class="card bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4">Số sinh viên theo ngành</h3>
+                    <div class="chart-container">
+                        <canvas id="studentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities Section -->
+            <div class="card bg-white rounded-lg shadow overflow-hidden mb-6">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold">Hoạt động gần đây</h3>
+                </div>
+                <div class="divide-y">
+                    <!-- Activity Items -->
+                    <div class="p-4 flex items-start hover:bg-gray-50">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-4">
+                            <i data-lucide="user-plus"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between">
+                                <h4 class="font-medium">2 sinh viên mới đăng ký</h4>
+                                <span class="text-sm text-gray-500">10 phút trước</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">Nguyễn Văn B và Trần Thị C đã đăng ký tài khoản mới</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 flex items-start hover:bg-gray-50">
+                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 mr-4">
+                            <i data-lucide="file-text"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between">
+                                <h4 class="font-medium">Bài tuyển dụng mới</h4>
+                                <span class="text-sm text-gray-500">45 phút trước</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">Công ty XYZ đã đăng bài tuyển dụng Intern Backend</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 flex items-start hover:bg-gray-50">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-500 mr-4">
+                            <i data-lucide="check-circle-2"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between">
+                                <h4 class="font-medium">Phê duyệt công ty</h4>
+                                <span class="text-sm text-gray-500">2 giờ trước</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">Đã phê duyệt ABC Tech làm đối tác</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 flex items-start hover:bg-gray-50">
+                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 mr-4">
+                            <i data-lucide="flag"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between">
+                                <h4 class="font-medium">Báo cáo vi phạm</h4>
+                                <span class="text-sm text-gray-500">5 giờ trước</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">Sinh viên Q báo cáo bài đăng vi phạm từ B Corp</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 text-center text-blue-500 font-medium cursor-pointer hover:bg-gray-50">
+                    Xem tất cả hoạt động
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="card bg-white rounded-lg shadow overflow-hidden">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Danh sách sinh viên mới</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-blue-50 text-blue-500 rounded-md text-sm hover:bg-blue-100">
+                            Xuất Excel
+                        </button>
+                        <button class="px-3 py-1 bg-gray-50 text-gray-700 rounded-md text-sm hover:bg-gray-100">
+                            Lọc
+                        </button>
+                        <button class="px-3 py-1 bg-gray-50 text-gray-700 rounded-md text-sm hover:bg-gray-100">
+                            Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Mã SV
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Họ tên
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Email
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Lớp
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Ngành học
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Hành động
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                SV2021001
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                Nguyễn Văn A
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                a.nguyen@example.com
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                AT19
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                An toàn thông tin
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-blue-500 hover:text-blue-700 mr-3">Xem</button>
+                                <button class="text-yellow-500 hover:text-yellow-700 mr-3">Sửa</button>
+                                <button class="text-red-500 hover:text-red-700">Xóa</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                SV2021002
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                Trần Thị B
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                b.tran@example.com
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                AT19
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                An toàn thông tin
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-blue-500 hover:text-blue-700 mr-3">Xem</button>
+                                <button class="text-yellow-500 hover:text-yellow-700 mr-3">Sửa</button>
+                                <button class="text-red-500 hover:text-red-700">Xóa</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                SV2021003
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                Lê Văn C
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                c.le@example.com
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                MM20
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                Mật mã học
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-blue-500 hover:text-blue-700 mr-3">Xem</button>
+                                <button class="text-yellow-500 hover:text-yellow-700 mr-3">Sửa</button>
+                                <button class="text-red-500 hover:text-red-700">Xóa</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                SV2021004
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                Phạm Thị D
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                d.pham@example.com
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                MM20
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                Mật mã học
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-blue-500 hover:text-blue-700 mr-3">Xem</button>
+                                <button class="text-yellow-500 hover:text-yellow-700 mr-3">Sửa</button>
+                                <button class="text-red-500 hover:text-red-700">Xóa</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                SV2021005
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                Hoàng Văn E
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                e.hoang@example.com
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                AT21
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                An toàn thông tin
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-blue-500 hover:text-blue-700 mr-3">Xem</button>
+                                <button class="text-yellow-500 hover:text-yellow-700 mr-3">Sửa</button>
+                                <button class="text-red-500 hover:text-red-700">Xóa</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-6 py-4 border-t flex items-center justify-between">
+                    <div class="text-sm text-gray-500">
+                        Hiển thị <span class="font-medium">1</span> đến <span class="font-medium">5</span> của <span class="font-medium">452</span> sinh viên
+                    </div>
+                    <div class="flex space-x-1">
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            Trước
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100">
+                            1
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            2
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            3
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            ...
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            10
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            Sau
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Modal - View Student Details -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="studentModal">
+    <div class="bg-white rounded-lg w-full max-w-2xl">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Thông tin chi tiết sinh viên</h3>
+            <button class="text-gray-500" id="closeStudentModal">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1">Mã sinh viên</label>
+                    <input type="text" class="w-full px-3 py-2 border rounded-md bg-gray-50" value="SV2021001" readonly>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1">Họ tên</label>
+                    <input type="text" class="w-full px-3 py-2 border rounded-md" value="Nguyễn Văn A">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1">Email</label>
+                    <input type="email" class="w-full px-3 py-2 border rounded-md" value="a.nguyen@example.com">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1">Số điện thoại</label>
+                    <input type="tel" class="w-full px-3 py-2 border rounded-md" value="0987654321">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1">Lớp</label>
+                    <select class="w-full px-3 py-2 border rounded-md">
+                        <option>AT19</option>
+                        <option>AT20</option>
+                        <option>AT21</option>
+                        <option>MM19</option>
+                        <option>MM20</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1">Ngành học</label>
+                    <select class="w-full px-3 py-2 border rounded-md">
+                        <option>An toàn thông tin</option>
+                        <option>Mật mã học</option>
+                        <option>Kỹ thuật phần mềm</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-8">
+                <h4 class="text-md font-semibold mb-4">Lịch sử ứng tuyển</h4>
+                <div class="border rounded-md divide-y">
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <h5 class="font-medium">Công ty ABC - Intern Backend Developer</h5>
+                            <p class="text-sm text-gray-500">Ứng tuyển: 15/04/2023 | Trạng thái: Đang xử lý</p>
+                        </div>
+                        <button class="text-blue-500 flex items-center text-sm">
+                            <i data-lucide="external-link" class="w-4 h-4 mr-1"></i>
+                            Xem bài tuyển
+                        </button>
+                    </div>
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <h5 class="font-medium">Công ty XYZ - Frontend Intern</h5>
+                            <p class="text-sm text-gray-500">Ứng tuyển: 01/04/2023 | Trạng thái: Đã từ chối</p>
+                        </div>
+                        <button class="text-blue-500 flex items-center text-sm">
+                            <i data-lucide="external-link" class="w-4 h-4 mr-1"></i>
+                            Xem bài tuyển
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8">
+                <h4 class="text-md font-semibold mb-4">Giảng viên hướng dẫn</h4>
+                <div class="border rounded-md p-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-4">
+                            <i data-lucide="user"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-medium">GS. Trần Văn D</h5>
+                            <p class="text-sm text-gray-500">Khoa Mật mã học | d.tran@example.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t flex justify-end space-x-3">
+            <button class="px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200">
+                Hủy
+            </button>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                Lưu thay đổi
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Sidebar Toggle for Mobile
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.add('sidebar-open');
+    });
+
+    sidebarClose.addEventListener('click', () => {
+        sidebar.classList.remove('sidebar-open');
+    });
+
+    // Dropdown Menu Toggle
+    const dropdownBtns = document.querySelectorAll('.dropdown-btn');
+    dropdownBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('i:last-child');
+
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        });
+    });
+
+
+
+    // Student Modal Show/Close
+    const viewButtons = document.querySelectorAll('button:first-child');
+    const studentModal = document.getElementById('studentModal');
+    const closeStudentModal = document.getElementById('closeStudentModal');
+
+    viewButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            if(button.textContent === 'Xem') {
+                studentModal.classList.remove('hidden');
+            }
+        });
+    });
+
+    closeStudentModal.addEventListener('click', () => {
+        studentModal.classList.add('hidden');
+    });
+
+    const ctx = document.getElementById('applicationsChart').getContext('2d');
+
+    const data = {
+        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5'],
+        datasets: [
+            {
+                label: 'Số lượt ứng tuyển',
+                data: [20, 35, 42, 58, 47],
+                backgroundColor: 'rgba(59, 130, 246, 0.5)',  // Xanh dương
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1,
+                hidden: false
+            },
+            {
+                label: 'Ứng tuyển thành công',
+                data: [10, 25, 30, 40, 35],
+                backgroundColor: 'rgba(16, 185, 129, 0.5)',  // Xanh lá
+                borderColor: 'rgba(16, 185, 129, 1)',
+                borderWidth: 1,
+                hidden: false
+            },
+            {
+                label: 'Chưa duyệt',
+                data: [5, 7, 8, 10, 9],
+                backgroundColor: 'rgba(245, 158, 11, 0.5)',  // Màu vàng
+                borderColor: 'rgba(245, 158, 11, 1)',
+                borderWidth: 1,
+                hidden: false
+            }
+        ]
+    };
+
+    const applicationsChart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // 🔄 Checkbox toggle từng loại
+    document.getElementById('toggleApply').addEventListener('change', function () {
+        applicationsChart.data.datasets[0].hidden = !this.checked;
+        applicationsChart.update();
+    });
+
+    document.getElementById('toggleSuccess').addEventListener('change', function () {
+        applicationsChart.data.datasets[1].hidden = !this.checked;
+        applicationsChart.update();
+    });
+
+    document.getElementById('togglePending').addEventListener('change', function () {
+        applicationsChart.data.datasets[2].hidden = !this.checked;
+        applicationsChart.update();
+    });
+
+    // Students by Major Chart
+    const studentsCtx = document.getElementById('studentsChart').getContext('2d');
+    const studentsChart = new Chart(studentsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['An toàn TT', 'Mật mã', 'Kỹ thuật PM', 'CNTT', 'Khác'],
+            datasets: [{
+                data: [180, 120, 80, 50, 22],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.7)',
+                    'rgba(22, 163, 74, 0.7)',
+                    'rgba(124, 58, 237, 0.7)',
+                    'rgba(217, 119, 6, 0.7)',
+                    'rgba(220, 38, 38, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

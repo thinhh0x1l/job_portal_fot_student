@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Bài tuyển dụng | Học viện Kỹ thuật Mật mã</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .sidebar-item-active {
+            background-color: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            font-weight: 500;
+        }
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-inactive {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .status-pending {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+        .job-row:hover {
+            background-color: #f9fafb;
+        }
+        .tab-active {
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+            font-weight: 500;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar-open {
+                transform: translateX(0);
+            }
+        }
+        .pagination-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        .pagination-btn.active {
+            background-color: var(--primary);
+            color: red;
+        }
+        .fake-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+    <th:block th:replace="~{narbarAdmin :: narbarStyle}"></th:block>
+</head>
+<body class="bg-gray-50">
+<div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <th:block th:replace="~{narbarAdmin :: sidebar}"></th:block>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <!-- Topbar -->
+        <th:block th:replace="~{narbarAdmin :: topbar}"></th:block>
+
+        <!-- Main Content -->
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Quản lý Bài tuyển dụng</h1>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="bg-white rounded-lg shadow p-4 mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                    <div class="flex flex-wrap items-end space-x-4">
+                        <!-- Company Filter -->
+                        <div class="w-full md:w-64">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Công ty</label>
+                            <select name="ctyName" class="w-full border border-gray-300 rounded-lg px-3 py-2
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            id="ctyNameSelect">
+                                <option th:value="0" th:selected="${ctyName==0}">Tất cả công ty</option>
+                                <option th:each="cty : ${recruiter}"
+                                        th:value="${cty.id}"
+                                        th:text="${cty.company.companyName}"
+                                        th:selected="${ctyName==cty.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="w-full md:w-64">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái duyệt</label>
+                            <select id="statusSelect"
+                                    name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2
+                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="0" th:selected="${status==0}">Tất cả trạng thái</option>
+                                <option value="1" th:selected="${status==1}">Chưa duyệt</option>
+                                <option value="2" th:selected="${status==2}">Từ chối</option>
+                                <option value="3" th:selected="${status==3}">Đã duyệt</option>
+                            </select>
+                        </div>
+
+                        <!-- Filter Button -->
+                        <div>
+                            <button type="submit" onclick="filterCtyAndStats()"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition duration-200">
+                                Lọc
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <div class="relative w-full md:w-64">
+                        <input type="text" placeholder="Tìm kiếm..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400 w-5 h-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job List -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                ID
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Tên bài tuyển dụng
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Công ty
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Trạng thái
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Thao tác
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Job 1 -->
+                        <tr class="job-row" th:each="j :${postJobs}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                            th:text="${j.id}">
+                                1001
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900"
+                                th:text="${j.name}">Intern Backend Developer (Java/Spring)</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <img class="h-10 w-10 rounded-full"
+                                             th:src="@{'/images/companies/'+${j.recruiter.id}+'/'+${j.recruiter.company.imageUrl}}" alt="">
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900"
+                                             th:text="${j.recruiter.company.companyName}">FPT Software</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:class="${j.colorV3()}" th:text="${j.statusV3()}">
+                                    Chưa duyệt
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3 action-btn"
+                                        title="Xem chi tiết" th:onclick="|openJobDetailModal(${j.id})|">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex items-center justify-between mt-6">
+                <div class="text-sm text-gray-500">
+                    Hiển thị <span class="font-medium" th:text="${startCount}">1</span>
+                    đến <span class="font-medium" th:text="${endCount}">3</span> của
+                    <span class="font-medium" th:text="${totalElement}">12</span> kết quả
+                </div>
+                <div class="flex space-x-2">
+                    <a th:classappend="${currentPage == 1 ? 'fake-disabled' : ''}"
+                       th:href="@{'/admin/manage-postjob?ctyName=' + ${ctyName} + '&status=' + ${status} +'&page=1'}"
+                       class="pagination-btn">
+                        <i class="fas fa-angles-left"></i>
+                    </a>
+
+                    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                        <a th:href="@{'/admin/manage-postjob?ctyName=' + ${ctyName} + '&status=' + ${status} + '&page=' + ${i}}"
+                           th:class="${currentPage == i ? 'pagination-btn active' : 'pagination-btn'}"
+                           th:text="${i}">
+                        </a>
+                    </th:block>
+
+                    <a th:classappend="${currentPage == totalPages || totalPages <= 1 ? 'fake-disabled' : ''}"
+                       th:href="@{'/admin/manage-postjob?ctyName=' + ${ctyName} + '&status=' + ${status} +'&page='+${totalPages}}"
+                       class="pagination-btn">
+                        <i class="fas fa-angles-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Detail Modal -->
+        <div class="fixed inset-0 overflow-y-auto z-50 hidden" id="jobDetailModal">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                        Chi tiết bài tuyển dụng
+                                    </h3>
+                                    <button type="button" class="close-modal text-gray-400 hover:text-gray-500">
+                                        <i data-lucide="x" class="w-6 h-6"></i>
+                                    </button>
+                                </div>
+
+                                <div class="mt-6">
+                                    <div class="flex items-start mb-6">
+                                        <div class="flex-shrink-0 h-16 w-16">
+                                            <img class="h-16 w-16 rounded-full" id="imageUrl"
+                                                 src="https://via.placeholder.com/64" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <h2 class="text-xl font-bold text-gray-900" id="jobName"
+                                            >Intern Backend Developer (Java/Spring)</h2>
+                                            <div class="flex items-center mt-1 text-sm text-gray-500">
+                                                <i data-lucide="building" class="w-4 h-4 mr-1">
+                                                </i>
+                                                <span id="companyName"></span>
+                                                <span class="mx-2">•</span>
+                                                <i data-lucide="map-pin" class="w-4 h-4 mr-1" ></i>
+
+                                                <span id="district"></span>
+                                                <span class="mx-2">•</span>
+                                                <i data-lucide="clock" class="w-4 h-4 mr-1" ></i>
+
+                                                <span id="timePost"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">Mô tả công việc</h3>
+                                        <div class="prose max-w-none text-gray-600">
+                                           <div id="description"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 ">
+                                        <div>
+                                            <h3 class="text-lg font-medium text-gray-900 mb-2">Yêu cầu</h3>
+                                            <div class="list-disc pl-5 text-gray-600 space-y-1">
+                                                <div id="recruitment"></div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 ">
+
+                                        <div>
+                                            <h3 class="text-lg font-medium text-gray-900 mb-2">Quyền lợi</h3>
+                                            <div class="list-disc pl-5 text-gray-600 space-y-1">
+                                                <div id="benefits"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">Kỹ năng yêu cầu</h3>
+                                        <div class="flex flex-wrap gap-2" id="tagJobList">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+
+                        <button type="button" class="close-modal w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Đóng
+                        </button>
+                        <!-- Nếu chưa duyệt -->
+                        <button id="choduyet"
+                                class="text-green-600 hover:text-green-900 action-btn hidden"
+                                title="Duyệt"
+                                onclick="openApproveModal()">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i> Duyệt
+                        </button>
+
+                        <!-- Nếu đã duyệt -->
+                        <span id="daduyet"
+                              class="text-green-600 font-semibold flex items-center gap-1 hidden">
+    <i data-lucide="check-circle" class="w-4 h-4"></i> Đã duyệt
+</span>
+
+                        <!-- Nếu bị từ chối -->
+                        <span id="tuchoi"
+                              class="text-red-600 font-semibold flex items-center gap-1 hidden">
+    <i data-lucide="x-circle" class="w-4 h-4"></i> Đã từ chối
+</span>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approve Modal -->
+        <div class="fixed inset-0 overflow-y-auto z-50 hidden" id="approveModal">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                        Duyệt bài tuyển dụng
+                                    </h3>
+                                    <button type="button" class="close-modal text-gray-400 hover:text-gray-500">
+                                        <i data-lucide="x" class="w-6 h-6"></i>
+                                    </button>
+                                </div>
+
+                                <div class="mt-6">
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                                        <select id="duyet"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="1">Chấp thuận</option>
+                                            <option value="2">Từ chối</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú (nếu có)</label>
+                                        <textarea rows="3" id="ghiChu"
+                                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button onclick="pheDuyet()"
+                                type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Phê duyệt
+                        </button>
+                        <button type="button" class="close-modal mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Hủy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let idPost
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Modal handling
+        const jobModal = document.getElementById('jobDetailModal');
+        const approveModal = document.getElementById('approveModal');
+        const closeModalButtons = document.querySelectorAll('.close-modal');
+
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                jobModal.classList.add('hidden');
+                approveModal.classList.add('hidden');
+            });
+        });
+
+        // Close modal when clicking outside
+        jobModal.addEventListener('click', (e) => {
+            if (e.target === jobModal) {
+                jobModal.classList.add('hidden');
+            }
+        });
+
+        approveModal.addEventListener('click', (e) => {
+            if (e.target === approveModal) {
+                approveModal.classList.add('hidden');
+            }
+        });
+        const hash = window.location.hash;
+        if (hash.startsWith('#jobDetailModal-')) {
+            const id = hash.replace('#jobDetailModal-', '');
+            idPost=id
+            openJobDetailModal(id)
+            history.replaceState(null, null, window.location.pathname + window.location.search);
+        }
+    });
+
+    async function openJobDetailModal(id) {
+        document.getElementById('choduyet').classList.add('hidden')
+        document.getElementById('daduyet').classList.add('hidden')
+        document.getElementById('tuchoi').classList.add('hidden')
+        let res = await fetch('/admin/api/detailJob/'+id)
+        idPost=id
+        if(res.ok){
+            let  data = await res.json();
+            document.getElementById('imageUrl').src=data.imageUrl
+            document.getElementById('companyName').innerText=data.companyName
+           document.getElementById('district').innerText=data.district
+            document.getElementById('timePost').innerText=data.timePost
+             document.getElementById('description').innerHTML=data.description
+           document.getElementById('recruitment').innerHTML=data.recruitment
+         document.getElementById('benefits').innerHTML=data.benefits
+
+            // const a = document.getElementById('tagJobList').innerHTML=data.tagJobList
+            let html = '';
+
+            data.tagJobList.forEach(tag => {
+                html += `<span class="${tag.color}">${tag.tagName}</span>`;
+            });
+
+            document.getElementById('tagJobList').innerHTML = html;
+            if(data.approved===0)
+                document.getElementById('choduyet').classList.remove('hidden')
+            if(data.approved===1)
+                document.getElementById('daduyet').classList.remove('hidden')
+            if(data.approved===2)
+                document.getElementById('tuchoi').classList.remove('hidden')
+            document.getElementById('jobDetailModal').classList.remove('hidden');
+        }
+
+    }
+
+    function openApproveModal() {
+        document.getElementById('approveModal').classList.remove('hidden');
+    }
+
+    // Dropdown Menu Toggle
+    const dropdownBtns = document.querySelectorAll('.dropdown-btn');
+    dropdownBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('i:last-child');
+
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        });
+    });
+    function filterCtyAndStats(){
+        window.location.href='/admin/manage-postjob?ctyName='
+            +document.getElementById('ctyNameSelect').value+'&status='+document.getElementById('statusSelect').value
+            +document.getElementById('ctyNameSelect').value+'&status='+document.getElementById('statusSelect').value
+
+    }
+    async function pheDuyet() {
+        const a = document.getElementById('duyet').value
+        const b = document.getElementById('ghiChu').value|| ''
+        console.log(a)
+        console.log(b)
+        const params = new URLSearchParams();
+        params.append('status', a);
+        params.append('note', b);
+
+        let res = await fetch('/admin/api/duyetjobPost/'+idPost, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params.toString()
+        })
+        if(res.ok){
+            document.getElementById('approveModal').classList.add('hidden')
+            document.getElementById('jobDetailModal').classList.add('hidden');
+            await openJobDetailModal(idPost)
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+
+    }
+</script>
+</body>
+</html>

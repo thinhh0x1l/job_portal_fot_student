@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Giảng viên | Học viện Kỹ thuật Mật mã</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .sidebar-item-active {
+            background-color: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            font-weight: 500;
+        }
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-inactive {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .status-pending {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+        .student-status-active {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        .student-status-completed {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .student-status-inactive {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .student-row:hover {
+            background-color: #f9fafb;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar-open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <th:block th:replace="~{narbarAdmin :: narbarStyle}"></th:block>
+</head>
+<body class="bg-gray-50">
+<div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <th:block th:replace="~{narbarAdmin :: sidebar}"></th:block>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <!-- Topbar -->
+        <th:block th:replace="~{narbarAdmin :: topbar}"></th:block>
+
+        <!-- Content -->
+        <main class="p-6">
+            <!-- Action Bar -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div class="flex flex-col md:flex-row gap-3 w-full">
+                    <div class="relative w-full md:w-64">
+                        <input type="text" placeholder="Tìm kiếm giảng viên..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400"></i>
+                    </div>
+                    <select class="w-full md:w-48 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>Tất cả khoa</option>
+                        <option>Công nghệ thông tin</option>
+                        <option>An toàn thông tin</option>
+                        <option>Mật mã học</option>
+                        <option>Kỹ thuật phần mềm</option>
+                    </select>
+                    <select class="w-full md:w-48 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>Tất cả trạng thái</option>
+                        <option>Đang hoạt động</option>
+                        <option>Tạm dừng</option>
+                        <option>Chờ kích hoạt</option>
+                    </select>
+                </div>
+
+                <button onclick="openLecturerModal('add')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center action-btn w-full md:w-auto">
+                    <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
+                    Thêm giảng viên
+                </button>
+            </div>
+
+            <!-- Lecturer Table -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã GV</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ tên</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khoa</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số SV hướng dẫn</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:each="l : ${lecturers}" class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" th:text="${l.id}">GV001</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium" th:text="${l.firstName+' '+l.lastName}">GS. Trần Văn A</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${l.email}">tranvana@hocvien.edu.vn</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${l.faculty.displayName}">Công nghệ thông tin</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                <button th:onclick="|showStudents(${l.id})|" class="text-blue-600 hover:text-blue-800 hover:underline" th:text="${l.getInterns().size()}"></button>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium status-active">Đang hoạt động</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button th:onclick="|openLecturerDetail(${l.id})|" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="openLecturerModal('edit', 'GV001')" class="text-yellow-500 hover:text-yellow-700 mr-3 action-btn">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="confirmDeleteLecturer('GV001', 'GS. Trần Văn A')" class="text-red-500 hover:text-red-700 action-btn">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+<!--                        <tr class="hover:bg-gray-50">-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">GV002</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">PGS. Nguyễn Thị B</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">nguyenthib@hocvien.edu.vn</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">An toàn thông tin</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">-->
+<!--                                <button onclick="showStudents('GV002')" class="text-blue-600 hover:text-blue-800 hover:underline">5</button>-->
+<!--                            </td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap">-->
+<!--                                <span class="px-3 py-1 rounded-full text-xs font-medium status-active">Đang hoạt động</span>-->
+<!--                            </td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">-->
+<!--                                <button onclick="openLecturerDetail('GV002')" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">-->
+<!--                                    <i data-lucide="eye" class="w-4 h-4"></i>-->
+<!--                                </button>-->
+<!--                                <button onclick="openLecturerModal('edit', 'GV002')" class="text-yellow-500 hover:text-yellow-700 mr-3 action-btn">-->
+<!--                                    <i data-lucide="edit" class="w-4 h-4"></i>-->
+<!--                                </button>-->
+<!--                                <button onclick="confirmDeleteLecturer('GV002', 'PGS. Nguyễn Thị B')" class="text-red-500 hover:text-red-700 action-btn">-->
+<!--                                    <i data-lucide="trash-2" class="w-4 h-4"></i>-->
+<!--                                </button>-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                        <tr class="hover:bg-gray-50">-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">GV003</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">TS. Lê Văn C</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">levanc@hocvien.edu.vn</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mật mã học</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">-->
+<!--                                <button onclick="showStudents('GV003')" class="text-blue-600 hover:text-blue-800 hover:underline">6</button>-->
+<!--                            </td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap">-->
+<!--                                <span class="px-3 py-1 rounded-full text-xs font-medium status-pending">Chờ kích hoạt</span>-->
+<!--                            </td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">-->
+<!--                                <button onclick="openLecturerDetail('GV003')" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">-->
+<!--                                    <i data-lucide="eye" class="w-4 h-4"></i>-->
+<!--                                </button>-->
+<!--                                <button onclick="openLecturerModal('edit', 'GV003')" class="text-yellow-500 hover:text-yellow-700 mr-3 action-btn">-->
+<!--                                    <i data-lucide="edit" class="w-4 h-4"></i>-->
+<!--                                </button>-->
+<!--                                <button onclick="confirmDeleteLecturer('GV003', 'TS. Lê Văn C')" class="text-red-500 hover:text-red-700 action-btn">-->
+<!--                                    <i data-lucide="trash-2" class="w-4 h-4"></i>-->
+<!--                                </button>-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                        <tr class="hover:bg-gray-50">-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">GV004</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">ThS. Phạm Thị D</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">phamthid@hocvien.edu.vn</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Kỹ thuật phần mềm</td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">-->
+<!--                                <button onclick="showStudents('GV004')" class="text-blue-600 hover:text-blue-800 hover:underline">4</button>-->
+<!--                            </td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap">-->
+<!--                                <span class="px-3 py-1 rounded-full text-xs font-medium status-inactive">Ngừng hoạt động</span>-->
+<!--                            </td>-->
+<!--                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">-->
+<!--                                <button onclick="openLecturerDetail('GV004')" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">-->
+<!--                                    <i data-lucide="eye" class="w-4 h-4"></i>-->
+<!--                                </button>-->
+<!--                                <button onclick="openLecturerModal('edit', 'GV004')" class="text-yellow-500 hover:text-yellow-700 mr-3 action-btn">-->
+<!--                                    <i data-lucide="edit" class="w-4 h-4"></i>-->
+<!--                                </button>-->
+<!--                                <button onclick="confirmDeleteLecturer('GV004', 'ThS. Phạm Thị D')" class="text-red-500 hover:text-red-700 action-btn">-->
+<!--                                    <i data-lucide="trash-2" class="w-4 h-4"></i>-->
+<!--                                </button>-->
+<!--                            </td>-->
+<!--                        </tr>-->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="text-sm text-gray-500">
+                        Hiển thị <span class="font-medium">1</span> đến <span class="font-medium">4</span> của <span class="font-medium">24</span> giảng viên
+                    </div>
+                    <div class="flex space-x-1">
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            Trước
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100">
+                            1
+                        </button>
+<!--                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">-->
+<!--                            2-->
+<!--                        </button>-->
+<!--                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">-->
+<!--                            3-->
+<!--                        </button>-->
+<!--                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">-->
+<!--                            ...-->
+<!--                        </button>-->
+<!--                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">-->
+<!--                            6-->
+<!--                        </button>-->
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            Sau
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Add/Edit Lecturer Modal -->
+<div  id="lecturer-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+    <div class="bg-white rounded-lg w-full max-w-2xl modal-content">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold" id="modal-title">Thêm giảng viên mới</h3>
+            <button class="text-gray-500" onclick="closeLecturerModal()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <form th:action="@{/admin/create-lecturer}" method="post"
+        th:object="${lecturer}" enctype="multipart/form-data">
+        <div class="p-6">
+            <div class="grid grid-cols-1 gap-y-4">
+                <div>
+                    <label for="avatar" class="block text-sm font-medium text-gray-700 mb-1">Upload Avatar</label>
+                    <input type="file" id="avatar" name="avatar"
+                           accept="image/*"
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+                                                                  file:rounded-lg file:border-0
+                                                                  file:text-sm file:font-semibold
+                                                                  file:bg-indigo-50 file:text-indigo-700
+                                                                  hover:file:bg-indigo-100
+                                                                  transition duration-150" required>
+                    <img id="avatar-preview" src="#" alt="Preview"
+                         class="mt-3 hidden w-32 h-32 object-cover rounded-full border border-gray-300 mx-auto" />
+
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Họ</label>
+                        <input type="text" th:field="*{firstName}" required
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="lecturer-fname">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">tên</label>
+                        <input type="text" th:field="*{lastName}" required
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="lecturer-lname">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" th:field="*{email}" required
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="lecturer-email">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                        <input type="tel"  required th:field="*{phoneNumber}"
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="lecturer-phone">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Khoa</label>
+                        <select th:field="*{faculty}" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="lecturer-department">
+                            <option th:each="f:${faculty}"
+                                    th:text="${f.displayName}"
+                                    th:value="${f}"
+                            >
+                            </option>
+
+                        </select>
+                    </div>
+                </div>
+                <div id="password-section">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" >Mật khẩu</label>
+                    <div class="relative">
+                        <input type="password" th:field="*{password}"
+                               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="lecturer-password">
+                        <button class="absolute right-3 top-2 text-gray-400" onclick="togglePasswordVisibility()">
+                            <i data-lucide="eye" class="w-5 h-5" id="password-eye"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t flex justify-end space-x-3">
+            <button type="button" onclick="closeLecturerModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Hủy
+            </button>
+            <button type="submit"
+                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" id="save-btn">
+                Lưu
+            </button>
+        </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lecturer Detail Modal -->
+<div id="lecturer-detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+    <div class="bg-white rounded-lg w-full max-w-3xl modal-content">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Thông tin chi tiết giảng viên</h3>
+            <button class="text-gray-500" onclick="closeLecturerDetail()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="w-full md:w-1/3 flex flex-col items-center">
+                    <div class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+                        <i data-lucide="user" class="w-16 h-16 text-gray-400"></i>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="text-xl font-semibold" id="detail-name">GS. Trần Văn A</h4>
+                        <p class="text-sm text-gray-500" id="detail-id">GV001</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <p class="text-sm" id="detail-email">tranvana@hocvien.edu.vn</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                            <p class="text-sm" id="detail-phone">0987654321</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Khoa</label>
+                            <p class="text-sm" id="detail-department">Công nghệ thông tin</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                            <p class="text-sm">
+                                <span class="px-2 py-1 rounded-full status-active" id="detail-status">Đang hoạt động</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="text-sm font-medium text-gray-700">Danh sách sinh viên hướng dẫn</h5>
+                            <button onclick="showStudents('GV001')" class="text-blue-600 text-sm hover:underline">Xem tất cả</button>
+                        </div>
+                        <div class="border rounded-lg overflow-hidden">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã SV</th>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên SV</th>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                                </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="student-row">
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium">SV001</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">Trần Văn B</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">
+                                        <span class="px-2 py-1 text-xs rounded-full student-status-active">Đang thực tập</span>
+                                    </td>
+                                </tr>
+                                <tr class="student-row">
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium">SV005</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">Lê Thị C</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Chờ bắt đầu</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t flex justify-end">
+            <button type="button" onclick="closeLecturerDetail()" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Student List Modal -->
+<div id="student-list-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+    <div class="bg-white rounded-lg w-full max-w-[90%] modal-content shadow-lg">
+        <div class="p-4 border-b flex justify-between items-center">
+            <div>
+                <h3 class="text-xl font-semibold">Danh sách sinh viên hướng dẫn</h3>
+                <p class="text-sm text-gray-500" id="lecturer-info">GS. Trần Văn A (GV001)</p>
+            </div>
+            <button class="text-gray-500" onclick="closeStudentList()">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="relative w-80">
+                    <input type="text" placeholder="Tìm kiếm sinh viên..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400"></i>
+                </div>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center action-btn">
+                    <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
+                    Thêm sinh viên
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Mã SV</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Họ tên</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Lớp</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Ngành</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Công ty thực tập</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                        <th class="px-4 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- Dòng mẫu -->
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">SV2021010</td>
+                        <td class="px-4 py-3 text-gray-900">Phạm Thị D</td>
+                        <td class="px-4 py-3 text-gray-500">AT21</td>
+                        <td class="px-4 py-3 text-gray-500">An toàn thông tin</td>
+                        <td class="px-4 py-3 text-gray-500">VNPT</td>
+                        <td class="px-4 py-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-600">Đã hủy</span>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <button class="text-red-500 hover:text-red-700 action-btn">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">SV2021001</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">Nguyễn Văn A</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">AT19</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">An toàn thông tin</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">FPT Software</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium student-status-active">Đang thực tập</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="text-red-500 hover:text-red-700 action-btn">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">SV2021002</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">Trần Thị B</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">AT20</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">An toàn thông tin</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Viettel Cyber</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium student-status-completed">Hoàn thành</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="text-red-500 hover:text-red-700 action-btn">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">SV2021005</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">Lê Văn C</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">MM20</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mật mã học</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">BKAV</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium student-status-active">Đang thực tập</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="text-red-500 hover:text-red-700 action-btn">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">SV2021010</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">Phạm Thị D</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">AT21</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">An toàn thông tin</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">VNPT</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium student-status-inactive">Đã hủy</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="text-red-500 hover:text-red-700 action-btn">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <!-- Thêm các dòng khác ở đây -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-sm text-gray-500">
+                    Tổng cộng: <span class="font-medium">4</span> sinh viên
+                </div>
+                <div class="mt-4 flex justify-end space-x-1 text-sm">
+                    <button class="px-3 py-1 rounded-md border text-gray-700 hover:bg-gray-100">&laquo;</button>
+                    <button class="px-3 py-1 rounded-md bg-blue-600 text-white">1</button>
+                    <button class="px-3 py-1 rounded-md border text-gray-700 hover:bg-gray-100">2</button>
+                    <button class="px-3 py-1 rounded-md border text-gray-700 hover:bg-gray-100">3</button>
+                    <button class="px-3 py-1 rounded-md border text-gray-700 hover:bg-gray-100">&raquo;</button>
+                </div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">Xuất Excel</button>
+                    <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">In danh sách</button>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+    <div class="bg-white rounded-lg w-full max-w-md">
+        <div class="p-4 border-b">
+            <h3 class="text-lg font-semibold">Xác nhận xóa</h3>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700">Bạn có chắc muốn xóa giảng viên <span id="delete-lecturer-name" class="font-semibold"></span>? Thao tác này không thể hoàn tác.</p>
+            <p class="text-sm text-red-500 mt-2">Lưu ý: Tất cả thông tin liên quan đến giảng viên này sẽ bị xóa vĩnh viễn.</p>
+        </div>
+        <div class="p-4 border-t flex justify-end space-x-3">
+            <button type="button" onclick="closeDeleteConfirm()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Hủy
+            </button>
+            <button type="button" onclick="deleteLecturer()" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                Xác nhận xóa
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Sidebar Toggle for Mobile
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.add('sidebar-open');
+    });
+
+    sidebarClose.addEventListener('click', () => {
+        sidebar.classList.remove('sidebar-open');
+    });
+
+    // Search Toggle
+    const searchButton = document.getElementById('searchButton');
+    const searchInput = document.getElementById('searchInput');
+
+    searchButton.addEventListener('click', () => {
+        searchInput.classList.toggle('hidden');
+    });
+
+    // Dropdown Menu Toggle
+    const dropdownBtns = document.querySelectorAll('.dropdown-btn');
+    dropdownBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('i:last-child');
+
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        });
+    });
+
+    // Modal functions
+    function openLecturerModal(action, lecturerId = null) {
+        const modal = document.getElementById('lecturer-modal');
+        const title = document.getElementById('modal-title');
+        const saveBtn = document.getElementById('save-btn');
+        const passwordSection = document.getElementById('password-section');
+
+        if (action === 'add') {
+            title.textContent = 'Thêm giảng viên mới';
+            saveBtn.textContent = 'Thêm mới';
+            passwordSection.classList.remove('hidden');
+
+            // Reset form
+
+            document.getElementById('lecturer-email').value = '';
+            document.getElementById('lecturer-phone').value = '';
+            document.getElementById('lecturer-department').value = '';
+            document.getElementById('lecturer-password').value = '';
+        } else {
+            title.textContent = 'Chỉnh sửa thông tin giảng viên';
+            saveBtn.textContent = 'Cập nhật';
+            passwordSection.classList.add('hidden');
+
+            // In a real app, fetch lecturer data based on ID
+            document.getElementById('lecturer-id').value = lecturerId;
+
+            document.getElementById('lecturer-email').value = 'tranvana@hocvien.edu.vn';
+            document.getElementById('lecturer-phone').value = '0987654321';
+            document.getElementById('lecturer-department').value = 'Công nghệ thông tin';
+            document.getElementById('lecturer-status').value = 'active';
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeLecturerModal() {
+        document.getElementById('lecturer-modal').classList.add('hidden');
+    }
+
+    function openLecturerDetail(lecturerId) {
+        // In a real app, fetch lecturer details based on ID
+        document.getElementById('detail-name').textContent = 'GS. Trần Văn A';
+        document.getElementById('detail-id').textContent = lecturerId;
+        document.getElementById('detail-email').textContent = 'tranvana@hocvien.edu.vn';
+        document.getElementById('detail-phone').textContent = '0987654321';
+        document.getElementById('detail-department').textContent = 'Công nghệ thông tin';
+        document.getElementById('detail-status').textContent = 'Đang hoạt động';
+
+        document.getElementById('lecturer-detail-modal').classList.remove('hidden');
+    }
+
+    function closeLecturerDetail() {
+        document.getElementById('lecturer-detail-modal').classList.add('hidden');
+    }
+
+    function showStudents(lecturerId) {
+        // In a real app, fetch lecturer name based on ID
+        document.getElementById('lecturer-info').textContent = 'GS. Trần Văn A (' + lecturerId + ')';
+        document.getElementById('student-list-modal').classList.remove('hidden');
+    }
+
+    function closeStudentList() {
+        document.getElementById('student-list-modal').classList.add('hidden');
+    }
+
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('lecturer-password');
+        const passwordEye = document.getElementById('password-eye');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordEye.setAttribute('data-lucide', 'eye-off');
+        } else {
+            passwordInput.type = 'password';
+            passwordEye.setAttribute('data-lucide', 'eye');
+        }
+
+    }
+
+    function confirmDeleteLecturer(lecturerId, lecturerName) {
+        document.getElementById('delete-lecturer-name').textContent = lecturerName;
+        document.getElementById('delete-confirm-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteConfirm() {
+        document.getElementById('delete-confirm-modal').classList.add('hidden');
+    }
+
+    function deleteLecturer() {
+        // In a real app, call API to delete lecturer
+        alert('Đã xóa giảng viên thành công!');
+        closeDeleteConfirm();
+    }
+
+    // Close modals when clicking outside
+    const modals = ['lecturer-modal', 'lecturer-detail-modal', 'student-list-modal', 'delete-confirm-modal'];
+    modals.forEach(id => {
+        const modal = document.getElementById(id);
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+            }
+        });
+    });
+    document.getElementById("avatar").addEventListener("change", (event) =>{
+        const preview = document.getElementById("avatar-preview");
+        const file = event.target.files[0];
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove("hidden");
+        }
+    });
+</script>
+</body>
+</html>

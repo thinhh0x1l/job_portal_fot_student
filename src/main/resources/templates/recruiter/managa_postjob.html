@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bài đăng tuyển dụng</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --gray: #6b7280;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .card {
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-approved {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-expired {
+            background-color: rgba(107, 114, 128, 0.1);
+            color: var(--gray);
+        }
+
+        .urgent-tag {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .new-tag {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+        }
+
+        .filter-card {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+        }
+
+        .pagination-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        .pagination-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .fake-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+    <th:block th:replace="~{narbar :: styleNarbar}"></th:block>
+</head>
+<body class="min-h-screen flex flex-col">
+<th:block th:replace="~{narbar :: narbar}"></th:block>
+
+<main class="flex-1 py-8">
+    <div class="container mx-auto px-4 max-w-7xl">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Quản lý bài đăng tuyển dụng</h1>
+                <p class="text-slate-600 mt-1">Theo dõi và quản lý các bài đăng tuyển dụng của bạn</p>
+            </div>
+            <button onclick="backe()" class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
+                <i class="fas fa-arrow-left"></i>
+                <span>Quay lại</span>
+            </button>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="bg-white filter-card p-6 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                <h2 class="text-xl font-semibold text-slate-800">Bộ lọc tìm kiếm</h2>
+                <div class="flex gap-3 w-full md:w-auto">
+                    <button onclick="clearr()" class="flex-1 md:flex-none flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
+                        <i class="fas fa-eraser"></i>
+                        <span>Xóa bộ lọc</span>
+                    </button>
+                    <button onclick="filter()" class="flex-1 md:flex-none flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                        <i class="fas fa-filter"></i>
+                        <span>Áp dụng</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Search Input -->
+                <div>
+                    <label for="search" class="block text-sm font-medium text-slate-700 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <input th:value="${like}" type="text" id="search" placeholder="Tên công việc..."
+                               class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+                </div>
+
+                <!-- Status Select -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-slate-700 mb-1">Trạng thái</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <select id="status" th:value="${status}" class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white transition">
+                            <option value="0" th:selected="${status == 0}">Tất cả trạng thái</option>
+                            <option value="1" th:selected="${status == 1}">Đã duyệt</option>
+                            <option value="2" th:selected="${status == 2}">Chờ duyệt</option>
+                            <option value="3" th:selected="${status == 3}">Hết hạn</option>
+                            <option value="4" th:selected="${status == 4}">Đã gỡ</option>
+                            <option value="5" th:selected="${status == 5}">Từ chối</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Select -->
+<!--                <div>-->
+<!--                    <label for="category" class="block text-sm font-medium text-slate-700 mb-1">Lĩnh vực</label>-->
+<!--                    <div class="relative">-->
+<!--                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">-->
+<!--                            <i class="fas fa-tag"></i>-->
+<!--                        </div>-->
+<!--                        <select id="category" class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white transition">-->
+<!--                            <option value="0">Tất cả lĩnh vực</option>-->
+<!--                            <option th:each="m : ${majors}"-->
+<!--                                    th:text="${m.getLabel()}"-->
+<!--                                    th:value="${m}"></option>-->
+<!--                        </select>-->
+<!--                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">-->
+<!--                            <i class="fas fa-chevron-down"></i>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+            </div>
+        </div>
+
+        <!-- Job Posts Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="job-posts-container">
+            <th:block th:each="j : ${jobPosts}">
+                <div th:id="${j.id}" onclick="clickDiv(this)" class="card bg-white overflow-hidden relative cursor-pointer group">
+                    <!-- Status Badge -->
+                    <div class="status-badge"
+                         th:classappend="${(j.colorV1())}">
+                       <span th:switch="${true}">
+
+                                <!-- Đã duyệt -->
+                                <i th:case="${j.statusV2()==1}"
+                                   class="fas fa-check-circle text-green-600 mr-1"
+                                   title="Đã duyệt"></i>
+
+                                                       <!-- Bị từ chối -->
+                                <i th:case="${j.statusV2()==5}"
+                                   class="fas fa-times-circle text-red-600 mr-1"
+                                   title="Bị từ chối"></i>
+
+                                                       <!-- Bị ẩn -->
+                                <i th:case="${j.statusV2()==4}"
+                                   class="fas fa-eye-slash text-gray-500 mr-1"
+                                   title="Bị ẩn"></i>
+
+                                                       <!-- Hết hạn -->
+                                <i th:case="${j.statusV2()==3}"
+                                   class="fas fa-calendar-times text-blue-400 mr-1"
+                                   title="Hết hạn"></i>
+
+                                                       <!-- Chờ duyệt -->
+                                <i th:case="*"
+                                   class="fas fa-clock text-yellow-500 mr-1"
+                                   title="Chờ duyệt"></i>
+
+                            </span>
+                        <span th:text="${j.statusV1()}"></span>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6">
+                        <!-- Tags -->
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span th:if="${j.timePost.isAfter(T(java.time.LocalDateTime).now().minusDays(7))}"
+                                  class="new-tag text-xs px-2.5 py-1 rounded-full font-medium">
+                                <i class="fas fa-sparkle mr-1"></i> Mới
+                            </span>
+                            <span th:if="${j.urgent}"
+                                  class="urgent-tag text-xs px-2.5 py-1 rounded-full font-medium bg-red-100 text-red-800">
+                                <i class="fas fa-bolt mr-1"></i> Tuyển gấp
+                            </span>
+                        </div>
+
+                        <!-- Job Title -->
+                        <h3 class="text-lg font-semibold text-slate-800 mb-3 group-hover:text-blue-600 transition-colors" th:text="${j.name}"></h3>
+
+                        <!-- Meta Info -->
+                        <div class="space-y-2 text-sm text-slate-600">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-calendar-plus text-slate-400 w-5"></i>
+                                <span th:text="${'Đăng: ' + j.timePost}"></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-calendar-minus text-slate-400 w-5"></i>
+                                <span th:text="${'Hết hạn: ' + j.postingDeadline}"></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-eye text-slate-400 w-5"></i>
+                                <span th:text="${j.view + ' lượt xem'}"></span>
+                            </div>
+                        </div>
+
+                        <!-- View Button -->
+                        <div class="mt-4 pt-4 border-t border-slate-100 flex justify-end">
+                            <span class="text-sm font-medium text-blue-600 flex items-center gap-1">
+                                Xem chi tiết
+                                <i class="fas fa-chevron-right text-xs mt-0.5"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-12 flex justify-center">
+            <div class="flex items-center gap-1">
+                <a th:classappend="${currentPage == 1 ? 'fake-disabled' : ''}"
+                   th:href="@{'/recruiter/quanly-baidang?like='+${like}+'&status='+${status}+'&page=1'}"
+                   class="pagination-btn">
+                    <i class="fas fa-angles-left"></i>
+                </a>
+
+                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{'/recruiter/quanly-baidang?like=' + ${like} + '&status=' + ${status} + '&page=' + ${i}}"
+                       th:class="${currentPage == i ? 'pagination-btn active' : 'pagination-btn'}"
+                       th:text="${i}">
+                    </a>
+                </th:block>
+
+                <a th:classappend="${currentPage == totalPages || totalPages <= 1 ? 'fake-disabled' : ''}"
+                   th:href="@{'/recruiter/quanly-baidang?like='+${like}+'&status='+${status}+'&page='+${totalPages}}"
+                   class="pagination-btn">
+                    <i class="fas fa-angles-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{footer :: footer}"></th:block>
+
+<script>
+    function clickDiv(e) {
+        window.location.href = '/recruiter/quanly-baidang/' + e.id;
+    }
+
+    function backe() {
+        window.location.href = "/recruiter/homepage";
+    }
+
+    function filter() {
+        let status = document.getElementById('status').value;
+        let search = document.getElementById('search').value.trim();
+        window.location.href = "/recruiter/quanly-baidang?like=" + search + "&status=" + status;
+    }
+
+    function clearr() {
+        window.location.href = "/recruiter/quanly-baidang";
+    }
+</script>
+</body>
+</html>

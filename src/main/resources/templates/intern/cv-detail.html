@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Details | Employer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+
+        .status-badge {
+            transition: all 0.3s ease;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-interview {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .card-shadow {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+        }
+
+        .hover-scale {
+            transition: transform 0.2s ease;
+        }
+
+        .hover-scale:hover {
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+    <th:block th:replace="~{narbar2 :: styleNarbar}"></th:block>
+</head>
+<body class="bg-gray-50">
+<div th:replace="~{narbar2 :: narbar}"></div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Chi tiết hồ sơ ứng tuyển</h1>
+            <div class="mt-2">
+                <span th:if="${cv.cvStatus.equals(cv.cvStatus.PENDING_APPROVAL)}"
+                      class="status-badge status-pending inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                    <i class="fas fa-clock mr-1.5"></i> Đang chờ duyệt
+                </span>
+                <span th:if="${cv.cvStatus.equals(cv.cvStatus.REJECTED)}"
+                      class="status-badge status-rejected inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                    <i class="fas fa-times-circle mr-1.5"></i> Đã từ chối
+                </span>
+                <span th:if="${cv.cvStatus.equals(cv.cvStatus.BEING_INTERVIEWED)}"
+                      class="status-badge status-interview inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                    <i class="fas fa-calendar-check mr-1.5"></i> Chuẩn bị phỏng vấn
+                </span>
+            </div>
+        </div>
+        <button onclick="backe()" class="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i> Quay lại
+        </button>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - CV Details -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Job Application Card -->
+            <div class="bg-white rounded-xl card-shadow overflow-hidden hover-scale">
+                <div class="p-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800">Công việc ứng tuyển</h2>
+                            <a th:href="@{'/tim-viec/' + ${cv.postJob.id}}"
+                               class="text-blue-600 hover:text-blue-800 hover:underline text-lg font-medium inline-block mt-1"
+                               target="_blank"
+                               th:text="${cv.postJob.name}"></a>
+                            <div class="mt-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                      th:text="${cv.postJob.major.getLabel()}"></span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            <span th:text="${'Mã CV: '+cv.id}"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Application Date -->
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                                <i class="fas fa-calendar-plus"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Ngày ứng tuyển</p>
+                                <p class="text-base font-medium text-gray-900" th:text="${p.format(cv.timeSent)}"></p>
+                            </div>
+                        </div>
+
+                        <!-- CV File -->
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">CV đính kèm</p>
+                                <a target="_blank" onclick="event.stopPropagation()"
+                                   th:href="@{'/images/sendCvs/'+${cv.intern.id}+'/'+${cv.fileCvUrl}}"
+                                   class="text-base font-medium text-blue-600 hover:underline">
+                                    Xem CV
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Candidate Information Card -->
+            <div class="bg-white rounded-xl card-shadow overflow-hidden hover-scale">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-user-circle text-blue-500 mr-2"></i>
+                        Thông tin ứng viên
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Họ và tên</label>
+                                <p class="mt-1 text-sm text-gray-900 font-medium" th:text="${cv.fullname}"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Số điện thoại</label>
+                                <p class="mt-1 text-sm text-gray-900 font-medium" th:text="${cv.phoneNumber}"></p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Email</label>
+                            <p class="mt-1 text-sm text-gray-900 font-medium" th:text="${cv.email}"></p>
+                        </div>
+
+                        <div class="divider my-4"></div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Giới thiệu bản thân</label>
+                            <div class="mt-2 p-4 bg-gray-50 rounded-lg">
+                                <th:block th:text="${cv.introduction}" class="text-sm text-gray-700 whitespace-pre-line"></th:block>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Candidate Profile -->
+        <div class="space-y-6">
+            <!-- Candidate Profile Card -->
+            <div class="bg-white rounded-xl card-shadow overflow-hidden hover-scale">
+                <div class="p-6">
+                    <div class="flex flex-col items-center">
+                        <div class="relative mb-4">
+                            <img th:src="@{'/images/user-photos/' + ${cv.intern.id} + '/' + ${cv.intern.imageUrl}}"
+                                 alt="Candidate Photo"
+                                 class="h-32 w-32 rounded-full object-cover border-4 border-white shadow">
+                        </div>
+
+                        <h3 class="text-xl font-semibold text-gray-900" th:text="${cv.intern.firstName + ' ' + cv.intern.lastName}"></h3>
+                        <p class="text-sm text-gray-500 mt-1" th:text="'MSSV: ' + ${cv.intern.email.split('@')[0]}"></p>
+
+                        <div class="mt-4 w-full space-y-3">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-envelope mr-2 text-gray-400"></i>
+                                <span th:text="${cv.intern.email}"></span>
+                            </div>
+
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-graduation-cap mr-2 text-gray-400"></i>
+                                <span>Chuyên ngành: Công nghệ thông tin</span>
+                            </div>
+                        </div>
+
+                        <a href="#" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Xem hồ sơ đầy đủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quá trình ứng tuyển</h3>
+                    <div class="space-y-6">
+
+                        <!-- Bước 1: Nộp CV -->
+                        <div class="flex items-start">
+                            <div class="flex flex-col items-center mr-3">
+                                <div class="h-3 w-3 bg-blue-500 rounded-full"></div>
+                                <div class="w-px h-10 bg-blue-500"></div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Nộp CV</p>
+                                <p class="text-sm text-gray-800" th:text="${'Ngày ' + cv.timeSent}">Ngày gửi</p>
+                            </div>
+                        </div>
+
+                        <!-- Bước 2: Xem xét hồ sơ -->
+                        <div class="flex items-start">
+                            <div class="flex flex-col items-center mr-3">
+                                <div class="h-3 w-3 rounded-full"
+                                     th:classappend="${cv.seen ? 'bg-blue-500' : 'bg-gray-300'}"></div>
+                                <div class="w-px h-10"
+                                     th:classappend="${cv.seen ? 'bg-blue-500' : 'bg-gray-200'}"></div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Xem xét hồ sơ</p>
+                                <p class="text-sm"
+                                   th:classappend="${cv.seen ? 'text-gray-800' : 'text-gray-400'}"
+                                   th:text="${cv.seen ? 'Đã xem hồ sơ' : 'Chưa xem'}">Chưa xem</p>
+                            </div>
+                        </div>
+
+                        <!-- Bước 3: Phỏng vấn -->
+                        <div class="flex items-start">
+                            <div class="flex flex-col items-center mr-3">
+                                <div class="h-3 w-3 rounded-full"
+                                     th:classappend="${cv.process(cv.cvStatus) ? 'bg-blue-500' : 'bg-gray-300'}"></div>
+                                <div class="w-px h-10"
+                                     th:classappend="${cv.process(cv.cvStatus) ? 'bg-blue-500' : 'bg-gray-200'}"></div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Phỏng vấn</p>
+                                <p class="text-sm"
+                                   th:classappend="${cv.process(cv.cvStatus) ? 'text-gray-800' : 'text-gray-400'}"
+                                   th:text="${cv.process(cv.cvStatus) ? 'Chuẩn bị phỏng vấn' : 'Chưa duyệt CV'}">Trạng thái</p>
+                            </div>
+                        </div>
+
+                        <!-- Bước 4: Kết quả -->
+                        <div class="flex items-start">
+                            <div class="flex flex-col items-center mr-3">
+                                <div class="h-3 w-3 rounded-full"
+                                     th:classappend="${cv.process3(cv.cvStatus)}"></div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Kết quả</p>
+                                <p class="text-sm"
+                                   th:classappend="${cv.process1(cv.cvStatus)}"
+                                   th:text="${cv.process2(cv.cvStatus)}">Kết quả</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+<!--            &lt;!&ndash; Actions Card &ndash;&gt;-->
+<!--            <div class="bg-white rounded-xl card-shadow overflow-hidden">-->
+<!--                <div class="p-6">-->
+<!--                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Thao tác</h3>-->
+
+<!--                    <div class="space-y-3">-->
+<!--                        <a th:href="@{'https://mail.google.com/mail/?view=cm&fs=1&to=' + ${cv.email}}"-->
+<!--                           target="_blank"-->
+<!--                           class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">-->
+<!--                            <i class="fas fa-envelope mr-2"></i> Liên hệ qua email-->
+<!--                        </a>-->
+
+<!--                        <form th:if="${cv.cvStatus.equals(cv.cvStatus.PENDING_APPROVAL)}" th:action="@{'/recruiter/interview/'+${cv.id}}" method="post">-->
+<!--                            <button type="submit" class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">-->
+<!--                                <i class="fas fa-calendar-check mr-2"></i> Mời phỏng vấn-->
+<!--                            </button>-->
+<!--                        </form>-->
+
+<!--                        <form th:if="${cv.cvStatus.equals(cv.cvStatus.BEING_INTERVIEWED)}" th:action="@{'/recruiter/interview/'+${cv.id}}" method="post">-->
+<!--                            <button type="submit" class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700">-->
+<!--                                <i class="fas fa-clock mr-2"></i> Lên lịch phỏng vấn-->
+<!--                            </button>-->
+<!--                        </form>-->
+
+<!--                        <button onclick="tuchoi(this)" class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700">-->
+<!--                            <i class="fas fa-times-circle mr-2"></i> Từ chối hồ sơ-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+        </div>
+    </div>
+</div>
+<div th:replace="~{narbar2 :: aiChatBot}"></div>
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+    function backe(){
+        window.location.href="/cv-dagui";
+    }
+
+    function tuchoi(button) {
+        // Add your rejection logic here
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // Any initialization code
+    });
+</script>
+</body>
+</html>

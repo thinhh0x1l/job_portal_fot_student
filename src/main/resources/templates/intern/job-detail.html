@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${jopPost.name + ' | Job Details'}">Job Post Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .urgent-badge {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .job-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .job-content ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background-color: #e5e7eb;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #6366f1);
+            transition: width 0.3s ease;
+        }
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .favorite-btn {
+            transition: all 0.2s ease;
+        }
+        .favorite-btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+    <th:block th:replace="~{narbar2 :: styleNarbar}"></th:block>
+</head>
+<body class="bg-gray-50">
+<div th:replace="~{narbar2 :: narbar}"></div>
+
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-2">
+            <li class="inline-flex items-center">
+                <a href="/homepage" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600">
+                    <i class="fas fa-home mr-2"></i>
+                    Trang chủ
+                </a>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                    <span class="ml-1 text-sm font-medium text-gray-700 md:ml-2" th:text="${jopPost.name}">Chi tiết bài đăng</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Main Content (Left Column) -->
+        <div class="lg:w-2/3">
+            <!-- Job Header Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6 card-hover">
+                <div class="p-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-3 mb-3">
+                                <h1 class="text-2xl font-bold text-gray-900" th:text="${jopPost.name}">Senior Frontend Developer</h1>
+                                <span th:if="${jopPost.urgent}" class="urgent-badge px-3 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full flex items-center">
+                                    <i class="fas fa-bolt mr-1"></i> TUYỂN GẤP
+                                </span>
+
+                            </div>
+
+
+
+                            <div class="flex flex-wrap items-center gap-2 mb-4">
+                                <span class="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full" th:text="${jopPost.major.getLabel()}">IT</span>
+                                <span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full" th:text="${#temporals.format(jopPost.postingDeadline, 'dd/MM/yyyy')}">Hết hạn: 15/06</span>
+                                <span class="px-3 py-1 bg-green-50 text-green-700 text-sm font-medium rounded-full" th:text="${jopPost.salary==0?'Không lương' :jopPost.salary+' triệu'}">15-20 triệu</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 mb-6" id="preloaded-tags" >
+                                <label th:each="tag :${jopPost.getTags()}"  th:attr="data-id=${tag.id}, data-name=${tag.name}"
+                                       th:class="${tag.getColorClassV1() + ' '}">
+                                    <span th:text="${tag.name}">Tag</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div sec:authorize="isAuthenticated() and hasRole('INTERN')"  class="favorite-btn">
+                            <button onclick="event.stopPropagation(); favorite(this)" class="text-gray-400 hover:text-red-500">
+                                <th:block th:if="${jopPost != null}">
+                                    <i th:attr="data-id=${jopPost.id}" th:unless="${jopPost.isFavorited(#authentication.principal)}" class="far fa-heart text-2xl"></i>
+                                    <i th:attr="data-id=${jopPost.id}" th:if="${jopPost.isFavorited(#authentication.principal)}" class="fas fa-heart text-2xl text-red-500"></i>
+                                </th:block>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow">
+                                <img th:src="@{'/images/companies/' + ${jopPost.recruiter.id} + '/' + ${jopPost.recruiter.company.imageUrl}}"
+                                     alt="Company Logo" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900" th:text="${jopPost.recruiter.company.companyName}">Tech Solutions Inc.</p>
+                                <p class="text-sm text-gray-500" th:text="${jopPost.recruiter.company.address}">Hà Nội</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-500">
+                                <i class="fas fa-eye mr-1"></i>
+                                <span th:text="${jopPost.view}">1,245</span> lượt xem
+                            </span>
+                            <span class="text-sm text-gray-500">
+                                <i class="fas fa-users mr-1"></i>
+                                <span th:text="${'Số lượng tuyển: '+jopPost.numberOfApplications}">24</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Details Sections -->
+            <div class="space-y-6">
+                <!-- Job Description Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 card-hover">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
+                            <i class="fas fa-file-alt text-lg"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-900">Mô tả công việc</h2>
+                    </div>
+
+                    <div class="job-content text-gray-700 ml-12">
+                        <div th:utext="${jopPost.formatDescription(jopPost.candidateRequirements,1)}" ></div>
+                    </div>
+                </div>
+
+                <!-- Requirements Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 card-hover">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-purple-100 rounded-lg text-purple-600">
+                            <i class="fas fa-user-check text-lg"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-900">Yêu cầu ứng viên</h2>
+                    </div>
+
+                    <div class="job-content text-gray-700 ml-12">
+                        <div th:utext="${jopPost.formatDescription(jopPost.candidateRequirements,4)}" ></div>
+                    </div>
+                </div>
+
+                <!-- Benefits Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 card-hover">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-green-100 rounded-lg text-green-600">
+                            <i class="fas fa-gift text-lg"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-900">Quyền lợi</h2>
+                    </div>
+
+                    <div class="job-content text-gray-700 ml-12">
+                        <div th:utext="${jopPost.formatDescription(jopPost.candidateRequirements,2)}" ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar (Right Column) -->
+        <div class="lg:w-1/3">
+            <!-- Company Profile Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6 card-hover">
+                <div class="p-6">
+                    <div class="flex flex-col items-center text-center mb-4">
+                        <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg mb-3">
+                            <img th:src="@{'/images/companies/' + ${jopPost.recruiter.id} + '/' + ${jopPost.recruiter.company.imageUrl}}"
+                                 alt="Company Logo" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900" th:text="${jopPost.recruiter.company.companyName}">Tech Solutions Inc.</h3>
+                        <p class="text-sm text-gray-500" th:text="${jopPost.recruiter.company.address}">Hà Nội, Việt Nam</p>
+                    </div>
+
+                    <div class="space-y-3 text-sm text-gray-700">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-users text-gray-400 w-5"></i>
+                            <span>Quy mô: <span class="font-medium"
+                                                th:text="${jopPost.recruiter.company.companySize==null?'25-99 nhân viên':
+                                                jopPost.recruiter.company.companySize.displayName}"></span></span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-building text-gray-400 w-5"></i>
+                            <span>Lĩnh vực: <span class="font-medium">Công nghệ thông tin</span></span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-globe text-gray-400 w-5"></i>
+                            <a target="_blank"
+                                    th:href="@{${jopPost.recruiter.company.website}}" class="text-blue-600 hover:underline">Website công ty</a>
+                        </div>
+                    </div>
+
+                    <a th:href="@{'/compy/'+${jopPost.recruiter.id}}" class="mt-4 inline-flex items-center justify-center w-full py-2 px-4 border border-blue-600 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition">
+                        Xem trang công ty
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Job Stats Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6 card-hover">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Thông tin công việc</h3>
+
+                    <div class="space-y-4">
+                        <!-- Salary -->
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
+                                <i class="fas fa-money-bill-wave text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Mức lương</p>
+                                <p class="text-lg font-bold text-gray-900" th:text="${jopPost.salary==0?'Không lương' :jopPost.salary+' triệu'}">15 - 20 triệu</p>
+                            </div>
+                        </div>
+
+                        <!-- Posted Date -->
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-green-50 rounded-lg text-green-600">
+                                <i class="fas fa-calendar-plus text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Ngày đăng</p>
+                                <p class="text-lg font-bold text-gray-900" th:text="${''+jopPost.timePost}">15/05/2023</p>
+                            </div>
+                        </div>
+
+                        <!-- Deadline -->
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-red-50 rounded-lg text-red-600">
+                                <i class="fas fa-calendar-times text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Hạn tuyển dụng</p>
+                                <p class="text-lg font-bold text-gray-900" th:text="${''+jopPost.postingDeadline}">15/06/2023</p>
+                            </div>
+                        </div>
+
+                        <!-- Time Remaining -->
+                        <div class="mt-4">
+                            <div class="flex justify-between text-sm text-gray-500 mb-1">
+                                <span>Thời gian còn lại</span>
+                                <span th:text="${p.format(jopPost.postingDeadline)+' hết hạn'}"></span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" th:style="'width:'+${per>100||per<0?100:per}+'%'"></div>
+                            </div>
+                            <div class="text-sm text-slate-500 mt-2 text-right" th:text="'Đã qua '+${per>100||per<0?100:per}+'% thời gian'"></div>
+                        </div>
+                        <button onclick="document.getElementById('viewModal').classList.remove('hidden')"
+                                class="text-sm text-blue-600 hover:underline">
+                            Xem ai đã nộp CV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apply Button -->
+            <button sec:authorize="isAuthenticated() and hasRole('INTERN')"
+                    id="ungtuyen" class="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:-translate-y-0.5">
+                <span class="button-icon">
+                    <i th:if="${ex == null||ex == 0}" class="fas fa-paper-plane mr-2"></i>
+                    <i th:unless="${ex == null ||ex == 0}" class="fa-solid fa-arrow-rotate-right mr-2"></i>
+                </span>
+                <span th:text="${(ex == null||ex == 0) ? 'Ứng tuyển ngay':'Ứng tuyển lại' }"></span>
+            </button>
+
+            <!-- Back Button -->
+            <button onclick="backe()" class="w-full mt-3 py-3 px-6 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition">
+                <i class="fas fa-arrow-left mr-2"></i> Quay lại
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="mt-8 text-center text-sm text-gray-500">
+        <p>Cập nhật lần cuối: <span th:text="${jopPost.updatedTime}">20/05/2023 14:30</span></p>
+    </div>
+</div>
+
+<!-- Apply Modal -->
+<div id="applyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <form id="registerForm" enctype="multipart/form-data" th:action="@{/guicv}" method="post" th:object="${sendOutCv}" class="w-full max-w-2xl">
+        <!-- Modal Container -->
+        <div class="bg-white rounded-2xl overflow-hidden shadow-xl transform transition-all max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b bg-white sticky top-0 z-10">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-gray-900">
+                        Ứng tuyển: <span class="text-blue-600" th:text="${jopPost.name}">Senior Frontend Developer</span>
+                    </h2>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="overflow-y-auto p-6 space-y-6 flex-1">
+
+                <th:block th:if="${myCV != null}">
+                    <div th:if="${3-ex != 0 && ex != 0}" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-yellow-400 mt-1"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700">
+                                    <strong>Lưu ý:</strong> Việc ứng tuyển nhiều lần sẽ giảm độ chuyên nghiệp của bạn trong mắt nhà tuyển dụng.
+                                    Bạn còn <span class="font-bold" th:text="${(3-ex)+' lượt'}">3 lượt</span> ứng tuyển lại cho công việc này, hãy cân nhắc kỹ!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:unless="${3-ex != 0}" id="hetluot" class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400 mt-1"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700">
+                                    <strong>Lưu ý:</strong> Việc ứng tuyển nhiều lần sẽ giảm độ chuyên nghiệp của bạn trong mắt nhà tuyển dụng.
+                                    Bạn đã <span class="font-bold">hết lượt</span> ứng tuyển lại cho công việc này!!!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+
+                <!-- CV Options -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-gray-900">📄 Chọn CV để ứng tuyển</h3>
+
+                    <!-- Saved CV Option -->
+                    <label id="box-saved" th:if="${myCV != null}" th:classappend="${myCV != null ? '' : 'hidden'}"
+                           class="block border rounded-lg p-4 hover:border-blue-500 transition cursor-pointer relative">
+                        <input id="ra1" type="radio" name="cv-option" value="saved" th:checked="${myCV != null}"
+                               class="absolute top-4 left-4 h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+                               onchange="toggleCVOption(this)">
+                        <div class="ml-8">
+                            <div class="flex justify-between items-start">
+                                <span class="text-blue-600 font-medium">
+                                    CV ứng tuyển gần nhất
+                                </span>
+                                <a th:href="@{'/images/sendCvs/' + ${myCV.intern.id} + '/' + ${myCV.fileCvUrl}}"
+                                   class="text-sm text-blue-600 hover:underline inline-flex items-center" target="_blank">
+                                    Xem CV <i class="fas fa-external-link-alt ml-1 text-xs"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate mt-1" th:text="${myCV.fileCvUrl}">CV_Frontend_Developer_NguyenVanA.pdf</p>
+
+                            <div class="mt-3 space-y-2 text-sm">
+                                <div class="flex items-center">
+                                    <i class="fas fa-user text-gray-400 mr-2 w-4"></i>
+                                    <span th:text="${myCV.fullname}">Nguyễn Văn A</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-envelope text-gray-400 mr-2 w-4"></i>
+                                    <span th:text="${myCV.email}">nguyenvana@example.com</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-phone text-gray-400 mr-2 w-4"></i>
+                                    <span th:text="${myCV.phoneNumber}">0987654321</span>
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="fullname" th:value="${myCV.fullname}">
+                            <input type="hidden" id="fileCvUrl" th:value="${myCV.fileCvUrl}">
+                            <input type="hidden" id="email" th:value="${myCV.email}">
+                            <input type="hidden" id="phoneNumber" th:value="${myCV.phoneNumber}">
+                        </div>
+                    </label>
+
+                    <!-- Upload CV Option -->
+                    <label id="box-upload" class="block border rounded-lg p-4 hover:border-blue-500 transition cursor-pointer relative">
+                        <input type="radio" name="cv-option" value="upload" id="ra2" th:checked="${myCV == null}"
+                               class="absolute top-4 left-4 h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+                               onchange="toggleCVOption(this)">
+                        <div class="ml-8">
+                            <p class="font-medium">Tải lên CV mới</p>
+                            <p class="text-sm text-gray-500">Chỉ chấp nhận file PDF (tối đa 5MB)</p>
+
+                            <!-- Upload Box (Hidden by default) -->
+                            <div class="upload-cv-box mt-3 hidden">
+                                <div class="flex items-center justify-center w-full">
+                                    <label for="upload-cv" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                            <p class="mb-2 text-sm text-gray-500">Kéo thả file hoặc click để chọn</p>
+                                            <p class="text-xs text-gray-500">PDF (tối đa 5MB)</p>
+                                        </div>
+                                        <input id="upload-cv" name="cvFile" type="file" class="hidden" accept=".pdf">
+                                    </label>
+                                </div>
+                                <p class="text-xs mt-2 text-gray-500" id="fileName"></p>
+                            </div>
+
+                            <!-- Applicant Info (Hidden by default) -->
+                            <div class="info-upload hidden mt-4 space-y-4">
+                                <p class="text-sm font-medium text-gray-700">Thông tin ứng viên</p>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên <span class="text-red-500">*</span></label>
+                                    <input th:field="*{fullname}" type="text" id="fullnameI"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+                                        <input th:field="*{email}" type="email" id="emailI"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+                                        <input th:field="*{phoneNumber}" type="text" id="phoneNumberI"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Cover Letter -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                        <i class="fas fa-feather-alt text-blue-500 mr-2"></i> Thư giới thiệu
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-3">Giới thiệu ngắn gọn về bản thân và lý do ứng tuyển</p>
+                    <textarea th:field="*{introduction}" id="introduction"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 h-32"
+                              placeholder="Ví dụ: Tôi là người cẩn thận, có 2 năm kinh nghiệm làm Frontend Developer..."></textarea>
+                </div>
+
+                <!-- Job ID Hidden Field -->
+                <input type="hidden" id="jobId" name="jobId" th:value="${jopPost.id}">
+
+                <!-- Important Notes -->
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-red-400 mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-700">Lưu ý quan trọng</h3>
+                            <div class="mt-2 text-sm text-red-600">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>Luôn cẩn trọng trong quá trình tìm việc</li>
+                                    <li>Xác minh thông tin nhà tuyển dụng nếu có nghi ngờ</li>
+                                    <li>Không cung cấp thông tin cá nhân nhạy cảm</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 border-t bg-white sticky bottom-0 z-10 flex justify-between gap-4">
+                <button type="button" onclick="closeModal()" class="w-1/2 py-2 rounded-md border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition">
+                    Hủy bỏ
+                </button>
+                <button type="submit" id="btn-apply"
+                        class="w-1/2 py-2 rounded-md
+
+                bg-blue-600 hover:bg-blue-700 text-white font-medium transition">
+                    Nộp hồ sơ
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div th:replace="~{footer :: footer}"></div>
+<div id="viewModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-lg relative">
+        <!-- Close button -->
+        <button id="closeViewModal" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900">
+            <i class="fas fa-times text-lg"></i>
+        </button>
+
+        <!-- Modal Content -->
+        <div class="p-6">
+            <h2 class="text-xl font-semibold text-slate-800 mb-2">Thông tin ai đã nôp cv</h2>
+            <p class="text-sm text-slate-600 mb-6">Thống kê chi tiết lượt xem bài viết của bạn.</p>
+
+<!--            &lt;!&ndash; Tổng quan &ndash;&gt;-->
+<!--            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-center">-->
+<!--                <div class="p-4 bg-blue-50 rounded-lg">-->
+<!--                    <p class="text-sm text-blue-700">Tổng lượt xem</p>-->
+<!--                    <p class="text-2xl font-bold text-blue-800" th:text="${totalViews}">0</p>-->
+<!--                </div>-->
+<!--                <div class="p-4 bg-green-50 rounded-lg">-->
+<!--                    <p class="text-sm text-green-700">Người dùng đã đăng nhập</p>-->
+<!--                    <p class="text-2xl font-bold text-green-800" th:text="${userViews}">0</p>-->
+<!--                </div>-->
+<!--                <div class="p-4 bg-gray-100 rounded-lg">-->
+<!--                    <p class="text-sm text-gray-700">Lượt xem vô danh</p>-->
+<!--                    <p class="text-2xl font-bold text-gray-800" th:text="${anonymousViews}">0</p>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <!-- Danh sách người đã xem -->
+            <h3 class="text-lg font-medium text-slate-700 mb-2">Người đã nộp</h3>
+            <ul class="divide-y divide-slate-200">
+                <li th:each="viewer : ${internSeen}" class="py-3 flex items-center gap-4">
+                    <img th:src="@{'/images/user-photos/' +${viewer.id}+'/'+ ${viewer.imageUrl}}" class="w-10 h-10 rounded-full object-cover" />
+                    <div>
+                        <p class="font-medium text-slate-800" th:text="${viewer.firstName + ' ' + viewer.lastName}">Nguyễn Văn A</p>
+                        <p class="text-sm text-slate-500" th:text="${viewer.email}">nguyenvana@example.com</p>
+                    </div>
+<!--                    <div>-->
+<!--                        <p class="font-medium text-slate-800" th:text="${'Role: '-->
+<!--                        +(viewer.role.name() =='INTERN' ?'Sinh viên':(viewer.role.name() =='RECRUITER'?'Nhà tuyển dụng':'Giảng viên'))}">Nguyễn Văn A</p>-->
+<!--                    </div>-->
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div th:replace="~{narbar2 :: aiChatBot}"></div>
+<div th:replace="~{footer :: footer}"></div>
+<script>
+    // Back button function
+    function backe() {
+        window.history.back();
+    }
+
+    // Apply button click handler
+    document.getElementById('ungtuyen').addEventListener('click', async () => {
+        let response = await fetch('/intern/api/auth');
+        let data = await response.text();
+        if(JSON.parse(data)) {
+            document.getElementById('applyModal').classList.remove('hidden');
+            const no = document.getElementById('hetluot');
+            if(no) {
+                document.getElementById('btn-apply').disabled = true;
+                document.getElementById('btn-apply').classList.replace('bg-blue-600', 'bg-gray-400');
+                document.getElementById('btn-apply').classList.replace('hover:bg-blue-700', 'hover:bg-gray-500');
+            }
+        } else {
+            window.location.href = '/login';
+        }
+    });
+
+    // File upload handler
+    document.getElementById('upload-cv').addEventListener('change', function(e) {
+        const fileNameDisplay = document.getElementById('fileName');
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            const fileSize = file.size / 1024 / 1024; // in MB
+            const fileType = file.name.split('.').pop().toLowerCase();
+
+            // Validate file type
+            if (fileType !== 'pdf') {
+                fileNameDisplay.textContent = 'Chỉ chấp nhận file PDF!';
+                fileNameDisplay.className = 'text-xs text-red-500';
+                this.value = '';
+                return;
+            }
+
+            // Validate file size
+            if (fileSize > 5) {
+                fileNameDisplay.textContent = 'File quá lớn (tối đa 5MB)!';
+                fileNameDisplay.className = 'text-xs text-red-500';
+                this.value = '';
+                return;
+            }
+
+            fileNameDisplay.textContent = `Đã chọn: ${file.name} (${fileSize.toFixed(1)}MB)`;
+            fileNameDisplay.className = 'text-xs text-green-600';
+        }
+    });
+
+    // Close modal function
+    function closeModal() {
+        document.getElementById('applyModal').classList.add('hidden');
+    }
+
+    // Toggle CV options
+    function toggleCVOption(el) {
+        const saved = document.getElementById('box-saved');
+        const upload = document.getElementById('box-upload');
+        const uploadBox = document.querySelector('.upload-cv-box');
+        const infoUpload = document.querySelector('.info-upload');
+
+        if(saved) {
+            saved.classList.remove('border-blue-500', 'ring-2', 'ring-blue-100');
+        }
+        upload.classList.remove('border-blue-500', 'ring-2', 'ring-blue-100');
+        uploadBox.classList.add('hidden');
+        infoUpload.classList.add('hidden');
+
+        if (el.value === 'saved' && saved) {
+            saved.classList.add('border-blue-500', 'ring-2', 'ring-blue-100');
+            document.getElementById('upload-cv').required = false;
+            document.getElementById('fullnameI').required = false;
+            document.getElementById('emailI').required = false;
+            document.getElementById('phoneNumberI').required = false;
+        } else {
+            upload.classList.add('border-blue-500', 'ring-2', 'ring-blue-100');
+            uploadBox.classList.remove('hidden');
+            infoUpload.classList.remove('hidden');
+            document.getElementById('upload-cv').required = true;
+            document.getElementById('fullnameI').required = true;
+            document.getElementById('emailI').required = true;
+            document.getElementById('phoneNumberI').required = true;
+        }
+    }
+
+    // Initialize CV option on page load
+    document.addEventListener("DOMContentLoaded", () => {
+        toggleCVOption(document.querySelector('input[name="cv-option"]:checked'));
+    });
+
+    // Form submission handler
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const ra1 = document.getElementById('ra1');
+
+        if(ra1 && ra1.checked) {
+            let email = document.getElementById('email').value;
+            let jobId = document.getElementById('jobId').value;
+            let fullname = document.getElementById('fullname').value;
+            let fileCvUrl = document.getElementById('fileCvUrl').value;
+            let phoneNumber = document.getElementById('phoneNumber').value;
+            let introduction = document.getElementById('introduction').value;
+
+            fetch('/intern/api/guicv', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    jobId: jobId,
+                    fullname: fullname,
+                    fileCvUrl: fileCvUrl,
+                    phoneNumber: phoneNumber,
+                    introduction: introduction
+                })
+            }).then(res => {
+                if (res.ok) {
+                    window.location.href = '/homepage';
+                }
+            });
+        } else {
+            e.target.submit();
+        }
+    });
+
+    // Favorite button handler
+    document.querySelectorAll('.fa-heart').forEach(icon => {
+        icon.addEventListener('click', function() {
+            if (this.classList.contains('far')) {
+                this.classList.remove('far');
+                this.classList.add('fas', 'text-red-500');
+                fetch(`/intern/api/likeJob`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.dataset.id)
+                });
+            } else {
+                this.classList.remove('fas', 'text-red-500');
+                this.classList.add('far');
+                fetch(`/intern/api/likeJob`, {
+                    method: "DELETE",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.dataset.id)
+                });
+            }
+        });
+    });
+    document.getElementById("closeViewModal").addEventListener("click", function() {
+        document.getElementById("viewModal").classList.add("hidden");
+    });
+</script>
+</body>
+</html>

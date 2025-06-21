@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Nhà tuyển dụng | Học viện Kỹ thuật Mật mã</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .sidebar-item-active {
+            background-color: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            font-weight: 500;
+        }
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-inactive {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .status-pending {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+        .company-status-verified {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        .company-status-unverified {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .company-status-pending {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .company-row:hover {
+            background-color: #f9fafb;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar-open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <th:block th:replace="~{narbarAdmin :: sidebar}"></th:block>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <!-- Topbar -->
+        <th:block th:replace="~{narbarAdmin :: topbar}"></th:block>
+
+        <!-- Content -->
+        <main class="p-6">
+            <!-- Action Bar -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div class="flex flex-col md:flex-row gap-3 w-full">
+                    <div class="relative w-full md:w-64">
+                        <input type="text" placeholder="Tìm kiếm công ty..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400"></i>
+                    </div>
+                    <select class="w-full md:w-48 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>Tất cả ngành nghề</option>
+                        <option>Công nghệ thông tin</option>
+                        <option>An toàn thông tin</option>
+                        <option>Tài chính ngân hàng</option>
+                        <option>Viễn thông</option>
+                    </select>
+                    <select class="w-full md:w-48 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>Tất cả địa bàn</option>
+                        <option>Hà Nội</option>
+                        <option>TP.HCM</option>
+                        <option>Đà Nẵng</option>
+                        <option>Khác</option>
+                    </select>
+                    <select class="w-full md:w-48 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>Tất cả trạng thái</option>
+                        <option>Đã xác thực</option>
+                        <option>Chưa xác thực</option>
+                        <option>Tạm dừng</option>
+                    </select>
+                </div>
+
+                <button onclick="openCompanyModal('add')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center action-btn w-full md:w-auto">
+                    <i data-lucide="building-2" class="w-4 h-4 mr-2"></i>
+                    Thêm công ty
+                </button>
+            </div>
+
+            <!-- Company Table -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên công ty</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngành nghề</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Địa chỉ</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Người liên hệ</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="company-row">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">NTD001</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">FPT Software</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Công nghệ phần mềm</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Hà Nội</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Nguyễn Văn A (0987654321)</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium company-status-verified">Đã xác thực</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button onclick="openCompanyDetail('NTD001')" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="openCompanyModal('edit', 'NTD001')" class="text-yellow-500 hover:text-yellow-700 mr-3 action-btn">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="confirmDeleteCompany('NTD001', 'FPT Software')" class="text-red-500 hover:text-red-700 action-btn">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="company-row">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">NTD002</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">Viettel Cyber Security</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">An toàn thông tin</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Hà Nội</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Trần Thị B (0912345678)</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium company-status-pending">Chờ xác thực</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button onclick="openCompanyDetail('NTD002')" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="openCompanyModal('edit', 'NTD002')" class="text-yellow-500 hover:text-yellow-700 mr-3 action-btn">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="confirmDeleteCompany('NTD002', 'Viettel Cyber Security')" class="text-red-500 hover:text-red-700 action-btn">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="company-row">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">NTD003</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">VNPT Technology</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Viễn thông</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">TP.HCM</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Lê Văn C (0905123456)</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium company-status-unverified">Chưa xác thực</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button onclick="openCompanyDetail('NTD003')" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="openCompanyModal('edit', 'NTD003')" class="text-yellow-500 hover:text-yellow-700 mr-3 action-btn">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="confirmDeleteCompany('NTD003', 'VNPT Technology')" class="text-red-500 hover:text-red-700 action-btn">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="text-sm text-gray-500">
+                        Hiển thị <span class="font-medium">1</span> đến <span class="font-medium">3</span> của <span class="font-medium">24</span> công ty
+                    </div>
+                    <div class="flex space-x-1">
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            Trước
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100">
+                            1
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            2
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            3
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            ...
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            8
+                        </button>
+                        <button class="px-3 py-1 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100">
+                            Sau
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Add/Edit Company Modal -->
+<div id="company-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+    <div class="bg-white rounded-lg w-full max-w-3xl modal-content">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold" id="company-modal-title">Thêm công ty mới</h3>
+            <button class="text-gray-500" onclick="closeCompanyModal()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 gap-y-4">
+                <!-- Ảnh đại diện công ty -->
+                <div class="flex flex-col items-center mb-4">
+                    <div class="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-200 mb-3 bg-gray-100 flex items-center justify-center">
+                        <img id="company-logo-preview" src="https://via.placeholder.com/150" alt="Logo công ty" class="w-full h-full object-contain">
+                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <label for="company-logo" class="cursor-pointer text-white">
+                                <i data-lucide="camera" class="w-5 h-5"></i>
+                            </label>
+                        </div>
+                    </div>
+                    <input type="file" id="company-logo" accept="image/*" class="hidden">
+                    <p class="text-sm text-gray-500">Logo công ty (tối đa 2MB, tỷ lệ 1:1)</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tên công ty*</label>
+                        <input type="text" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mã số thuế*</label>
+                        <input type="text" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-tax">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ngành nghề*</label>
+                        <select required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-industry">
+                            <option value="">Chọn ngành nghề</option>
+                            <option>Công nghệ thông tin</option>
+                            <option>An toàn thông tin</option>
+                            <option>Tài chính ngân hàng</option>
+                            <option>Viễn thông</option>
+                            <option>Khác</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quy mô</label>
+                        <select class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-size">
+                            <option value="">Chọn quy mô</option>
+                            <option>Dưới 10 nhân viên</option>
+                            <option>10-50 nhân viên</option>
+                            <option>50-200 nhân viên</option>
+                            <option>200-500 nhân viên</option>
+                            <option>Trên 500 nhân viên</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ*</label>
+                        <input type="text" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-address">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                        <input type="url" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-website" placeholder="https://">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+                        <input type="email" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-email">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại*</label>
+                        <input type="tel" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-phone">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mô tả công ty</label>
+                    <textarea rows="3" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-description"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Người liên hệ*</label>
+                        <input type="text" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-contact-name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
+                        <input type="text" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-contact-position">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email liên hệ*</label>
+                        <input type="email" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-contact-email">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SĐT liên hệ*</label>
+                        <input type="tel" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-contact-phone">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                        <select class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="company-status">
+                            <option value="verified">Đã xác thực</option>
+                            <option value="pending">Chờ xác thực</option>
+                            <option value="unverified">Chưa xác thực</option>
+                            <option value="inactive">Tạm dừng</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Giấy phép kinh doanh</label>
+                        <input type="file" id="company-license" accept=".pdf,.jpg,.png" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t flex justify-end space-x-3">
+            <button type="button" onclick="closeCompanyModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Hủy
+            </button>
+            <button type="button" onclick="saveCompany()" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" id="company-save-btn">
+                Lưu
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Company Detail Modal -->
+<div id="company-detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+    <div class="bg-white rounded-lg w-full max-w-4xl modal-content">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Thông tin chi tiết công ty</h3>
+            <button class="text-gray-500" onclick="closeCompanyDetail()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="w-full md:w-1/3 flex flex-col items-center">
+                    <div class="w-40 h-40 rounded-lg bg-gray-200 flex items-center justify-center mb-4">
+                        <img id="detail-logo" src="https://via.placeholder.com/150" alt="Logo công ty" class="w-full h-full object-contain">
+                    </div>
+                    <div class="text-center">
+                        <h4 class="text-xl font-semibold" id="detail-name">FPT Software</h4>
+                        <p class="text-sm text-gray-500" id="detail-id">NTD001</p>
+                        <p class="text-sm font-medium mt-1" id="detail-industry">Công nghệ phần mềm</p>
+                    </div>
+                    <div class="mt-4 w-full">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-gray-600">Trạng thái:</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-medium company-status-verified" id="detail-status">Đã xác thực</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-gray-600">Quy mô:</span>
+                            <span class="text-sm font-medium" id="detail-size">Trên 500 nhân viên</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-gray-600">Ngày tạo:</span>
+                            <span class="text-sm" id="detail-created">15/08/2021</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mã số thuế</label>
+                            <p class="text-sm" id="detail-tax">0100109106</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+                            <p class="text-sm" id="detail-address">Tòa nhà FPT, Phạm Văn Bạch, Cầu Giấy, Hà Nội</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                            <p class="text-sm">
+                                <a href="#" id="detail-website" class="text-blue-600 hover:underline">https://fptsoftware.com</a>
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <p class="text-sm" id="detail-email">contact@fptsoftware.com</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                            <p class="text-sm" id="detail-phone">(024) 7300 5588</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Giấy phép kinh doanh</label>
+                            <p class="text-sm">
+                                <a href="#" class="text-blue-600 hover:underline flex items-center">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-1"></i> Xem giấy phép
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mô tả công ty</label>
+                        <p class="text-sm text-gray-600" id="detail-description">
+                            FPT Software là công ty phần mềm hàng đầu Việt Nam, cung cấp các giải pháp công nghệ thông tin cho khách hàng trong nước và quốc tế.
+                            Công ty có hơn 20,000 nhân viên với mạng lưới văn phòng tại 26 quốc gia.
+                        </p>
+                    </div>
+
+                    <!-- Thông tin người liên hệ -->
+                    <div class="mt-6">
+                        <h5 class="text-sm font-medium text-gray-700 mb-3">Người liên hệ</h5>
+                        <div class="border rounded-lg p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Họ tên</label>
+                                    <p class="text-sm font-medium" id="detail-contact-name">Nguyễn Văn A</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Chức vụ</label>
+                                    <p class="text-sm" id="detail-contact-position">Trưởng phòng Tuyển dụng</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Email</label>
+                                    <p class="text-sm" id="detail-contact-email">nguyenvana@fptsoftware.com</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Số điện thoại</label>
+                                    <p class="text-sm" id="detail-contact-phone">0987654321</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách việc làm -->
+            <div class="mt-8">
+                <h5 class="text-sm font-medium text-gray-700 mb-3">Việc làm đang tuyển (3)</h5>
+                <div class="border rounded-lg overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vị trí</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Địa điểm</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hạn nộp</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium">Lập trình viên Java</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm">Hà Nội</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm">30/06/2023</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm">
+                                <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">Đang tuyển</span>
+                            </td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-right">
+                                <button class="text-blue-500 hover:text-blue-700">
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium">Chuyên viên An ninh mạng</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm">TP.HCM</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm">15/07/2023</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm">
+                                <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">Đang tuyển</span>
+                            </td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-right">
+                                <button class="text-blue-500 hover:text-blue-700">
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t flex justify-end">
+            <button type="button" onclick="closeCompanyDetail()" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+    <div class="bg-white rounded-lg w-full max-w-md">
+        <div class="p-4 border-b">
+            <h3 class="text-lg font-semibold">Xác nhận xóa</h3>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700">Bạn có chắc muốn xóa công ty <span id="delete-company-name" class="font-semibold"></span>? Thao tác này không thể hoàn tác.</p>
+            <p class="text-sm text-red-500 mt-2">Lưu ý: Tất cả thông tin liên quan đến công ty này sẽ bị xóa vĩnh viễn.</p>
+        </div>
+        <div class="p-4 border-t flex justify-end space-x-3">
+            <button type="button" onclick="closeDeleteConfirm()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Hủy
+            </button>
+            <button type="button" onclick="deleteCompany()" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                Xác nhận xóa
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Sidebar Toggle for Mobile
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.add('sidebar-open');
+    });
+
+    sidebarClose.addEventListener('click', () => {
+        sidebar.classList.remove('sidebar-open');
+    });
+
+    // Search Toggle
+    const searchButton = document.getElementById('searchButton');
+    const searchInput = document.getElementById('searchInput');
+
+    searchButton.addEventListener('click',() => {
+        searchInput.classList.toggle('hidden');
+    });
+
+    // Dropdown Menu Toggle
+    const dropdownBtns = document.querySelectorAll('.dropdown-btn');
+    dropdownBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('i:last-child');
+
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        });
+    });
+
+    // Modal functions
+    function openCompanyModal(action, companyId = null) {
+        const modal = document.getElementById('company-modal');
+        const title = document.getElementById('company-modal-title');
+        const saveBtn = document.getElementById('company-save-btn');
+
+        if (action === 'add') {
+            title.textContent = 'Thêm công ty mới';
+            saveBtn.textContent = 'Thêm mới';
+
+            // Reset form
+            document.getElementById('company-name').value = '';
+            document.getElementById('company-tax').value = '';
+            document.getElementById('company-industry').value = '';
+            document.getElementById('company-size').value = '';
+            document.getElementById('company-address').value = '';
+            document.getElementById('company-website').value = '';
+            document.getElementById('company-email').value = '';
+            document.getElementById('company-phone').value = '';
+            document.getElementById('company-description').value = '';
+            document.getElementById('company-contact-name').value = '';
+            document.getElementById('company-contact-position').value = '';
+            document.getElementById('company-contact-email').value = '';
+            document.getElementById('company-contact-phone').value = '';
+            document.getElementById('company-status').value = 'verified';
+            document.getElementById('company-logo-preview').src = 'https://via.placeholder.com/150';
+        } else {
+            title.textContent = 'Chỉnh sửa thông tin công ty';
+            saveBtn.textContent = 'Cập nhật';
+
+            // In a real app, fetch company data based on ID
+            document.getElementById('company-name').value = 'FPT Software';
+            document.getElementById('company-tax').value = '0100109106';
+            document.getElementById('company-industry').value = 'Công nghệ thông tin';
+            document.getElementById('company-size').value = 'Trên 500 nhân viên';
+            document.getElementById('company-address').value = 'Tòa nhà FPT, Phạm Văn Bạch, Cầu Giấy, Hà Nội';
+            document.getElementById('company-website').value = 'https://fptsoftware.com';
+            document.getElementById('company-email').value = 'contact@fptsoftware.com';
+            document.getElementById('company-phone').value = '(024) 7300 5588';
+            document.getElementById('company-description').value = 'FPT Software là công ty phần mềm hàng đầu Việt Nam...';
+            document.getElementById('company-contact-name').value = 'Nguyễn Văn A';
+            document.getElementById('company-contact-position').value = 'Trưởng phòng Tuyển dụng';
+            document.getElementById('company-contact-email').value = 'nguyenvana@fptsoftware.com';
+            document.getElementById('company-contact-phone').value = '0987654321';
+            document.getElementById('company-status').value = 'verified';
+            document.getElementById('company-logo-preview').src = 'https://logo.clearbit.com/fptsoftware.com';
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeCompanyModal() {
+        document.getElementById('company-modal').classList.add('hidden');
+    }
+
+    function openCompanyDetail(companyId) {
+        // In a real app, fetch company details based on ID
+        document.getElementById('detail-id').textContent = companyId;
+        document.getElementById('detail-name').textContent = 'FPT Software';
+        document.getElementById('detail-industry').textContent = 'Công nghệ phần mềm';
+        document.getElementById('detail-status').textContent = 'Đã xác thực';
+        document.getElementById('detail-status').className = 'px-3 py-1 rounded-full text-xs font-medium company-status-verified';
+        document.getElementById('detail-size').textContent = 'Trên 500 nhân viên';
+        document.getElementById('detail-created').textContent = '15/08/2021';
+        document.getElementById('detail-tax').textContent = '0100109106';
+        document.getElementById('detail-address').textContent = 'Tòa nhà FPT, Phạm Văn Bạch, Cầu Giấy, Hà Nội';
+        document.getElementById('detail-website').textContent = 'https://fptsoftware.com';
+        document.getElementById('detail-website').href = 'https://fptsoftware.com';
+        document.getElementById('detail-email').textContent = 'contact@fptsoftware.com';
+        document.getElementById('detail-phone').textContent = '(024) 7300 5588';
+        document.getElementById('detail-description').textContent = 'FPT Software là công ty phần mềm hàng đầu Việt Nam, cung cấp các giải pháp công nghệ thông tin cho khách hàng trong nước và quốc tế. Công ty có hơn 20,000 nhân viên với mạng lưới văn phòng tại 26 quốc gia.';
+        document.getElementById('detail-contact-name').textContent = 'Nguyễn Văn A';
+        document.getElementById('detail-contact-position').textContent = 'Trưởng phòng Tuyển dụng';
+        document.getElementById('detail-contact-email').textContent = 'nguyenvana@fptsoftware.com';
+        document.getElementById('detail-contact-phone').textContent = '0987654321';
+        document.getElementById('detail-logo').src = 'https://logo.clearbit.com/fptsoftware.com';
+
+        document.getElementById('company-detail-modal').classList.remove('hidden');
+    }
+
+    function closeCompanyDetail() {
+        document.getElementById('company-detail-modal').classList.add('hidden');
+    }
+
+    function confirmDeleteCompany(companyId, companyName) {
+        document.getElementById('delete-company-name').textContent = companyName + ' (' + companyId + ')';
+        document.getElementById('delete-confirm-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteConfirm() {
+        document.getElementById('delete-confirm-modal').classList.add('hidden');
+    }
+
+    function deleteCompany() {
+        // In a real app, call API to delete company
+        alert('Đã xóa công ty thành công!');
+        closeDeleteConfirm();
+    }
+
+    function saveCompany() {
+        // In a real app, validate and save company data
+        alert('Đã lưu thông tin công ty thành công!');
+        closeCompanyModal();
+    }
+
+    // Handle company logo upload preview
+    document.getElementById('company-logo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File ảnh không được vượt quá 2MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('company-logo-preview').src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Close modals when clicking outside
+    const modals = ['company-modal', 'company-detail-modal', 'delete-confirm-modal'];
+    modals.forEach(id => {
+        const modal = document.getElementById(id);
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+            }
+        });
+    });
+
+    // Sample data for demonstration
+    function loadSampleData() {
+        // This would be replaced with actual API calls in a real application
+        console.log('Loading sample data...');
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSampleData();
+    });
+</script> </body> </html>

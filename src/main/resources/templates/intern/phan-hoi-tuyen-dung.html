@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <th:block th:replace="~{narbar2 :: styleNarbar}"></th:block>
+</head>
+<body>
+<div th:replace="~{narbar2 :: narbar}"></div>
+<!-- NỀN TOÀN TRANG -->
+<div class="min-h-screen bg-gray-100 py-6 px-4 flex justify-center">
+    <!-- KHUNG TRẮNG CHỨA TOÀN BỘ -->
+    <div class="w-full bg-white rounded-lg shadow p-6" style="max-width: 1000px;">
+
+        <!-- HEADER -->
+        <div class="flex justify-between items-center mb-5">
+            <h2 class="text-xl font-bold text-gray-800">Danh sách nhà tuyển dụng đang muốn tuyển dụng bạn</h2>
+        </div>
+
+        <!-- CARD 2 -->
+        <div th:each="cv :${cvs}"  th:attr="data-id=${cv.id}" onclick="showthongBao(this)"
+             th:href="@{${cv.url}}"
+             class="flex gap-3 border border-yellow-200 rounded-md bg-white hover:bg-yellow-50 transition p-3 mb-4 shadow-sm ">
+            <div class="w-[85px] h-[85px] rounded-lg overflow-hidden border border-gray-200">
+                <img th:src="@{'/images/companies/'+${cv.postJob.recruiter.id}+'/'+${cv.postJob.recruiter.company.imageUrl}}"
+                     alt="Company Logo"
+                     class="w-full h-full object-cover">
+            </div>
+
+            <div class="flex-1 text-sm">
+                <div class="flex justify-between items-start">
+                    <h3 class="font-semibold text-gray-800 leading-snug" th:text="${cv.postJob.name}">
+                        Nhân Viên Kế Toán - Ưu Tiên Đi Làm Ngay (Làm Việc Tại Đà Nẵng)
+                    </h3>
+                    <span class="text-green-600 font-semibold text-xs whitespace-nowrap"
+                          th:text="${cv.postJob.salary != 0 ? cv.postJob.salary+ ' triệu' : 'Không lương'}"> Thỏa thuận</span>
+                    <span class="text-green-600 font-semibold text-xs whitespace-nowrap"
+                          th:text="${cv.process2(cv.cvStatus)}"> Thỏa thuận</span>
+                </div>
+                <p class="text-gray-600 mt-0.5"
+                   th:text="${cv.postJob.recruiter.company.companyName}">Công ty Cổ Phần Đầu tư phát triển Miền Trung</p>
+                <p class="text-gray-500 text-x">Thời gian ứng tuyển: <th:block th:text="${' '+cv.timeSent }"></th:block></p>
+                <div class="flex justify-between items-center ">
+                    <p class="text-gray-500 text-xs">
+                        CV đã ứng tuyển: <a href="#" class="text-green-600 underline">CV tải lên</a>
+                    </p>
+                    <div class="job-applies-meta" >
+                        <div class="flex gap-2">
+                            <!--                            <a href="https://candidate.topcvconnect.com/conversations/new/59807"-->
+                            <!--                               class="flex items-center gap-1 px-3 py-0.5 border border-green-600 text-green-600 rounded-md text-sm hover:bg-green-600 hover:text-white transition">-->
+                            <!--                                <i class="fa-solid fa-message"></i> Nhắn tin-->
+                            <!--                            </a>-->
+                            <a target="_blank" onclick="event.stopPropagation()"
+                               th:href="@{'/images/sendCvs/'+${cv.intern.id}+'/'+${cv.fileCvUrl}}"
+                               class="flex items-center gap-1 px-3 py-0.5 border border-green-600 text-green-600 rounded-md text-sm hover:bg-green-600 hover:text-white transition">
+                                <i class="fa-solid fa-eye"></i> Xem CV
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="box-cv-apply-status border-t border-gray-200 mt-2 pt-2">
+                    <div class="cv-apply-status-text">
+
+                        <p class="text-xs text-blue-600 font-medium">Nhấn vào để xác Thực tập sinh</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<div th:replace="~{narbar2 :: aiChatBot}"></div>
+<div th:replace="~{footer :: footer}"></div>
+<script>
+    document.getElementById("dropdownStatusButton").addEventListener("click", () => {
+        document.getElementById("dropdownStatus").classList.toggle("hidden");
+    });
+
+
+    function changeS(e){
+        const selectedValue = e.value;
+        if(selectedValue ==='0')
+            window.location.href="/cv-dagui"
+        if (selectedValue === '1') {
+            window.location.href="/cv-dagui?status=1"
+        }
+        if (selectedValue === '2') {
+            window.location.href="/cv-dagui?status=2"
+        }
+    }
+    async function aaa(e){
+        await fetch(`/recruiter/api/increaseView`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(e.dataset.id)
+        });
+        window.location.href='/chitiet-cv/'+e.dataset.id
+
+    }
+    async function showthongBao(e) {
+        const originalHref = e.getAttribute('href');
+        e.removeAttribute('href');
+
+        if (originalHref && originalHref.includes('thong-bao')) {
+            try {
+                const response = await fetch(originalHref);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data) {
+                        document.getElementById('modelThongBao').classList.remove('hidden');
+                        document.getElementById('imageThongBao').setAttribute('src', '/images/' + data.companyImage);
+                        document.getElementById("congviecThongBao").innerText = data.jobName;
+                        document.getElementById("congtyThongBao").innerText = data.companyName;
+                        document.getElementById("contentThongBao").innerText = data.content;
+                        document.getElementById("congviecThongBao").setAttribute('href', data.jobUrl);
+                        document.getElementById("cvThongBao").setAttribute('href', data.sotUrl);
+                        document.getElementById("setId").setAttribute('value', data.id);
+
+                        let res = await fetch('intern/api/check-company');
+                        document.getElementById('XacNhan4').classList.add('hidden');
+                        document.getElementById('XacNhan2').classList.add('hidden');
+                        document.getElementById('XacNhan3').classList.add('hidden');
+                        if (res.ok && !await res.json()) {
+                            document.getElementById('XacNhan1').classList.add('hidden');
+                            document.getElementById('XacNhan4').classList.remove('hidden');
+                        }
+
+                        if (data.statusCv === "REJECTED") {
+                            document.getElementById('XacNhan1').classList.add('hidden');
+                            document.getElementById('XacNhan4').classList.add('hidden');
+                            document.getElementById('XacNhan2').classList.remove('hidden');
+                        }
+
+                        if (data.statusCv === "HIRED") {
+                            document.getElementById('XacNhan1').classList.add('hidden');
+                            document.getElementById('XacNhan4').classList.add('hidden');
+                            document.getElementById('XacNhan3').classList.remove('hidden');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+        e.setAttribute('href', originalHref);
+    }
+</script>
+
+</body>
+</html>

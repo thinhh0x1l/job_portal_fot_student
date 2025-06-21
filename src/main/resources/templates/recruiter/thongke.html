@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Thống Kê Bài Đăng Tuyển Dụng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+    <div th:replace="~{narbar :: styleNarbar}"></div>
+</head>
+<div th:replace="~{narbar :: narbar}"></div>
+<body class="bg-gray-50">
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Thống Kê Bài Đăng Tuyển Dụng</h1>
+
+    <!-- Thống kê tổng quan -->
+    <div id="summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="col-span-4 text-center text-gray-600">Đang tải thống kê...</div>
+    </div>
+
+    <!-- Tabs điều hướng -->
+    <div class="mb-8">
+        <div class="flex flex-wrap border-b border-gray-200">
+            <button class="tab-btn px-4 py-2 font-medium text-sm rounded-t-lg mr-2 bg-blue-100 text-blue-700" data-tab="posts-tab">Bài đăng</button>
+            <button class="tab-btn px-4 py-2 font-medium text-sm rounded-t-lg mr-2 hover:bg-gray-100" data-tab="views-tab">Lượt xem</button>
+        </div>
+    </div>
+
+    <!-- Nội dung tab Bài đăng -->
+    <div class="tab-content active" id="posts-tab">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Biểu đồ bài đăng -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Thống kê trạng thái bài đăng</h3>
+                    <div class="flex space-x-2">
+                        <button onclick="postsData(1)"
+                                id="btnPostMonth"
+                                class="px-4 py-1 text-sm font-medium border border-gray-300 rounded hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        >
+                            Theo tháng
+                        </button>
+                        <button onclick="postsData(2)"
+                                id="btnPostDay"
+                                class="px-4 py-1 text-sm font-medium border border-gray-300 rounded hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        >
+                            Theo ngày
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="postsChart"></canvas>
+                </div>
+            </div>
+
+
+            <!-- Biểu đồ ứng tuyển -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Thống kê số lượng bài tuyển dụng</h3>
+                    <div class="flex space-x-2">
+                        <button onclick="appsRes(1)"
+                                id="btnMonth"
+                                class="px-4 py-1 text-sm font-medium border border-gray-300 rounded hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        >
+                            Theo tháng
+                        </button>
+                        <button onclick="appsRes(2)"
+                                id="btnDay"
+                                class="px-4 py-1 text-sm font-medium border border-gray-300 rounded hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        >
+                            Theo ngày
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="applicationsChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Biểu đồ ngành nghề -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h3 class="text-lg font-semibold mb-4">Phân bổ bài đăng theo Vị trí tuyển dụng</h3>
+            <div class="chart-container">
+                <canvas id="majorsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nội dung tab Lượt xem -->
+    <div class="tab-content" id="views-tab">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Biểu đồ lượt xem bài đăng -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Lượt xem bài đăng theo tháng</h3>
+                <div class="chart-container">
+                    <canvas id="postViewsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Biểu đồ tỷ lệ xem/ứng tuyển -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Tỷ lệ xem/ứng tuyển</h3>
+                <div class="chart-container">
+                    <canvas id="viewApplicationRatioChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ lượt xem theo ngành nghề -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h3 class="text-lg font-semibold mb-4">Lượt xem theo ngành nghề</h3>
+            <div class="chart-container">
+                <canvas id="viewsByMajorChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Xử lý tab
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Xóa active class từ tất cả các tab và nút
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('bg-blue-100', 'text-blue-700');
+                b.classList.add('hover:bg-gray-100');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Thêm active class vào tab được chọn
+            btn.classList.add('bg-blue-100', 'text-blue-700');
+            btn.classList.remove('hover:bg-gray-100');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    const summaryDiv = document.getElementById('summary');
+
+    const renderSummary = (data) => {
+        summaryDiv.innerHTML = `
+        ${createCard('Tổng số bài đăng', data.totalPosts, 'fas fa-file-alt', 'bg-blue-100', 'text-blue-600', data.totalChange)}
+        ${createCard('Bài đang hoạt động', data.activePosts, 'fas fa-check-circle', 'bg-green-100', 'text-green-600', data.activeChange)}
+        ${createCard('Bài đã hết hạn', data.expiredPosts, 'fas fa-times-circle', 'bg-red-100', 'text-red-600', data.expiredChange)}
+        ${createCard('Bài tuyển gấp', data.urgentPosts, 'fas fa-bolt', 'bg-yellow-100', 'text-yellow-600', data.urgentChange)}
+    `;
+    };
+
+    const createCard = (title, value, icon, bgColor, iconColor, change) => {
+        let changeHtml = '';
+
+        if (typeof change === 'string') {
+            changeHtml = `<span class="text-green-600 text-sm"><i class="fas fa-arrow-up mr-1"></i>${change}</span>`;
+        } else if (typeof change === 'number') {
+            const rounded = Math.round(change);
+            if (rounded > 0) {
+                changeHtml = `<span class="text-green-600 text-sm"><i class="fas fa-arrow-up mr-1"></i>${rounded}% so với tháng trước</span>`;
+            } else if (rounded < 0) {
+                changeHtml = `<span class="text-red-600 text-sm"><i class="fas fa-arrow-down mr-1"></i>${Math.abs(rounded)}% so với tháng trước</span>`;
+            } else {
+                changeHtml = `<span class="text-gray-500 text-sm">Không thay đổi so với tháng trước</span>`;
+            }
+        } else {
+            changeHtml = `<span class="text-gray-500 text-sm">Không có dữ liệu giữa 2 tháng</span>`;
+        }
+
+        return `
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">${title}</p>
+                    <h3 class="text-2xl font-bold text-gray-800">${value}</h3>
+                </div>
+                <div class="${bgColor} p-3 rounded-full">
+                    <i class="${icon} ${iconColor} text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                ${changeHtml}
+            </div>
+        </div>
+    `;
+    };
+    let postsChartInstance; // biến toàn cục để giữ instance
+
+    const renderPostsChart = (labels, data) => {
+        if (postsChartInstance) {
+            postsChartInstance.destroy();
+        }
+        postsChartInstance= new Chart(document.getElementById('postsChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: data
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    };
+    let postsChartInstance1
+    const renderApplicationsChart = (labels, datasets) => {
+        if (postsChartInstance1)
+            postsChartInstance1.destroy();
+        postsChartInstance1= new Chart(document.getElementById('applicationsChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true },
+                    x: { stacked: false }
+                }
+            }
+        });
+    };
+
+    const renderMajorsChart = (labels, data) => {
+        new Chart(document.getElementById('majorsChart'), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(139, 92, 246, 0.7)',
+                        'rgba(217, 119, 6, 0.7)',
+                        'rgba(220, 38, 38, 0.7)',
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const data = context.dataset.data || [];
+                                const total = data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    // Biểu đồ lượt xem bài đăng
+    const renderPostViewsChart = (labels, viewData, uniqueViewData,anymoreViewData) => {
+        new Chart(document.getElementById('postViewsChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                            label: 'Tổng lượt xem',
+                            data: viewData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        },
+                    {
+                        label: 'Lượt xem từ người khác nhau',
+                        data: uniqueViewData,
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Lượt xem vô danh',
+                        data: anymoreViewData,
+                        backgroundColor: 'rgba(107, 114, 128, 0.7)',     // xám (Tailwind slate-500)
+                        borderColor: 'rgba(107, 114, 128, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    };
+
+    // Biểu đồ tỷ lệ xem/ứng tuyển
+    const renderViewApplicationRatioChart = (labels, viewData, applicationData) => {
+        new Chart(document.getElementById('viewApplicationRatioChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Lượt xem bài đăng',
+                        data: viewData,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Lượt ứng tuyển',
+                        data: applicationData,
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    };
+
+    // Biểu đồ lượt xem theo ngành nghề
+    const renderViewsByMajorChart = (labels, data) => {
+        new Chart(document.getElementById('viewsByMajorChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Lượt xem',
+                    data: data,
+                    backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                    borderColor: 'rgba(139, 92, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { beginAtZero: true }
+                }
+            }
+        });
+    };
+
+    // Load dữ liệu từ API
+    async function loadStatistics() {
+        try {
+            const [summaryRes, majorsRes] = await Promise.all([
+                fetch('/recruiter/api/getAllByRecruiterIdChart'),
+
+                fetch('/recruiter/api/getAllByRecruiterIdOrderByMajor')
+            ]);
+
+            const summaryData = await summaryRes.json();
+
+            const majorsData = await majorsRes.json();
+
+
+            renderSummary(summaryData);
+
+            renderMajorsChart(majorsData.labels, majorsData.data);
+
+            // Render các biểu đồ lượt xem với dữ liệu ảo
+            renderPostViewsChart(
+                summaryData.viewRes.monthlyViews.labels,
+                summaryData.viewRes.monthlyViews.viewData,
+                summaryData.viewRes.monthlyViews.uniqueViewData,
+                summaryData.viewRes.monthlyViews.anymoreViewData,
+            );
+            // renderViewApplicationRatioChart(
+            //     viewsData.ratioData.labels,
+            //     viewsData.ratioData.viewData,
+            //     viewsData.ratioData.applicationData
+            // );
+            renderViewsByMajorChart(
+                summaryData.viewRes.viewsByMajor.labels,
+                summaryData.viewRes.viewsByMajor.data
+            );
+
+        } catch (error) {
+            summaryDiv.innerHTML = `<div class="col-span-4 text-red-500 text-center">Lỗi khi tải dữ liệu. Vui lòng thử lại sau.</div>`;
+            console.error("Lỗi tải dữ liệu:", error);
+        }
+    }
+    // Load dữ liệu từ API
+    async function appsRes(by) {
+        try {
+            const [ appsRes] = await Promise.all([
+
+                fetch('/recruiter/api/chartPostJobChart/'+by),
+            ]);
+            const appsData = await appsRes.json();
+            renderApplicationsChart(appsData.labels, appsData.datasets);
+        } catch (error) {
+            // summaryDiv.innerHTML = `<div class="col-span-4 text-red-500 text-center">Lỗi khi tải dữ liệu. Vui lòng thử lại sau.</div>`;
+            console.error("Lỗi tải dữ liệu:", error);
+        }
+    }
+    async function postsData(by){
+        try {
+            const [ postsRes, ] = await Promise.all([
+                fetch('/recruiter/api/chartPostJob1/'+by),
+
+            ]);
+            const postsData = await postsRes.json();
+            renderPostsChart(postsData.labels, postsData.data);
+        } catch (error) {
+            // summaryDiv.innerHTML = `<div class="col-span-4 text-red-500 text-center">Lỗi khi tải dữ liệu. Vui lòng thử lại sau.</div>`;
+            console.error("Lỗi tải dữ liệu:", error);
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadStatistics);
+    document.addEventListener('DOMContentLoaded', ()=>{document.getElementById('btnPostMonth').click()});
+    document.addEventListener('DOMContentLoaded', ()=>{document.getElementById('btnMonth').click()});
+</script>
+</body>
+</html>

@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý thực tập sinh - Học viện Kỹ thuật Mật mã</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                        secondary: '#1e3a8a',
+                        accent: '#dc2626',
+                        dark: '#1f2937',
+                        light: '#f9fafb'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --secondary: #1e3a8a;
+            --accent: #dc2626;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .urgent-badge {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-btn.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-container {
+            max-height: 90vh;
+            animation: modalOpen 0.3s ease-out;
+        }
+
+        @keyframes modalOpen {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .file-upload-box {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-box:hover {
+            border-color: var(--primary);
+            background-color: rgba(30, 64, 175, 0.05);
+        }
+
+        .file-upload-box.dragover {
+            border-color: var(--primary);
+            background-color: rgba(30, 64, 175, 0.1);
+        }
+    </style>
+    <th:block th:replace="~{narbar :: styleNarbar}"></th:block>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<th:block th:replace="~{narbar :: narbar}"></th:block>
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-8">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Quản lý thực tập sinh</h1>
+            <p class="text-gray-600 mt-2">Theo dõi và quản lý thực tập sinh của công ty</p>
+        </div>
+        <button onclick="taoTask()"
+                class="mt-4 md:mt-0 px-6 py-3 bg-primary hover:bg-secondary text-white font-medium rounded-lg shadow-md transition-colors duration-300 flex items-center">
+            <i class="fas fa-plus-circle mr-2"></i>
+            Tạo nhiệm vụ mới
+        </button>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="bg-white rounded-xl shadow-sm mb-8">
+        <input hidden id="tab" th:value="${tab}">
+        <div class="flex border-b border-gray-200">
+            <button id="tab1"
+                    th:classappend="${tab.equals('tab1')?'active':''}" onclick="switchtab(this)"
+                    class="tab-btn py-4 px-6 font-medium text-gray-500 hover:text-primary transition-colors"
+                    data-tab="contenttab1">
+                <i class="fas fa-users mr-2"></i>
+                Sinh viên
+            </button>
+            <button id="tab2" th:classappend="${tab.equals('tab2')?'active':''}" onclick="switchtab(this)"
+                    class="tab-btn py-4 px-6 font-medium text-gray-500 hover:text-primary transition-colors"
+                    data-tab="contenttab2">
+                <i class="fas fa-tasks mr-2"></i>
+                Nhiệm vụ
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab Content: Sinh viên -->
+    <div id="contenttab1" class="tab-content" th:classappend="${tab.equals('tab1')?'active':''}">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Thẻ 1: Tổng số sinh viên - màu xanh dương -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                        <i class="fas fa-user-graduate text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Tổng số sinh viên</p>
+                        <p class="text-2xl font-bold text-gray-800">24</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thẻ 2: Đang thực tập - màu vàng -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                        <i class="fas fa-briefcase text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Đang thực tập</p>
+                        <p class="text-2xl font-bold text-gray-800">18</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thẻ 3: Đã hoàn thành - màu xanh lá -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Đã hoàn thành</p>
+                        <p class="text-2xl font-bold text-gray-800">6</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Filter Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- Chọn trạng thái -->
+                <div class="md:col-span-3">
+                    <label for="internStatus_tab1" class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                    <select id="internStatus_tab1" name="jobId" th:value="${internStatus}"
+                            class="w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option th:selected="${internStatus.equals('0')}" value="0">Tất cả sinh viên</option>
+                        <option th:selected="${internStatus.equals('1')}" value="1">Đang thực tập</option>
+                        <option th:selected="${internStatus.equals('2')}" value="2">Đã hoàn thành</option>
+                    </select>
+                </div>
+
+                <!-- Tìm kiếm -->
+                <div class="md:col-span-5">
+                    <label for="search-cv-tab1" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" id="search-cv-tab1" th:value="${keyword}"
+                               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                               placeholder="Tìm theo ID, tên hoặc email">
+                    </div>
+                </div>
+
+                <!-- Nút tìm kiếm -->
+                <div class="md:col-span-4 flex items-end">
+                    <button id="btn_search_tab1" onclick="btn_search_tab11(this)"
+                            class="w-full h-[42px] inline-flex justify-center items-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <i class="fas fa-search mr-2"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student List -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900">Danh sách sinh viên</h3>
+                <span class="text-sm text-gray-500" th:text="${'Tổng số: '+totalElement}"></span>
+            </div>
+
+            <div class="divide-y divide-gray-200">
+                <!-- Student Card -->
+                <div th:each="so: ${sendPage}" onclick="clickDetailsTab1(this)" th:id="${'tab1'+so.id}"
+                     class="p-6 hover:bg-gray-50 transition-colors cursor-pointer card-hover">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <img th:src="@{'/images/user-photos/'+${so.id}+'/'+${so.imageUrl}}"
+                                 alt="User Avatar" class="w-16 h-16 rounded-full border-2 border-white shadow-md">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center">
+                                <p class="text-sm font-medium text-gray-500 mb-1" th:text="${'ID: '+so.id}">ID: 123</p>
+                                <span th:if="${internStatus.equals('1')}" class="status-badge bg-green-100 text-green-800">Đang thực tập</span>
+                                <span th:if="${internStatus.equals('2')}" class="status-badge bg-blue-100 text-blue-800">Đã hoàn thành</span>
+                            </div>
+                            <h4 class="text-xl font-bold text-gray-900 truncate" th:text="${so.firstName+' '+so.lastName}">Nguyễn Văn A</h4>
+                            <div class="flex items-center text-sm text-gray-500 mt-1">
+                                <i class="fas fa-envelope mr-2"></i>
+                                <span th:text="${so.email}" class="truncate">nguyenvana@example.com</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 mt-1">
+                                <i class="fas fa-phone-alt mr-2"></i>
+                                <span th:text="${so.phoneNumber ?: 'Chưa cập nhật'}">0123456789</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${totalElement >0}" class="px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between">
+                <div class="mb-4 sm:mb-0">
+                    <p th:text="${'Hiển thị '+startCount+' - '+endCount+' của '+totalElement}"
+                       class="text-sm text-gray-700"></p>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <a th:href="@{'/recruiter/thuc-tap-sinh?tab=tab1&page=1'+
+                                 ${'&internStatus='+internStatus}+
+                                 ${'&keyword='+keyword}}"
+                       th:classappend="${currentPage == 1  ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}"
+                       class="px-3 py-1 border border-gray-300 rounded-lg text-gray-600">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+
+                    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                        <a th:href="@{'/recruiter/thuc-tap-sinh?page=' + ${i} +'&tab=tab1'+
+                                      ${'&internStatus='+internStatus}+
+                                      ${'&keyword='+keyword}}"
+                           th:if="${currentPage!=i && i > 0}"
+                           th:text="${i}"
+                           class="px-3 py-1 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100">
+                        </a>
+                        <span th:if="${currentPage==i}" th:text="${i}"
+                              class="px-3 py-1 bg-primary text-white rounded-lg"></span>
+                    </th:block>
+
+                    <a th:href="@{'/recruiter/thuc-tap-sinh?page=' + ${totalPages} ++'&tab=tab1'+
+                                  ${'&internStatus='+internStatus}+
+                                  ${'&keyword='+keyword}}"
+                       th:classappend="${currentPage == totalPages || totalPages <= 1? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}"
+                       class="px-3 py-1 border border-gray-300 rounded-lg text-gray-600">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Content: Nhiệm vụ -->
+    <div id="contenttab2"  th:if="${tab.equals('tab2')}" class="tab-content" th:classappend="${tab.equals('tab2')?'active':''}">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+
+            <!-- Tổng nhiệm vụ -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                        <i class="fas fa-tasks text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Tổng nhiệm vụ</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${taskStatusDum.get_1()}">100</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đã hoàn thành -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Đã hoàn thành</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${taskStatusDum.get_2()}">65</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hoàn thành trễ -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-gray-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-gray-100 text-gray-600 mr-4">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Hoàn thành trễ</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${taskStatusDum.get_3()}">10</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chưa hoàn thành -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                        <i class="fas fa-times-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Chưa hoàn thành</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${taskStatusDum.get_4()}">15</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chưa chấm điểm -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-orange-100 text-orange-600 mr-4">
+                        <i class="fas fa-question-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Chưa chấm điểm</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${taskStatusDum.get_5()}">10</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Filter Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- Chọn tuần -->
+                <div class="md:col-span-3">
+                    <label for="job_name_tab2" class="block text-sm font-medium text-gray-700 mb-1">Tuần</label>
+                    <select id="job_name_tab2" name="jobId" th:value="${w}"
+                            class="w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option th:selected="${week.isEmpty()}" value="">Tất cả các tuần</option>
+                        <option th:each="w : ${weeks}"
+                                th:text="${w.label()}"
+                                th:value="${w}"
+                                th:selected="${w.name().equals(week)}"
+                        ></option>
+                    </select>
+                </div>
+
+                <!-- Chọn trạng thái -->
+                <div class="md:col-span-3">
+                    <label for="status_tab2" class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                    <select id="status_tab2" name="seen" th:value="${status}"
+                            class="w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option th:selected="${status.isEmpty()}" value="">Tất cả</option>
+                        <option th:each="t : ${taskStatus}"
+                                th:text="${t.getLabel()}"
+                                th:value="${t}"
+                                th:selected="${t.name().equals(status)}"
+                        ></option>
+                    </select>
+                </div>
+
+                <!-- Tìm kiếm -->
+                <div class="md:col-span-4">
+                    <label for="search-cv-tab2" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" id="search-cv-tab2" th:value="${keyword}" min="0"
+                               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                               placeholder="Tìm theo email, tên nhiệm vụ">
+                    </div>
+                </div>
+
+                <!-- Nút tìm kiếm -->
+                <div class="md:col-span-2 flex items-end">
+                    <button id="btn_search_tab2" onclick="btn_search_tab2(this)"
+                            class="w-full h-[42px] inline-flex justify-center items-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <i class="fas fa-search mr-2"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900">Danh sách nhiệm vụ</h3>
+                <span class="text-sm text-gray-500" th:text="${'Tổng số: '+totalElement1}"></span>
+            </div>
+
+            <div class="divide-y divide-gray-200">
+                <!-- Task Card -->
+                <div th:each="so:${sendPage1}" onclick="clickDetailsTab2(this)" th:id="${'tab1'+so.id}"
+                     class="p-6 hover:bg-gray-50 transition-colors cursor-pointer card-hover">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="flex items-start space-x-4 mb-4 md:mb-0">
+                            <div class="flex-shrink-0">
+                                <img th:src="@{'/images/user-photos/'+${so.intern.id}+'/'+${so.intern.imageUrl}}"
+                                     alt="User Avatar" class="w-12 h-12 rounded-full border-2 border-white shadow-md">
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded bg-blue-100 text-blue-800"
+                                          th:text="${so.weeks.label()}">Tuần 1</span>
+                                    <h4 class="text-lg font-bold text-gray-900" th:text="${so.name}">Phát triển tính năng X</h4>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1" th:text="${so.intern.firstName+' '+so.intern.lastName}">Nguyễn Văn A</p>
+                                <p class="text-sm text-gray-500" th:text="${so.intern.email}">nguyenvana@example.com</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col md:items-end space-y-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-medium text-gray-500">Hạn chót:</span>
+                                <span class="text-sm font-semibold" th:text="${#temporals.format(so.endTime, 'dd/MM/yyyy HH:mm', viLocale)}">15/06/2023 23:59</span>
+                            </div>
+
+                            <div class="flex items-center space-x-3">
+                                <span th:if="${so.points!=null}"
+                                      class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                                    Điểm: <span th:text="${so.points}">8.5</span>
+                                </span>
+                                <span th:if="${so.points==null}"
+                                      class="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full">
+                                    Chưa chấm điểm
+                                </span>
+
+                                <span th:if="${so.taskStatus.equals(so.taskStatus.CHUA_HOAN_THANH)}"
+                                      class="status-badge bg-yellow-100 text-yellow-800">
+                                    Chưa hoàn thành
+                                </span>
+                                <span th:if="${so.taskStatus.equals(so.taskStatus.HOAN_THANH_TRE)}"
+                                      class="status-badge bg-gray-200 text-gray-800">
+                                    Hoàn thành trễ
+                                </span>
+                                <span th:if="${so.taskStatus.equals(so.taskStatus.DA_HOAN_THANH)}"
+                                      class="status-badge bg-green-100 text-green-800">
+                                    Đã hoàn thành
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${totalElement1 >0}" class="px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between">
+                <div class="mb-4 sm:mb-0">
+                    <p th:text="${'Hiển thị '+startCount1+' - '+endCount1+' của '+totalElement1}"
+                       class="text-sm text-gray-700"></p>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <a th:href="@{'/recruiter/thuc-tap-sinh?tab=tab2&page=1'+
+                                ${'&week='+week}+
+                                ${'&status='+status}+
+                                 ${'&keyword='+keyword}}"
+                       th:classappend="${currentPage1 == 1  ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}"
+                       class="px-3 py-1 border border-gray-300 rounded-lg text-gray-600">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+
+                    <th:block th:each="i : ${#numbers.sequence(1, totalPages1)}">
+                        <a th:href="@{'/recruiter/thuc-tap-sinh?page=' + ${i} +'&tab=tab2'+
+                                      ${'&week='+week}+
+                                      ${'&status='+status}+
+                                      ${'&keyword='+keyword}}"
+                           th:if="${currentPage1!=i && i > 0}"
+                           th:text="${i}"
+                           class="px-3 py-1 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100">
+                        </a>
+                        <span th:if="${currentPage1==i}" th:text="${i}"
+                              class="px-3 py-1 bg-primary text-white rounded-lg"></span>
+                    </th:block>
+
+                    <a th:href="@{'/recruiter/thuc-tap-sinh?page=' + ${totalPages1} ++'&tab=tab2'+
+                                      ${'&week='+week}+
+                                      ${'&status='+status}+
+                                      ${'&keyword='+keyword}}"
+                       th:classappend="${currentPage1 == totalPages1 || totalPages1 <= 1? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}"
+                       class="px-3 py-1 border border-gray-300 rounded-lg text-gray-600">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal Tạo Nhiệm Vụ -->
+<form id="formF">
+    <div id="modalAddTask" class="fixed inset-0 z-50 hidden modal-overlay">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-6xl modal-container overflow-hidden">
+                <div class="flex flex-col md:flex-row h-full">
+                    <!-- Cột trái: Form tạo nhiệm vụ -->
+                    <div class="w-full md:w-1/2 p-6 border-r border-gray-200 overflow-y-auto scrollbar">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">Tạo nhiệm vụ mới</h2>
+                            <button type="button" onclick="dongg()" class="text-gray-400 hover:text-gray-500">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+
+                        <!-- Upload File -->
+                        <div id="box-upload" class="file-upload-box rounded-xl p-6 mb-6 transition-colors">
+                            <div class="text-center">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-primary mb-3"></i>
+                                <h3 class="font-medium text-gray-900 mb-1">Tải lên file nhiệm vụ</h3>
+                                <p class="text-sm text-gray-500 mb-4">Kéo thả file vào đây hoặc click để chọn file</p>
+
+                                <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <i class="fas fa-upload mr-2"></i>
+                                    Chọn file từ máy tính
+                                    <input id="upload-cv" name="cvFile" type="file" class="sr-only" accept=".pdf,.docx" required>
+                                </label>
+                                <p class="text-xs mt-2 text-gray-500">Định dạng hỗ trợ: .pdf, .docx (tối đa 5MB)</p>
+                                <p class="text-xs mt-2 font-medium" id="fileName"></p>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin nhiệm vụ -->
+                        <div class="space-y-4">
+                            <div>
+                                <label for="taskName" class="block text-sm font-medium text-gray-700 mb-1">Tên nhiệm vụ <span class="text-red-500">*</span></label>
+                                <input type="text" id="taskName" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="filterSelect" class="block text-sm font-medium text-gray-700 mb-1">Tuần <span class="text-red-500">*</span></label>
+                                    <select id="filterSelect" th:value="${w}"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        <option th:value="${w}"
+                                                th:each="w : ${weeks}"
+                                                th:text="${w.label()}"
+                                        ></option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="expiredAt" class="block text-sm font-medium text-gray-700 mb-1">Hạn chót <span class="text-red-500">*</span></label>
+                                    <input type="datetime-local" id="expiredAt" name="expiredAt" required
+                                           th:min="${minDateTime}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mô tả nhiệm vụ</label>
+                                <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                          placeholder="Mô tả chi tiết yêu cầu của nhiệm vụ..."></textarea>
+                            </div>
+
+                            <div class="pt-4 border-t border-gray-200">
+                                <div class="flex justify-between">
+                                    <button type="button" onclick="dongg()"
+                                            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                        Hủy bỏ
+                                    </button>
+                                    <button type="button" id="sendData" onclick="sendata()"
+                                            class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Tạo nhiệm vụ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột phải: Danh sách sinh viên -->
+                    <div class="w-full md:w-1/2 p-6 bg-gray-50 overflow-y-auto scrollbar">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Chọn sinh viên</h3>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input id="searchInput" type="text" placeholder="Tìm theo tên hoặc email"
+                                       class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                        </div>
+
+                        <div id="cvContainer" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script >
+    const container = document.getElementById("cvContainer");
+    const searchInput = document.getElementById("searchInput");
+
+    async function sendata(){
+        const form = document.getElementById('formF');
+        if (!form.checkValidity()) {
+            form.reportValidity(); // hiện thông báo lỗi như bình thường
+            return; // không tiếp tục nếu thiếu field required
+        }
+
+        const expiredAt = document.getElementById("expiredAt").value; // dạng: "2025-06-06T15:30"
+        const filterSelect = document.getElementById("filterSelect").value; // Tuan
+        const taskName = document.getElementById("taskName").value; // Tuan
+        const file = document.getElementById("upload-cv").files[0];
+        const filteredList = window.cvList
+            .filter(item => item.added)
+            .map(item => item.id);
+        const body = {
+            internId: filteredList,
+            endTime: expiredAt,
+            taskName: taskName,
+            week: filterSelect,
+        };
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("data", new Blob([JSON.stringify(body)], {type: "application/json"}));
+        console.log(formData)
+        const response = await fetch("/recruiter/api/addTask", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            document.getElementById('modalAddTask').classList.add('hidden')
+        } else {
+            console.error("Gửi thất bại");
+        }
+    }
+    function loadButton(){
+        if(countAdded>0){
+            document.getElementById('sendData').classList.remove('bg-gray-600', 'hover:bg-gray-700')
+            document.getElementById('sendData').classList.add('bg-green-600', 'hover:bg-green-700')
+            document.getElementById("sendData").disabled = false;
+        }
+
+        else{
+            document.getElementById('sendData').classList.remove('bg-green-600', 'hover:bg-green-700')
+            document.getElementById('sendData').classList.add('bg-gray-600', 'hover:bg-gray-700')
+            document.getElementById("sendData").disabled = true;
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        loadButton()
+        // const form = document.getElementById('cvForm');
+        const fileInput = document.getElementById('upload-cv');
+        const fileNameDisplay = document.getElementById('fileName');
+        // const fileInfo = document.getElementById('fileInfo');
+        // const successMessage = document.getElementById('successMessage');
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const fileSize = file.size / 1024 / 1024; // in MB
+                const fileType = file.name.split('.').pop().toLowerCase();
+
+                // Validate file type
+                if (fileType !== 'pdf' && fileType !== 'docx') {
+                    fileNameDisplay.textContent = 'Định dạng file không hợp lệ!';
+                    fileNameDisplay.className = 'text-xs text-red-500';
+                    fileInput.value = '';
+                    return;
+                }
+
+                // Validate file size
+                if (fileSize > 5) {
+                    fileNameDisplay.textContent = 'Dung lượng file vượt quá 5MB!';
+                    fileNameDisplay.className = 'text-xs text-red-500';
+                    fileInput.value = '';
+                    return;
+                }
+
+                fileNameDisplay.textContent = `Đã chọn: ${file.name} (${fileSize.toFixed(5)}MB)`;
+                fileNameDisplay.className = 'text-xs text-green-600';
+            }
+        })
+    })
+    function renderCVs(filteredData) {
+        container.innerHTML = "";
+        filteredData.forEach(cv => {
+            const html = `
+        <div  class="relative group rounded-xl border border-gray-200 p-4
+             bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all
+             duration-300 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:ring-2 peer-checked:ring-blue-100">
+            <input type="checkbox" name="selectedApplicants" ${cv.added ? 'checked' : ''}
+                   class="absolute top-4 right-4 w-5 h-5 text-blue-600 border
+                   border-gray-300 rounded-sm focus:ring-blue-500 peer"
+                   onclick="added(${cv.id})" />
+
+            <div class="flex items-start gap-4">
+                <img src="${cv.image}" alt="Avatar"
+                     class="rounded-full w-12 h-12 object-cover border border-gray-300 shadow-sm" />
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-base font-semibold text-gray-800">${cv.name}</div>
+                            <div class="text-sm text-gray-500">${cv.email}</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        Thời gian ứng tuyển: <span class="font-medium text-gray-700">3/6/25, 3:12 PM</span>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+            container.insertAdjacentHTML("beforeend", html);
+        });
+    }
+    async function taoTask(e){
+
+        let res = await fetch('/recruiter/api/interns')
+        let data = await res.json();
+        // Lưu vào biến toàn cục nếu cần tái sử dụng sau này
+        window.cvList = data;
+        container.innerHTML = ""; // Xóa nội dung cũ nếu có
+        renderCVs(data)
+        document.getElementById('modalAddTask').classList.remove('hidden')
+
+    }
+    let countAdded = 0;
+
+    // Lắng nghe khi người dùng gõ tìm kiếm
+    searchInput.addEventListener("input", function () {
+        const keyword = this.value.toLowerCase();
+
+        const filtered = window.cvList.filter(cv =>
+            cv.name.toLowerCase().includes(keyword) ||
+            cv.email.toLowerCase().includes(keyword)
+        );
+
+        renderCVs(filtered);
+    });
+
+
+    // Ban đầu render toàn bộ
+    function added(e){
+        console.log(e)
+        const cv = window.cvList.find(cv => cv.id === e);
+        if (cv) {
+            cv.added = !cv.added;
+            countAdded = cv.added? countAdded+1:countAdded-1;
+        }
+        loadButton()
+    }
+    function dongg(){
+        document.getElementById('modalAddTask').classList.add('hidden')
+    }
+    function switchtab(e){
+        window.location.href='/recruiter/thuc-tap-sinh?tab='+e.id
+    }
+
+    ///////// tab1
+    document.getElementById('internStatus_tab1').addEventListener('change',(e)=>{
+        console.log(e.target.value)
+        window.location.href='/recruiter/thuc-tap-sinh?tab=tab1&internStatus='+e.target.value
+    })
+
+    function btn_search_tab11(e){
+        let search_cv_tab1 =document.getElementById('search-cv-tab1').value
+        let internStatus_tab1 =document.getElementById('internStatus_tab1').value
+        window.location.href='/recruiter/thuc-tap-sinh?tab=tab1'+'&internStatus='+internStatus_tab1+'&keyword='+search_cv_tab1
+    }
+
+    function clickDetailsTab1(e){
+        window.location.href='/recruiter/thuc-tap-sinh/'+ e.id.substring(4)
+    }
+    function clickDetailsTab2(e){
+        window.location.href='/recruiter/nhiem-vu/'+ e.id.substring(4)
+    }
+    ///////// tab1
+
+    ///////// tab2
+    document.getElementById('job_name_tab2').addEventListener('change',(e)=>{
+        const status_tab1= document.getElementById('status_tab2').value
+        window.location.href='/recruiter/thuc-tap-sinh?tab=tab2&week='+e.target.value+'&status='+status_tab1
+    })
+    document.getElementById('status_tab2').addEventListener('change',(e)=>{
+        const job_name_tab1= document.getElementById('job_name_tab2').value
+        window.location.href='/recruiter/thuc-tap-sinh?tab=tab2&week='+job_name_tab1+'&status='+e.target.value
+    })
+    function btn_search_tab2(e) {
+        const status_tab1 = document.getElementById('status_tab2').value
+        const job_name_tab1 = document.getElementById('job_name_tab2').value
+        let search_cv_tab1 = document.getElementById('search-cv-tab2').value
+        window.location.href = '/recruiter/thuc-tap-sinh?tab=tab2&week=' + job_name_tab1 + '&status=' + status_tab1 + '&keyword=' + search_cv_tab1
+    }
+    document.getElementById('internStatus_tab1').addEventListener('change', function (e) {
+        window.location.href='/recruiter/thuc-tap-sinh?tab=tab1&internStatus='+e.target.value
+    });
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Bài đăng | Trang Nhà Tuyển Dụng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #dbeafe;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .urgent-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+
+        .job-content {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .section-title {
+            position: relative;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--dark);
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: #e2e8f0;
+            transform: rotate(90deg);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .salary-badge {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .badge-new {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #047857;
+        }
+
+        .badge-urgent {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #b91c1c;
+        }
+
+        .icon-wrapper {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .section-title:after {
+                width: 40px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+    <th:block th:replace="~{narbar :: styleNarbar}"></th:block>
+</head>
+<body>
+<!-- Header Placeholder -->
+<th:block th:replace="~{narbar :: narbar}"></th:block>
+
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex flex-wrap justify-between items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-800 mb-2">Chi tiết bài đăng</h1>
+            <p class="text-slate-600">Xem và quản lý chi tiết bài đăng tuyển dụng của bạn</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <button id="openModalBtn" onclick="openM()" class="btn btn-primary">
+                <i class="fas fa-edit mr-2"></i> Chỉnh Sửa
+            </button>
+            <button onclick="backe()" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i> Quay lại
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="card">
+        <!-- Job Header -->
+        <div class="p-6 border-b border-slate-100">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
+                <div class="flex-1">
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <h1 class="text-2xl font-bold text-slate-800" th:text="${jopPost.name}"></h1>
+                        <div class="flex flex-wrap gap-2">
+                                <span th:if="${jopPost.timePost.isAfter(T(java.time.LocalDateTime).now().minusDays(7))}"
+                                      class="badge-new">
+                                    <i class="fas fa-bolt mr-1"></i> MỚI
+                                </span>
+                            <span th:if="${jopPost.urgent}"
+                                  class="badge-urgent urgent-pulse">
+                                    <i class="fas fa-fire mr-1"></i> TUYỂN GẤP
+                                </span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3 mb-6">
+                        <span class="tag" th:text="${jopPost.major.getLabel()}">Information Technology</span>
+                        <div class="salary-badge">
+                            <i class="fas fa-money-bill-wave mr-2"></i>
+                            <span th:text="${jopPost.salary ==0 ?'Không lương': jopPost.salary + ' triệu'}"></span>
+                            <span th:unless="${jopPost.salary ==0}">/tháng</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 mb-6" id="preloaded-tags" >
+                        <label th:each="tag :${jopPost.getTags()}"  th:attr="data-id=${tag.id}, data-name=${tag.name}"
+                                th:class="${tag.getColorClassV1() + ' '}">
+                            <span th:text="${tag.name}">Tag</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Banner -->
+            <div class="p-4 rounded-lg mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4 "
+                 th:classappend="${jopPost.colorV1()}">
+                <div>
+                    <p class="font-semibold flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i> Trạng thái bài đăng:
+                        <span class="font-bold ml-1" th:text="${jopPost.statusV1()}"></span>
+                    </p>
+                    <p class="text-sm mt-1">
+                        <i class="far fa-clock mr-1"></i>
+                        <span th:text="${expire +' (' + jopPost.postingDeadline +')'}"></span>
+<!--                        <span class="font-medium" th:text="${jopPost.hidden?' [ĐÃ BỊ ẨN]':''}"></span>-->
+                    </p>
+                </div>
+                <button class="btn btn-secondary self-start md:self-auto">
+                    <i class="fas fa-calendar-plus mr-2"></i> Gia hạn
+                </button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="stat-card p-5 rounded-lg flex items-center">
+                    <div class="icon-wrapper bg-blue-100 text-blue-600">
+                        <i class="fas fa-users text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-sm">Số lượng ứng tuyển</p>
+                        <p class="text-xl font-bold text-slate-800" th:text="${jopPost.numberOfApplications}">24</p>
+                    </div>
+                </div>
+
+                <div class="stat-card p-5 rounded-lg flex items-center">
+                    <div class="icon-wrapper bg-green-100 text-green-600">
+                        <i class="fas fa-eye text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-sm">Lượt xem</p>
+                        <p class="text-xl font-bold text-slate-800" th:text="${jopPost.view}">1,245</p>
+                        <button th:if="${totalViews!=null}"
+                                onclick="document.getElementById('viewModal').classList.remove('hidden')"
+                                class="text-sm text-blue-600 hover:underline">
+                            Xem ai đã xem
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="stat-card p-5 rounded-lg flex items-center">
+                    <div class="icon-wrapper bg-purple-100 text-purple-600">
+                        <i class="fas fa-bolt text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-sm">Trạng thái</p>
+                        <p class="text-lg font-bold text-slate-800"
+                           th:text="${jopPost.statusV1()}">Active</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Section -->
+        <div class="p-6 border-b border-slate-100">
+            <h3 class="section-title">Chi tiết thời gian</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="bg-slate-50 p-5 rounded-lg border border-slate-100">
+                    <div class="flex items-center">
+                        <div class="icon-wrapper bg-orange-100 text-orange-600">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-sm">Ngày tạo</p>
+                            <p class="text-lg font-semibold text-slate-800" th:text="${' '+ jopPost.timePost}">May 15, 2023</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-lg border border-slate-100">
+                    <div class="flex items-center">
+                        <div class="icon-wrapper bg-red-100 text-red-600">
+                            <i class="fas fa-calendar-times"></i>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-sm">Ngày hết hạn</p>
+                            <p class="text-lg font-semibold text-slate-800" th:text="${jopPost.postingDeadline}">June 15, 2023</p>
+                            <p class="text-slate-500 text-sm" th:text="${'Kết thúc: '+p.format(jopPost.postingDeadline) }"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8">
+                <div class="flex justify-between text-sm text-slate-500 mb-2">
+                    <span>Ngày tạo</span>
+                    <span>Ngày hết hạn</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" th:style="'width:'
+                     +${per>100||per<0?100:per}+
+                      '%'"></div>
+                </div>
+                <div class="text-sm text-slate-500 mt-2 text-right" th:text="'Đã qua '+${per>100||per<0?100:per}+'% thời gian'"></div>
+            </div>
+        </div>
+
+        <!-- Job Content Section -->
+        <div class="p-6">
+            <h3 class="section-title">Nội dung công việc</h3>
+
+            <div class="space-y-6">
+                <!-- Job Description -->
+                <div>
+                    <h4 class="text-md font-semibold text-slate-700 mb-3 flex items-center">
+                        <i class="fas fa-align-left text-blue-500 mr-2"></i> Chi tiết công việc
+                    </h4>
+                    <div class="job-content">
+                        <div th:utext="${jopPost.formatDescription(jopPost.description,1)}"></div>
+                    </div>
+                </div>
+
+                <!-- Candidate Requirements -->
+                <div>
+                    <h4 class="text-md font-semibold text-slate-700 mb-3 flex items-center">
+                        <i class="fas fa-user-check text-green-500 mr-2"></i> Yêu cầu ứng viên
+                    </h4>
+                    <div class="job-content" >
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Yêu cầu ứng viên</label>
+                            <div th:utext="${jopPost.formatDescription(jopPost.candidateRequirements,2)}" ></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benefits -->
+                <div>
+                    <h4 class="text-md font-semibold text-slate-700 mb-3 flex items-center">
+                        <i class="fas fa-gift text-amber-500 mr-2"></i> Quyền lợi
+                    </h4>
+                    <div class="job-content">
+                        <div th:utext="${jopPost.formatDescription(jopPost.benefits,3)}" ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="bg-slate-50 px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-slate-500 flex items-center">
+                <i class="fas fa-history mr-2"></i>
+                <span th:text="${'Cập nhật lần cuối: ' + jopPost.updatedTime}"></span>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <form th:if="
+                ${jopPost.statusV2()==1 || jopPost.statusV2()==2}"
+                      method="post" th:action="@{'/recruiter/hidden-postjob/'+${jopPost.id}}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-eye-slash mr-2"></i> Gỡ bài đăng
+                    </button>
+                </form>
+                <button th:if="${jopPost.approved}"
+                        onclick="openModal1()" class="bg-blue-600 text-white px-4 py-2 rounded">Xem thống kê ứng tuyển</button>
+                <a th:href="@{'/recruiter/duyet-cv?tab=tab1&likeId='+${jopPost.id}}"
+                   class="btn btn-primary">
+                    <i class="fas fa-users mr-2"></i>
+                    <span th:text="${'Xem các CV chưa duyệt ('+numberOfApplicants+')'}"></span>
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Edit Modal -->
+<div id="modal" class="modal-overlay hidden z-40">
+    <div class="modal-content">
+        <button id="closeModalBtn" class="modal-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="p-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-1">Cập nhật bài đăng</h2>
+            <p class="text-slate-500 mb-6">Chỉnh sửa thông tin bài đăng tuyển dụng</p>
+
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Tên công việc</label>
+                    <input th:value="${jopPost.name}"
+                           type="text" id="jobTitle" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Nhập tên công việc">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Lĩnh vực</label>
+                        <select id="industry" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option th:each="major :${majors}"
+                                    th:value="${major.name()}"
+                                    th:selected="${major == jopPost.major}"
+                                    th:text="${major.getLabel()}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Mức lương (triệu)</label>
+                        <input type="number" min="0" th:value="${jopPost.salary}"
+                               id="salary" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Nhập mức lương">
+                    </div>
+                </div>
+                <button type="button" onclick="openTagModal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    Sửa kỹ năng
+                </button>
+                <div id="containerTag"></div>
+                <div class="flex items-center">
+                    <input th:checked="${jopPost.urgent}"
+                           id="urgent" type="checkbox" class="h-5 w-5 text-blue-600 border-slate-300 rounded">
+                    <label for="urgent" class="ml-3 text-sm text-slate-700">Tuyển gấp (Ưu tiên hiển thị)</label>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Chi tiết công việc</label>
+                    <textarea id="jobDetail" rows="4" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="- Nhập mô tả công việc"
+                              th:text="${jopPost.description}"></textarea>
+                    <p class="text-xs text-slate-500 mt-1">Mỗi mô tả nên bắt đầu bằng dấu gạch ngang (-)</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Yêu cầu ứng viên</label>
+                    <textarea id="requirements" rows="4" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="- Nhập yêu cầu ứng viên"
+                              th:text="${jopPost.candidateRequirements}"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Quyền lợi</label>
+                    <textarea id="benefits" rows="4" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="- Nhập quyền lợi"
+                              th:text="${jopPost.benefits}"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8">
+                <button id="cancelBtn" class="btn btn-secondary px-5">Hủy bỏ</button>
+                <button id="btnSubmit" class="btn btn-primary px-5">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input th:value="${jopPost.id}" hidden id="jobId">
+<!--??????????????????????????????????????-->
+<div id="viewModal" th:if="${totalViews!=null}"
+     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-lg relative">
+        <!-- Close button -->
+        <button id="closeViewModal" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900">
+            <i class="fas fa-times text-lg"></i>
+        </button>
+
+        <!-- Modal Content -->
+        <div class="p-6">
+            <h2 class="text-xl font-semibold text-slate-800 mb-2">Thông tin lượt xem bài tuyển dụng</h2>
+            <p class="text-sm text-slate-600 mb-6">Thống kê chi tiết lượt xem bài viết của bạn.</p>
+
+            <!-- Tổng quan -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-center">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-700">Tổng lượt xem</p>
+                    <p class="text-2xl font-bold text-blue-800" th:text="${totalViews}">0</p>
+                </div>
+                <div class="p-4 bg-green-50 rounded-lg">
+                    <p class="text-sm text-green-700">Người dùng đã đăng nhập</p>
+                    <p class="text-2xl font-bold text-green-800" th:text="${userViews}">0</p>
+                </div>
+                <div class="p-4 bg-gray-100 rounded-lg">
+                    <p class="text-sm text-gray-700">Lượt xem vô danh</p>
+                    <p class="text-2xl font-bold text-gray-800" th:text="${anonymousViews}">0</p>
+                </div>
+            </div>
+
+            <!-- Danh sách người đã xem -->
+            <h3 class="text-lg font-medium text-slate-700 mb-2">Người đã xem</h3>
+            <ul class="divide-y divide-slate-200">
+                <li th:each="viewer : ${viewers}" class="py-3 flex items-center gap-4">
+                    <img th:src="@{'/images/user-photos/' +${viewer.id}+'/'+ ${viewer.imageUrl}}" class="w-10 h-10 rounded-full object-cover" />
+                    <div>
+                        <p class="font-medium text-slate-800" th:text="${viewer.firstName + ' ' + viewer.lastName}">Nguyễn Văn A</p>
+                        <p class="text-sm text-slate-500" th:text="${viewer.email}">nguyenvana@example.com</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-slate-800" th:text="${'Role: '
+                        +(viewer.role.name() =='INTERN' ?'Sinh viên':(viewer.role.name() =='RECRUITER'?'Nhà tuyển dụng':'Giảng viên'))}">Nguyễn Văn A</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!--??????????????????????????????????????-->
+
+
+<!-- Modal -->
+<div id="statisticsModal"
+     class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-4xl p-6 relative">
+        <!-- Nút đóng -->
+        <button onclick="closeModal1()"
+                class="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-xl">&times;</button>
+
+        <!-- Tiêu đề -->
+        <h3 class="text-lg font-semibold mb-4">Thống kê các CV của bài tuyển dụng</h3>
+
+        <!-- Chart -->
+        <div class="h-[400px]">
+            <canvas id="applicationsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal chọn kỹ năng -->
+<div id="tagModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center hidden z-50">
+    <div class="bg-white w-full max-w-4xl rounded-lg shadow-lg p-8 overflow-y-auto max-h-[80vh]">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Chọn kỹ năng</h2>
+            <button onclick="closeTagModal()" class="text-gray-600 hover:text-red-500 text-2xl">&times;</button>
+        </div>
+
+
+        <div class="space-y-6" id="tags-by-type">
+
+
+        </div>
+
+        <!-- Nút lưu -->
+        <div class="mt-6 flex justify-end">
+            <button onclick="showTag(2)" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                Lưu kỹ năng
+            </button>
+        </div>
+
+    </div>
+</div>
+<!-- Footer Placeholder -->
+<th:block th:replace="~{footer :: footer}"></th:block>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal functionality
+        const modal = document.getElementById("modal");
+        const openBtn = document.getElementById("openModalBtn");
+        const closeBtn = document.getElementById("closeModalBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+
+        openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+        closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+        cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
+
+        // Close modal when clicking outside
+        // modal.addEventListener('click', (e) => {
+        //     if (e.target === modal) {
+        //         modal.classList.add("hidden");
+        //     }
+        // });
+
+        // Update job functionality
+    });
+    document.getElementById("closeViewModal").addEventListener("click", function() {
+        document.getElementById("viewModal").classList.add("hidden");
+    });
+    function openM(){
+        showTag(null)
+        document.getElementById("modal").classList.remove("hidden")
+    }
+    document.getElementById('btnSubmit').addEventListener('click', async (e) => {
+        let idx = document.getElementById('jobId').value;
+        const tagIds = selectedTags.map(tag => tag.id);
+        const data = {
+            id: idx,
+            name: document.getElementById('jobTitle').value,
+            description: document.getElementById('jobDetail').value,
+            salary: document.getElementById('salary').value,
+            candidateRequirements: document.getElementById('requirements').value,
+            benefits: document.getElementById('benefits').value,
+            urgent: document.getElementById('urgent').checked,
+            major: document.getElementById('industry').value,
+            tagIds: tagIds
+        };
+
+        try {
+            let response = await fetch('/recruiter/api/quanly-baidang', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            if(response.ok) {
+                window.location.reload()
+            } else {
+                alert('Cập nhật không thành công. Vui lòng thử lại.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+        }
+    });
+    let applicationsChart; // To store chart instance
+    async function openModal1() {
+        document.getElementById('statisticsModal').classList.remove('hidden');
+        const jobId = document.getElementById('jobId').value;
+
+        // Nếu chưa khởi tạo biểu đồ, thì fetch và tạo mới
+        if (!applicationsChart) {
+            let response = await fetch('/recruiter/api/postJobChartResponse/'+jobId)
+            let data = await response.json()
+            console.log(data)
+            createChart(data);
+
+        }
+    }
+
+    function closeModal1() {
+        document.getElementById('statisticsModal').classList.add('hidden');
+    }
+
+    function createChart(dataFromApi) {
+        const ctx = document.getElementById('applicationsChart').getContext('2d');
+
+        const chartData = {
+            labels: ['Các cv được nộp'], // ['Tháng 1', 'Tháng 2', ...]
+            datasets: [
+                {
+                    label: 'Số lượt ứng tuyển',
+                    data: [dataFromApi.totalCv], // [20, 35, ...]
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Đã duyệt',
+                    data: [dataFromApi.totalCvApproved],
+                    backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Chưa duyệt',
+                    data: [dataFromApi.totalCvNotApproved],
+                    backgroundColor: 'rgba(245, 158, 11, 0.5)',
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    borderWidth: 1
+                }
+            ]
+        };
+
+        applicationsChart = new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+    }
+
+    const selectedTags = [];
+    document.addEventListener('DOMContentLoaded', function () {
+        const tagElements = document.querySelectorAll('#preloaded-tags label');
+
+        tagElements.forEach(label => {
+            console.log(label.dataset.id)
+            const id = parseInt(label.dataset.id);
+            selectedTags.push({ id, label });
+        });
+
+        console.log('Các tag được load từ jobPost:', selectedTags);
+    });
+
+
+    async function renderTagsByType() {
+        showTag(null)
+        const res = await fetch('/recruiter/api/get-all-tags-to-update'); // bạn cần endpoint trả về dạng group theo tagType
+        const data = await res.json(); // giả sử dạng: { "Backend": [...], "Frontend": [...], ... }
+        const displayNameMap = {
+            "programmingLanguage": "Ngôn ngữ lập trình",
+            "backend": "Backend",
+            "frontend": "Frontend",
+            "database": "Database",
+            "order": "Order"
+            // thêm các key khác nếu cần
+        };
+        const container = document.getElementById('tags-by-type');
+        let html = '';
+
+        for (const [typeName, tags] of Object.entries(data)) {
+            const displayName = displayNameMap[typeName] || typeName;
+            html += `
+            <div>
+                <h3 class="text-base font-semibold mb-2">${displayName }</h3>
+                <div class="flex flex-wrap gap-2">
+        `;
+
+            tags.forEach(tag => {
+                const isChecked = selectedTags.some(t => t.id === tag.id);
+                html += `
+                <label class="${tag.className}">
+                    <input
+                        type="checkbox"
+                        name="tags"
+                        value="${tag.id}"
+                        data-id="${tag.id}"
+                        data-name="${tag.name}"
+                        class="hidden peer"
+                        onclick="checkedTagFromDataset(this)"
+                        ${isChecked ? 'checked' : ''}
+                    />
+                    <span class="${tag.checked}">
+                        <span>${tag.name}</span>
+                    </span>
+                </label>
+            `;
+            });
+
+            html += `</div></div>`;
+        }
+
+        container.innerHTML = html;
+    }
+
+
+    function checkedTagFromDataset(el) {
+        const id = parseInt(el.dataset.id);
+        const label = el.closest('label');
+        // Kiểm tra xem tag đã được chọn chưa (tìm theo id)
+        const index = selectedTags.findIndex(tag => tag.id === id);
+
+        if (index === -1) {
+            // Nếu chưa có thì thêm vào mảng
+            selectedTags.push({ id, label });
+        } else {
+            // Nếu đã có thì xóa khỏi mảng
+            selectedTags.splice(index, 1);
+        }
+        console.trace("Tag đã chọn:", selectedTags);
+        console.trace("Tag:", (label));
+    }
+    function backe() {
+        window.location.href = "/recruiter/quanly-baidang";
+    }
+    async function openTagModal() {
+        await renderTagsByType()
+        document.getElementById('tagModal').classList.remove('hidden');
+    }
+
+    function closeTagModal() {
+        document.getElementById('tagModal').classList.add('hidden');
+    }
+    function showTag(i){
+        const container = document.getElementById('containerTag');
+        container.innerHTML = '';
+
+        selectedTags.forEach(tag => {
+            if (tag.label) {
+                const cloned = tag.label.cloneNode(true);
+                cloned.querySelector('input')?.remove(); // xóa input đi nếu có
+                container.appendChild(cloned);
+            }
+        });
+        if(i)
+            closeTagModal()
+    }
+</script>
+
+</body>
+</html>

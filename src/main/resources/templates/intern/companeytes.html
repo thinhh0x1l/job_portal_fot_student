@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Profile | Recruitment Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+
+        .company-header {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
+        }
+
+        .verified-badge {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .verified-badge::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.25rem;
+            height: 1.25rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310B981'%3E%3Cpath fill-rule='evenodd' d='M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z' clip-rule='evenodd' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .company-tab {
+            transition: all 0.2s ease;
+        }
+
+        .company-tab.active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .job-card {
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .job-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .urgent-badge {
+            animation: pulse 1.5s infinite;
+        }
+
+        .review-card {
+            border-left: 3px solid #3b82f6;
+        }
+
+        .rating-stars {
+            color: #f59e0b;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        /* Hide all tab content by default */
+        .tab-content {
+            display: none;
+        }
+
+        /* Show active tab content */
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+    <th:block th:replace="~{narbar2 :: styleNarbar}"></th:block>
+</head>
+<body class="bg-gray-50">
+<!-- Header placeholder (will be replaced with Thymeleaf) -->
+<th:block th:replace="~{narbar2 :: narbar}"></th:block>
+
+<!-- Company Header Section -->
+<div class="company-header py-8">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Company Logo -->
+            <div class="flex-shrink-0">
+                <div class="w-32 h-32 md:w-40 md:h-40 rounded-lg bg-white shadow-md border border-gray-200 overflow-hidden flex items-center justify-center">
+                    <img th:if="${company.imageUrl}" th:src="@{'/images/companies/'+${company.id}+'/'+${company.imageUrl}}" alt="Company Logo"
+                         class="w-full h-full object-contain">
+                    <div th:unless="${company.imageUrl}" class="text-4xl text-gray-400 font-bold w-full h-full bg-gray-100 flex items-center justify-center">
+                        <span th:text="${company.companyName.substring(0, 1)}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Basic Info -->
+            <div class="flex-1">
+                <div class="flex flex-col h-full justify-between">
+                    <div>
+                        <div class="flex items-center flex-wrap gap-2 mb-2">
+                            <h1 class="text-2xl md:text-3xl font-bold text-gray-900" th:text="${company.companyName}"></h1>
+                            <span th:if="${company.checkAp()}" class="verified-badge text-sm text-green-700">Đã xác thực</span>
+                            <span th:unless="${company.checkAp()}" class="verified-badge text-sm text-yellow-700">Chưa xác thực</span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 mb-4">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full" th:text="${company.companySize==null?'':company.companySize.displayName}"></span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full" th:text="${company.district.displayName}"></span>
+                            <span th:if="${!company.operated}" class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Ngừng hoạt động</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4">
+                        <a th:if="${company.website}" th:href="${company.website}" target="_blank" class="flex items-center text-blue-600 hover:underline">
+                            <i class="fas fa-globe mr-2"></i>
+                            <span th:text="${company.website}"></span>
+                        </a>
+                        <a th:if="${company.email}" th:href="'mailto:' + ${company.email}" class="flex items-center text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-envelope mr-2"></i>
+                            <span th:text="${company.email}"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 py-8">
+    <!-- Navigation Tabs -->
+    <div class="border-b border-gray-200 mb-8">
+        <nav class="-mb-px flex space-x-8">
+            <a href="#" class="company-tab active py-4 px-1 text-sm font-medium" data-tab="about">Thông tin công ty</a>
+            <a href="#" class="company-tab py-4 px-1 text-sm font-medium" data-tab="jobs">Việc làm đang tuyển</a>
+            <a href="#" class="company-tab py-4 px-1 text-sm font-medium" data-tab="reviews">Đánh giá</a>
+        </nav>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column - Tab Content -->
+        <div class="lg:col-span-2">
+            <!-- About Company Tab Content -->
+            <div id="about-tab" class="tab-content active">
+                <!-- About Company Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Giới thiệu công ty</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="prose max-w-none" th:utext="${company.description}"></div>
+
+                        <!-- Company Highlights -->
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-gray-900">Quy mô công ty</h3>
+                                    <p class="text-sm text-gray-500" th:text="${company.companySize.displayName}"></p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-gray-900">Địa chỉ</h3>
+                                    <p class="text-sm text-gray-500" th:text="${company.address + ', ' + company.district.displayName}"></p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <i class="fas fa-phone-alt"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-gray-900">Điện thoại</h3>
+                                    <p class="text-sm text-gray-500" th:text="${company.numberPhone}"></p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <i class="fas fa-file-contract"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-gray-900">Mã số thuế</h3>
+                                    <p class="text-sm text-gray-500" th:text="${company.taxCode}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Company Verification Section -->
+                <div th:if="${company.certificate}" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Giấy phép kinh doanh</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-shrink-0">
+                                <div class="h-12 w-12 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                                    <i class="fas fa-certificate"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600 mb-2">Công ty đã cung cấp giấy phép kinh doanh và được xác minh.</p>
+                                <a th:href="@{'/images/certificate/' + ${company.id}+'/'+${company.certificate}}" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center">
+                                    <i class="fas fa-eye mr-2"></i> Xem giấy phép kinh doanh
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Company Gallery Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Hình ảnh công ty</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <!-- Placeholder for company photos -->
+                            <div class="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                <i class="fas fa-image text-gray-400 text-2xl"></i>
+                            </div>
+                            <div class="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                <i class="fas fa-image text-gray-400 text-2xl"></i>
+                            </div>
+                            <div class="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                <i class="fas fa-image text-gray-400 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Openings Tab Content -->
+            <div id="jobs-tab" class="tab-content">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-semibold text-gray-900">Việc làm đang tuyển</h2>
+                            <span class="text-sm text-gray-500">12 vị trí</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <!-- Job Filters -->
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                            <div class="flex-1">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Tìm kiếm việc làm...">
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                    <option selected>Tất cả địa điểm</option>
+                                    <option>Hà Nội</option>
+                                    <option>Hồ Chí Minh</option>
+                                    <option>Đà Nẵng</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Job Listings -->
+                        <div class="space-y-4">
+                            <!-- Job 1 -->
+                            <div class="job-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div class="p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-gray-900 mb-1">Senior Frontend Developer (ReactJS)</h3>
+                                            <p class="text-sm text-gray-500 mb-3">Hà Nội</p>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                <i class="fas fa-code text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Full-time</span>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">$2000 - $3000</span>
+                                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full urgent-badge">Gấp</span>
+                                    </div>
+
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-500">Đăng 2 ngày trước</span>
+                                        <a href="#" class="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Job 2 -->
+                            <div class="job-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div class="p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-gray-900 mb-1">Backend Engineer (Node.js)</h3>
+                                            <p class="text-sm text-gray-500 mb-3">Hồ Chí Minh</p>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                <i class="fas fa-server text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Full-time</span>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">$2500 - $3500</span>
+                                    </div>
+
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-500">Đăng 1 tuần trước</span>
+                                        <a href="#" class="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Job 3 -->
+                            <div class="job-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div class="p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-gray-900 mb-1">UI/UX Designer</h3>
+                                            <p class="text-sm text-gray-500 mb-3">Đà Nẵng</p>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                <i class="fas fa-paint-brush text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Part-time</span>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">$1500 - $2000</span>
+                                    </div>
+
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-500">Đăng 3 ngày trước</span>
+                                        <a href="#" class="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Job 4 -->
+                            <div class="job-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div class="p-6">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-gray-900 mb-1">DevOps Engineer</h3>
+                                            <p class="text-sm text-gray-500 mb-3">Hà Nội</p>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                <i class="fas fa-cloud text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Full-time</span>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">$3000 - $4000</span>
+                                    </div>
+
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-500">Đăng 5 ngày trước</span>
+                                        <a href="#" class="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="mt-6 flex items-center justify-between">
+                            <div class="flex-1 flex justify-between sm:hidden">
+                                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Previous
+                                </a>
+                                <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Next
+                                </a>
+                            </div>
+                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-700">
+                                        Showing <span class="font-medium">1</span> to <span class="font-medium">4</span> of <span class="font-medium">12</span> results
+                                    </p>
+                                </div>
+                                <div>
+                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Previous</span>
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                        <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                            1
+                                        </a>
+                                        <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                            2
+                                        </a>
+                                        <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                            3
+                                        </a>
+                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Next</span>
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+<!--            &lt;!&ndash; Review Summary &ndash;&gt;-->
+<!--            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">-->
+<!--                <div class="bg-gray-50 p-4 rounded-lg">-->
+<!--                    <h3 class="text-sm font-medium text-gray-900 mb-2">Môi trường làm việc</h3>-->
+<!--                    <div class="flex items-center mb-1">-->
+<!--                        <div class="mr-2 text-yellow-500">-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                        </div>-->
+<!--                        <span class="text-sm font-medium text-gray-900">4.8</span>-->
+<!--                    </div>-->
+<!--                    <div class="w-full bg-gray-200 rounded-full h-2">-->
+<!--                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 80%"></div>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="bg-gray-50 p-4 rounded-lg">-->
+<!--                    <h3 class="text-sm font-medium text-gray-900 mb-2">Lương thưởng</h3>-->
+<!--                    <div class="flex items-center mb-1">-->
+<!--                        <div class="mr-2 text-yellow-500">-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="far fa-star"></i>-->
+<!--                        </div>-->
+<!--                        <span class="text-sm font-medium text-gray-900">4.2</span>-->
+<!--                    </div>-->
+<!--                    <div class="w-full bg-gray-200 rounded-full h-2">-->
+<!--                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 70%"></div>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="bg-gray-50 p-4 rounded-lg">-->
+<!--                    <h3 class="text-sm font-medium text-gray-900 mb-2">Cơ hội thăng tiến</h3>-->
+<!--                    <div class="flex items-center mb-1">-->
+<!--                        <div class="mr-2 text-yellow-500">-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star"></i>-->
+<!--                            <i class="fas fa-star-half-alt"></i>-->
+<!--                            <i class="far fa-star"></i>-->
+<!--                        </div>-->
+<!--                        <span class="text-sm font-medium text-gray-900">3.7</span>-->
+<!--                    </div>-->
+<!--                    <div class="w-full bg-gray-200 rounded-full h-2">-->
+<!--                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 60%"></div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+            <!-- Reviews Tab Content -->
+            <div id="reviews-tab" class="tab-content">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-semibold text-gray-900">Đánh giá công ty</h2>
+                            <div class="flex items-center">
+                                <span id="avgStars" class="text-sm font-medium text-gray-900">4.5</span>
+                                <span class="mx-1 text-gray-500">·</span>
+                                <span id="totalComment"
+                                        class="text-sm text-gray-500">24 đánh giá</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+
+
+                        <!-- Review Filters -->
+                        <div class="flex flex-wrap items-center gap-2 mb-6">
+                            <button id="0star"
+                                    class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full hover:bg-blue-200">Tất cả</button>
+                            <button id="5star"
+                                    class="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full hover:bg-gray-200">5 sao (15)</button>
+                            <button id="4star"
+                                    class="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full hover:bg-gray-200">4 sao (6)</button>
+                            <button id="3star"
+                                    class="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full hover:bg-gray-200">3 sao (2)</button>
+                            <button id="2star"
+                                    class="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full hover:bg-gray-200">1-2 sao (1)</button>
+                            <button id="1star"
+                                    class="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full hover:bg-gray-200" >1-2 sao (1)</button>
+
+                        </div>
+
+                        <!-- Review List -->
+                        <div id="containerComments" class="space-y-6">
+                            <!-- Review 1 -->
+
+                        </div>
+                        <!-- Pagination -->
+                        <div class="mt-6 flex items-center justify-center">
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"  id="pagination"
+                                 aria-label="Pagination">
+<!--                                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">-->
+<!--                                    <span class="sr-only">Previous</span>-->
+<!--                                    <i class="fas fa-chevron-left"></i>-->
+<!--                                </a>-->
+<!--                                -->
+<!--                                <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">-->
+<!--                                    1-->
+<!--                                </a>-->
+<!--                                <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">-->
+<!--                                    2-->
+<!--                                </a>-->
+<!--                                <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">-->
+<!--                                    3-->
+<!--                                </a>-->
+<!--                                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">-->
+<!--                                    <span class="sr-only">Next</span>-->
+<!--                                    <i class="fas fa-chevron-right"></i>-->
+<!--                                </a>-->
+                            </nav>
+                        </div>
+                        <!-- Write Review Form -->
+                        <div th:if="${user!=null&&(user.id!=company.id)}" class="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Gửi đánh giá của bạn</h3>
+<!--                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">-->
+<!--                                    <input type="text" placeholder="Họ tên" class="w-full px-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>-->
+<!--                                    <input type="text" placeholder="Vai trò (VD: Nhân viên cũ, Thực tập...)" class="w-full px-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>-->
+<!--                                </div>-->
+<!--                                <div class="grid grid-cols-2 gap-4 mb-4">-->
+<!--                                    <input type="text" placeholder="Năm bắt đầu (VD: 2020)" class="w-full px-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">-->
+<!--                                    <input type="text" placeholder="Năm kết thúc (VD: 2022 hoặc Nay)" class="w-full px-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">-->
+<!--                                </div>-->
+                                <!-- Rating Stars -->
+                                <div class="flex items-center mb-4">
+                                    <span class="text-sm font-medium text-gray-900 mr-3">Đánh giá của bạn:</span>
+                                    <div onclick="g()" id="star-rating" class="flex text-yellow-500 text-lg cursor-pointer">
+                                        <i class="far fa-star" data-value="1"></i>
+                                        <i class="far fa-star" data-value="2"></i>
+                                        <i class="far fa-star" data-value="3"></i>
+                                        <i class="far fa-star" data-value="4"></i>
+                                        <i class="far fa-star" data-value="5"></i>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="rating" id="rating-value" >
+
+                                <input type="text" placeholder="Tiêu đề đánh giá" id="titleC"
+                                       class="w-full px-4 py-2 border rounded-md text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+
+                                <textarea placeholder="Nội dung đánh giá..." id="contentC"
+                                          rows="4" class="w-full px-4 py-2 border rounded-md text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+
+                                <button onclick="submitRating()"  class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-medium">
+                                    Gửi đánh giá
+                                </button>
+                        </div>
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Sidebar -->
+        <div class="space-y-6">
+            <!-- Company Stats -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Thông tin hoạt động</h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Ngày cập nhật thông tin</p>
+                            <p class="text-sm font-medium text-gray-900" th:text="${#temporals.format(company.dateInformationUpdated, 'dd/MM/yyyy')}"></p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-gray-500">Trạng thái xác minh</p>
+                            <p th:if="${company.checkAp()}" class="text-sm font-medium text-green-600 flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i> Đã xác minh
+                            </p>
+                            <p th:unless="${company.checkAp()}" class="text-sm font-medium text-yellow-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i> Chưa xác minh
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-gray-500">Tình trạng hoạt động</p>
+                            <p th:if="${company.operated}" class="text-sm font-medium text-green-600 flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i> Đang hoạt động
+                            </p>
+                            <p th:unless="${company.operated}" class="text-sm font-medium text-red-600 flex items-center">
+                                <i class="fas fa-times-circle mr-2"></i> Ngừng hoạt động
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Box -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Liên hệ</h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Điện thoại</p>
+                                <p class="text-sm font-medium text-gray-900" th:text="${company.numberPhone}"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Email</p>
+                                <p class="text-sm font-medium text-gray-900" th:text="${company.email}"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Website</p>
+                                <a th:href="${company.website}" target="_blank" class="text-sm font-medium text-blue-600 hover:underline" th:text="${company.website}"></a>
+                            </div>
+                        </div>
+                        <input type="hidden" id="companyIdC" th:value="${company.id}">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-500">Địa chỉ</p>
+                                <p class="text-sm font-medium text-gray-900" th:text="${company.address}"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <button class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            <i class="fas fa-paper-plane mr-2"></i> Gửi tin nhắn
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Links -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Mạng xã hội</h2>
+                </div>
+                <div class="p-6">
+                    <div class="flex space-x-4">
+                        <a href="#" class="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center hover:bg-blue-200">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="h-10 w-10 rounded-full bg-blue-100 text-blue-400 flex items-center justify-center hover:bg-blue-200">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="h-10 w-10 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Similar Companies -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Công ty tương tự</h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <!-- Company 1 -->
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center mr-3">
+                                <span class="text-gray-600 font-medium">T</span>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900">TechVision</h3>
+                                <p class="text-xs text-gray-500">50-100 nhân viên · Hà Nội</p>
+                            </div>
+                        </div>
+
+                        <!-- Company 2 -->
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center mr-3">
+                                <span class="text-gray-600 font-medium">D</span>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900">Digital Solutions</h3>
+                                <p class="text-xs text-gray-500">100-200 nhân viên · Hồ Chí Minh</p>
+                            </div>
+                        </div>
+
+                        <!-- Company 3 -->
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center mr-3">
+                                <span class="text-gray-600 font-medium">I</span>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900">Innovate Co.</h3>
+                                <p class="text-xs text-gray-500">20-50 nhân viên · Đà Nẵng</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a th:href="@{/companies}" class="text-sm text-blue-600 hover:underline">Xem thêm công ty</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- Footer placeholder (will be replaced with Thymeleaf) -->
+<div th:replace="~{narbar2 :: aiChatBot}"></div>
+<div th:replace="~{footer :: footer}"></div>
+
+<script>
+    const stars = document.querySelectorAll("#star-rating i");
+    const ratingInput = document.getElementById("rating-value");
+
+    let companyId
+    stars.forEach(star => {
+        star.addEventListener("click", () => {
+            const rating = star.getAttribute("data-value");
+            ratingInput.value = rating;
+
+            stars.forEach(s => {
+                s.classList.remove("fas");
+                s.classList.add("far");
+            });
+
+            for (let i = 0; i < rating; i++) {
+                stars[i].classList.remove("far");
+                stars[i].classList.add("fas");
+            }
+        });
+    });
+    function resetStars() {
+        stars.forEach((s) => {
+            const rating = s.getAttribute("data-value");
+            if(ratingInput.value>=rating){
+                s.classList.remove("fas");
+                s.classList.add("far");
+            }
+        });
+        ratingInput.value = null
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        companyId = document.getElementById('companyIdC').value
+
+        initStarFilterEvents(companyId)
+        fetchReviews(companyId)
+    })
+
+    let npagee
+
+    async function fetchReviews(companyId, page,nstar) {
+        try {
+            page = !page ? '' : page;
+            nstar = !nstar ? '' : nstar;
+            npagee=page
+
+            const response = await fetch('/user/api/reviews/' + companyId + "?page=" + page+"&star="+nstar);
+            if (!response.ok) throw new Error("Lỗi khi lấy đánh giá");
+
+            const reviews = await response.json();
+            const container = document.getElementById("containerComments");
+            container.innerHTML = ""; // reset danh sách
+
+            document.getElementById('totalComment').innerText = `Có bình ${reviews.totalComments} luận`
+            document.getElementById('avgStars').innerHTML = `${parseFloat(reviews.avgStar.toFixed(1))}<i class="fas fa-star  text-yellow-500 text-lg"></i>`
+            // document.getElementById('allstar').innerText
+            document.getElementById('5star').innerText = `5 sao(${reviews.starAnalysis[4]})`
+            document.getElementById('4star').innerText = `4 sao(${reviews.starAnalysis[3]})`
+            document.getElementById('3star').innerText = `3 sao(${reviews.starAnalysis[2]})`
+            document.getElementById('2star').innerText = `2 sao(${reviews.starAnalysis[1]})`
+            document.getElementById('1star').innerText = `1 sao(${reviews.starAnalysis[0]})`
+
+
+            renderPagination(reviews.currentPage, reviews.numberOfPage)
+            console.log(reviews.image);
+            reviews.comments.forEach(c => {
+                const reviewHTML = `
+                    <div class="review-card bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                          <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center">
+                              <img src="${c.image}" class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3" />
+                              <div>
+                                <h4 class="text-sm font-medium text-gray-900">${c.fullname}</h4>
+                                <p class="text-xs text-gray-500">${c.role}</p>
+                              </div>
+                            </div>
+                            <div class="flex items-center">
+                              <div class="rating-stars mr-2" id="containerStarEdit-${c.commentId}">
+                                ${renderStars(c.star)}
+                              </div>
+                              <span class="text-xs text-gray-500">${timeAgo(new Date(c.created))}</span>
+                            </div>
+                          </div>
+                          <h5 id="containerTitleEdit-${c.commentId}" class="text-sm font-medium text-gray-900 mb-2">${c.title}</h5>
+                          <p  id="containerContentEdit-${c.commentId}" class="text-sm text-gray-600 mb-3">${c.content}</p>
+
+                          <div class="flex items-center text-xs justify-between mt-4">
+                              <div class="flex gap-4">
+                                <button onclick="likeComment(${c.commentId}, ${companyId}, ${page ? page : null}, ${nstar ? nstar : null})"
+                                  class="flex items-center hover:text-blue-600 ${c.liked ? 'text-blue-500' : ''}">
+                                  <i class="far fa-thumbs-up mr-1"></i> ${c.liked ? 'Đã thích ' : 'Thích '} (${c.like})
+                                </button>
+
+                                <button class="flex items-center text-gray-500 hover:text-blue-600">
+                                  <i class="far fa-comment mr-1"></i> Phản hồi (0)
+                                </button>
+                              </div>
+
+                              ${c.itsMe?`
+                              <div class="flex gap-3">
+                                <button <button onclick="editComment(${c.commentId}, {
+                                                            star: ${c.star},
+                                                            title: '${c.title.replace(/'/g, "\\'")}',
+                                                            content: '${c.content.replace(/'/g, "\\'")}'
+                                                        })"
+                                  class="flex items-center text-gray-500 hover:text-green-600">
+                                  <i class="fas fa-edit mr-1"></i> Chỉnh sửa
+                                </button>
+
+                                <button onclick="deleteComment(${c.commentId})"
+                                  class="flex items-center text-gray-500 hover:text-red-600">
+                                  <i class="fas fa-trash-alt mr-1"></i> Xóa
+                                </button>
+                              </div>`:``}
+                            </div>
+
+                        </div>
+
+                        `;
+
+                container.insertAdjacentHTML('beforeend', reviewHTML);
+            });
+
+        } catch (error) {
+            console.error("Lỗi khi fetch đánh giá:", error);
+        }
+    }
+    async function likeComment(commentId,companyId, page,nstar){
+        const response = await fetch('/user/api/like/' + commentId,{
+            method :"PATCH"
+        })
+        if (!response.ok) throw new Error("Lỗi khi lấy đánh giá");
+        await fetchReviews(companyId, page,nstar)
+
+    }
+    function initStarFilterEvents(companyId) {
+        const starIds = ['0star', '5star', '4star', '3star', '2star', '1star'];
+
+        starIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            el.classList.add('cursor-pointer', 'text-gray-600');
+
+            el.addEventListener('click', () => {
+                // Reset tất cả về trạng thái chưa chọn
+                starIds.forEach(resetId => {
+                    const resetEl = document.getElementById(resetId);
+                    if (!resetEl) return;
+                    resetEl.classList.remove('text-blue-800', 'font-semibold', 'bg-blue-100', 'hover:bg-blue-200');
+                    resetEl.classList.add('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                });
+
+                // Highlight phần tử được chọn
+                el.classList.remove('bg-gray-100', 'text-gray-800', 'hover:bg-gray-200');
+                el.classList.add('text-blue-800', 'font-semibold', 'bg-blue-100', 'hover:bg-blue-200');
+
+                const selectedStar = parseInt(id[0]);
+                fetchReviews(companyId, null, selectedStar); // ⚠️ không đệ quy nữa vì không gán lại sự kiện
+            });
+        });
+    }
+    function renderPagination(currentPage, totalPages) {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement("a");
+            btn.href = "#";
+            btn.textContent = (i);
+            btn.className = `${
+                i === currentPage ? "z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium" : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+            }`;
+            btn.setAttribute("data-page", i);
+
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                const page = parseInt(this.getAttribute("data-page"));
+                fetchReviews(companyId, page); // truyền lại companyId và page
+            });
+
+            pagination.appendChild(btn);
+        }
+    }
+
+
+    function renderStars(star) {
+        const full = '<i class="fas fa-star"></i>';
+        const empty = '<i class="far fa-star"></i>';
+        return full.repeat(star) + empty.repeat(5 - star);
+    }
+
+    function getInitials(name) {
+        return name.split(' ').map(word => word[0]).join('').toUpperCase();
+    }
+
+    function timeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date; // thời gian chênh lệch (milliseconds)
+
+        const seconds = Math.floor(diffMs / 1000);
+        const minutes = Math.floor(diffMs / (1000 * 60));
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const months = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30));
+        const years = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365));
+
+        if (seconds < 60) return `Vừa xong`;
+        if (minutes < 60) return `${minutes} phút trước`;
+        if (hours < 24) return `${hours} giờ trước`;
+        if (days < 30) return `${days} ngày trước`;
+        if (months < 12) return `${months} tháng trước`;
+        return `${years} năm trước`;
+    }
+
+
+    async function submitRating(e) {
+
+        if(!ratingInput.value){
+            alert("Hãy đánh giá sao")
+            return
+        }
+
+        const ratingData = {
+            companyId: parseInt(document.getElementById('companyIdC').value),
+            title: document.getElementById('titleC').value,
+            content: document.getElementById('contentC').value,
+            star: !ratingInput.value ? 5 : parseInt(ratingInput.value),
+        };
+        document.getElementById('titleC').value=''
+        document.getElementById('contentC').value=''
+        console.log(
+            ratingData
+        )
+        try {
+            const response = await fetch('/user/api/createComment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(ratingData)
+            });
+            if (response.ok) {
+                await fetchReviews(companyId)
+                resetStars()
+                // Optionally reset form or update UI
+            } else {
+                alert("Lỗi khi gửi đánh giá.");
+            }
+        } catch (error) {
+            console.error('Lỗi mạng:', error);
+            alert("Không thể kết nối máy chủ.");
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('.company-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab');
+
+        // ✅ Nếu có param ?tab=xyz => mở tab đó, ngược lại mở tab đầu tiên
+        if (activeTab) {
+            activateTab(activeTab);
+        } else if (tabs.length > 0) {
+            const firstTabId = tabs[0].getAttribute('data-tab');
+            activateTab(firstTabId);
+        }
+
+        // Xử lý khi người dùng bấm tab
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function (e) {
+                e.preventDefault();
+                const tabId = this.getAttribute('data-tab');
+                activateTab(tabId);
+
+                // Cập nhật URL mà không reload trang
+                const newUrl = `${window.location.pathname}?tab=${tabId}`;
+                window.history.pushState({}, '', newUrl);
+            });
+        });
+
+        // Hàm thực thi khi chuyển tab
+        function activateTab(tabId) {
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            const currentTab = document.querySelector(`[data-tab="${tabId}"]`);
+            const currentContent = document.getElementById(`${tabId}-tab`);
+
+            if (currentTab && currentContent) {
+                currentTab.classList.add('active');
+                currentContent.classList.add('active');
+            }
+        }
+    });
+
+    let currentEditId = null; // Để nhớ commentId đang sửa
+    let editRating = 0;       // Lưu sao mới
+    const starCount = 5;
+
+    function editComment(commentId, currentData = {}) {
+        currentEditId = commentId;
+
+        // Gán dữ liệu cũ vào modal
+        document.getElementById('editTitle').value = currentData.title || '';
+        document.getElementById('editContent').value = currentData.content || '';
+        editRating = currentData.star || 0;
+
+        renderEditStars(); // Gắn sao vào
+
+        document.getElementById('editModal').classList.remove('hidden');
+        document.getElementById('editModal').classList.add('flex');
+    }
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+        document.getElementById('editModal').classList.remove('flex');
+    }
+    function renderEditStars() {
+        const starContainer = document.getElementById('editStars');
+        starContainer.innerHTML = ''; // Xóa sao cũ
+
+        for (let i = 1; i <= starCount; i++) {
+            const star = document.createElement('i');
+            star.className = i <= editRating ? 'fas fa-star text-yellow-400 cursor-pointer' : 'far fa-star text-yellow-400 cursor-pointer';
+            star.setAttribute('data-value', i);
+            star.onclick = () => {
+                editRating = i;
+                renderEditStars(); // Re-render
+            };
+            starContainer.appendChild(star);
+        }
+    }
+    async function saveEdit() {
+        const title = document.getElementById('editTitle').value.trim();
+        const content = document.getElementById('editContent').value.trim();
+        let containerStarEdit=  document.getElementById('containerStarEdit-'+currentEditId)
+        document.getElementById('containerContentEdit-'+currentEditId).innerText=content
+        document.getElementById('containerTitleEdit-'+currentEditId).innerText=title
+        containerStarEdit.innerHTML = renderStars(editRating);
+        if (editRating === 0) {
+            alert("Vui lòng chọn số sao");
+            return;
+        }
+
+        // Gửi request chỉnh sửa
+        const data = {
+            commentId: currentEditId,
+            editRating: editRating,
+            title: title,
+            content: content
+        };
+
+        try {
+            const res = await fetch(`/user/api/update-comment`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                await fetchReviews(companyId,npagee)
+                closeEditModal();
+                // Tải lại bình luận (hoặc cập nhật lại DOM)
+            } else {
+                const err = await res.json();
+                alert("Lỗi: " + err.message);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Có lỗi khi kết nối đến server");
+        }
+    }
+
+
+</script>
+<!-- Modal chỉnh sửa đánh giá -->
+<div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+    <div class="bg-white p-6 rounded-lg w-full max-w-md relative">
+        <h3 class="text-lg font-semibold mb-4">Chỉnh sửa đánh giá</h3>
+
+        <!-- Rating stars -->
+        <div class="flex gap-1 mb-4" id="editStars">
+            <!-- Gắn sao bằng JS -->
+        </div>
+
+        <!-- Tiêu đề -->
+        <input type="text" id="editTitle" placeholder="Tiêu đề" class="w-full border rounded px-3 py-2 mb-3"/>
+
+        <!-- Nội dung -->
+        <textarea id="editContent" rows="4" placeholder="Nội dung"
+                  class="w-full border rounded px-3 py-2 mb-4"></textarea>
+
+        <div class="flex justify-end gap-3">
+            <button onclick="closeEditModal()" class="text-gray-600 hover:text-black">Hủy</button>
+            <button onclick="saveEdit()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Lưu</button>
+        </div>
+
+        <button onclick="closeEditModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-800">✕</button>
+    </div>
+</div>
+
+</body>
+</html>

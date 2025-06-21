@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Truy cập bị từ chối | KMA Tuyển Dụng</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            position: relative;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            filter: brightness(60%); /* Điều chỉnh độ tối tại đây (0% = tối đen, 100% = bình thường) */
+            z-index: -1;
+        }
+
+
+        .error-card {
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.92);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        .lock-icon {
+            position: relative;
+        }
+
+        .lock-icon::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: currentColor;
+            border-radius: 50%;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+<div class="error-card max-w-2xl w-full rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+    <div class="p-8 md:p-10">
+        <!-- KMA Header -->
+        <div class="flex items-center justify-center mb-6">
+            <div class="bg-amber-500 text-white p-3 rounded-lg mr-3">
+                <i class="fas fa-briefcase text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">KMA <span class="text-amber-600">Tuyển Dụng</span></h2>
+        </div>
+
+        <!-- Main Error Content -->
+        <div class="text-center mb-8">
+            <div class="pulse-animation inline-block mb-6">
+                <div class="bg-amber-100 text-amber-600 p-5 rounded-full inline-flex lock-icon">
+                    <i class="fas fa-lock text-4xl"></i>
+                </div>
+            </div>
+
+            <h1 class="text-5xl font-bold text-amber-600 mb-3">403</h1>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Truy cập bị từ chối</h2>
+            <p class="text-gray-600 mb-6">
+                Bạn không có quyền truy cập trang này. Vui lòng kiểm tra lại thông tin đăng nhập hoặc liên hệ quản trị viên nếu bạn cho rằng đây là nhầm lẫn.
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+
+            <!-- Link điều hướng đến trang phù hợp với vai trò -->
+            <a sec:authorize="hasRole('ADMIN')"
+               th:href="@{/admin/dashboard}"
+               class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+            <a sec:authorize="hasRole('RECRUITER')"
+               th:href="@{/recruiter/homepage}"
+               class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+            <a sec:authorize="hasRole('LECTURER')"
+               th:href="@{/lecturer/manage-student}"
+               class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+            <a sec:authorize="hasRole('INTERN')"
+               th:href="@{/homepage}"
+               class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+            <!-- Dành cho người chưa đăng nhập (anonymous) -->
+            <a sec:authorize="isAnonymous()"
+               th:href="@{/homepage}"
+               class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i> Trang chủ
+            </a>
+
+
+            <a th:href="@{/contact}"
+               class="border border-amber-600 text-amber-600 hover:bg-amber-50 font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                <i class="fas fa-user-shield mr-2"></i> Yêu cầu quyền truy cập
+            </a>
+        </div>
+
+        <!-- User Info -->
+        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+            <div class="flex items-center justify-center space-x-4">
+                <div class="bg-gray-200 p-3 rounded-full">
+                    <i class="fas fa-user text-gray-600"></i>
+                </div>
+                <div class="text-left">
+                    <p class="font-medium text-gray-800" sec:authentication="name">Khách</p>
+                    <!-- Nếu đã đăng nhập -->
+                    <p class="text-sm text-gray-500" sec:authorize="isAuthenticated()"
+                       sec:authentication="authorities">
+                        Quyền: <span sec:authentication="authorities"></span>
+                    </p>
+
+                    <!-- Nếu chưa đăng nhập -->
+                    <p class="text-sm text-gray-500" sec:authorize="isAnonymous()">
+                        Quyền: Chưa xác định
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-sm text-gray-500 border-t border-gray-200 pt-4">
+            <p>© 2023 KMA Tuyển Dụng - Hệ thống quản lý tuyển dụng</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

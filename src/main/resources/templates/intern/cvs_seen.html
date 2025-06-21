@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Việc Làm Đã Ứng Tuyển</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f7ff 0%, #f8fafc 100%);
+        }
+        .job-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid transparent;
+        }
+        .job-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            border-left-color: #3b82f6;
+        }
+        .status-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-new {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        .status-seen {
+            background-color: #fffbeb;
+            color: #b45309;
+        }
+        .filter-btn {
+            transition: all 0.2s ease;
+        }
+        .filter-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+        }
+    </style>
+    <div th:replace="~{narbar2 :: styleNarbar}"></div>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<!-- Header -->
+<div th:replace="~{narbar2 :: narbar}"></div>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Filter Section -->
+        <div class="border-b border-gray-200 px-6 py-5">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-lg font-semibold text-gray-800">
+                        Tìm thấy <span class="text-blue-600" th:text="${totalCV}">12</span> đơn ứng tuyển
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">Quản lý tất cả đơn ứng tuyển của bạn tại đây</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="changeS(0)" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50" th:classappend="${status == 0} ? 'active' : ''">
+                        Tất cả
+                    </button>
+                    <button onclick="changeS(1)" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50" th:classappend="${status == 1} ? 'active' : ''">
+                        Đã ứng tuyển
+                    </button>
+                    <button onclick="changeS(2)" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50" th:classappend="${status == 2} ? 'active' : ''">
+                        NTD đã xem
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Applications -->
+        <div class="divide-y divide-gray-100">
+            <!-- Application Card -->
+            <div th:each="cv :${cvs}" th:attr="data-id=${cv.id}" onclick="aaa(this)"
+                 class="job-card bg-white cursor-pointer p-6 hover:bg-blue-50">
+                <div class="flex flex-col md:flex-row">
+                    <!-- Company Logo -->
+                    <div class="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                        <div class="w-16 h-16 rounded-xl bg-white border border-gray-200 overflow-hidden flex items-center justify-center">
+                            <img th:src="@{'/images/companies/'+${cv.postJob.recruiter.id}+'/'+${cv.postJob.recruiter.company.imageUrl}}"
+                                 alt="Company Logo"
+                                 class="w-12 h-12 object-contain">
+                        </div>
+                    </div>
+
+                    <!-- Job Details -->
+                    <div class="flex-grow">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-start">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900" th:text="${cv.postJob.name}">
+                                    Nhân Viên Kế Toán - Làm Việc Tại Đà Nẵng
+                                </h3>
+                                <p class="text-gray-700 font-medium mt-1" th:text="${cv.postJob.recruiter.company.companyName}">
+                                    Công ty Cổ Phần Đầu tư phát triển Miền Trung
+                                </p>
+                            </div>
+                            <span class="mt-2 md:mt-0 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold"
+                                  th:text="${cv.postJob.salary != 0 ? cv.postJob.salary+ ' triệu' : 'Không lương'}">
+                                    15 - 20 triệu
+                                </span>
+                        </div>
+
+                        <!-- Meta Info -->
+                        <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                            <div class="flex flex-wrap gap-4">
+                                <div class="flex items-center text-gray-600 text-sm">
+                                    <i class="far fa-clock mr-2 text-blue-500"></i>
+                                    <span>Ứng tuyển: <th:block th:text="${cv.timeSent}"></th:block></span>
+                                </div>
+
+                            </div>
+
+                            <!-- Status Badge -->
+                            <div class="mt-3 md:mt-0">
+                                    <span th:if="${cv.seen}" class="status-badge status-seen">
+                                        <i class="fas fa-eye mr-1"></i> NTD đã xem hồ sơ
+                                    </span>
+                                <span th:unless="${cv.seen}" class="status-badge status-new">
+                                        <i class="fas fa-paper-plane mr-1"></i> Đã ứng tuyển
+                                    </span>
+                            </div>
+
+                        </div>
+                        <div class="mt-4 md:mt-4">
+                            <span th:text="${cv.process2(cv.cvStatus)}"
+                                  th:classappend="${cv.process3(cv.cvStatus)}" >
+
+                            </span>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-5 flex justify-end space-x-3">
+                    <a onclick="event.stopPropagation()"
+                       target="_blank"
+                            th:href="@{'/images/sendCvs/'+${cv.intern.id}+'/'+${cv.fileCvUrl}}"
+                            class="flex items-center px-4 py-2 bg-white border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition">
+                        <i class="far fa-file-alt mr-2 text-blue-500"></i></i> XEM CV
+                    </a>
+                    <button onclick="event.stopPropagation()"
+                            class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-envelope mr-2"></i> Nhắn tin
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:unless="${cvs}" class="py-16 text-center">
+            <div class="mx-auto w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center mb-6">
+                <i class="fas fa-file-invoice text-blue-500 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">Chưa có đơn ứng tuyển nào</h3>
+            <p class="text-gray-500 max-w-md mx-auto mb-6">
+                Bạn chưa ứng tuyển vào công việc nào. Hãy tìm kiếm công việc phù hợp và ứng tuyển ngay!
+            </p>
+            <button class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                <i class="fas fa-search mr-2"></i> Tìm việc ngay
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- Stats Section -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm opacity-80">Tổng đơn ứng tuyển</p>
+                    <p class="text-3xl font-bold mt-1">24</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-blue-400 bg-opacity-30 flex items-center justify-center">
+                    <i class="fas fa-file-alt text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-blue-400 border-opacity-30 flex items-center">
+                <span class="text-sm">+12% so với tháng trước</span>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm opacity-80">Đơn đã được xem</p>
+                    <p class="text-3xl font-bold mt-1">16</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-green-400 bg-opacity-30 flex items-center justify-center">
+                    <i class="fas fa-eye text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-green-400 border-opacity-30 flex items-center">
+                <span class="text-sm">Tỷ lệ 67%</span>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm opacity-80">Đơn đang chờ</p>
+                    <p class="text-3xl font-bold mt-1">8</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-purple-400 bg-opacity-30 flex items-center justify-center">
+                    <i class="fas fa-clock text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-purple-400 border-opacity-30">
+                <div class="w-full bg-purple-300 bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: 33%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-lg font-bold mb-4">Hỗ Trợ Ứng Viên</h3>
+                <ul class="space-y-2 text-gray-300">
+                    <li><a href="#" class="hover:text-white">Hướng dẫn tạo CV</a></li>
+                    <li><a href="#" class="hover:text-white">Kinh nghiệm phỏng vấn</a></li>
+                    <li><a href="#" class="hover:text-white">Mẫu CV chuyên nghiệp</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold mb-4">Dành Cho Nhà Tuyển Dụng</h3>
+                <ul class="space-y-2 text-gray-300">
+                    <li><a href="#" class="hover:text-white">Đăng tuyển dụng</a></li>
+                    <li><a href="#" class="hover:text-white">Tìm ứng viên</a></li>
+                    <li><a href="#" class="hover:text-white">Giải pháp tuyển dụng</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold mb-4">Về Chúng Tôi</h3>
+                <ul class="space-y-2 text-gray-300">
+                    <li><a href="#" class="hover:text-white">Giới thiệu</a></li>
+                    <li><a href="#" class="hover:text-white">Điều khoản sử dụng</a></li>
+                    <li><a href="#" class="hover:text-white">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold mb-4">Liên Hệ</h3>
+                <p class="text-gray-300 mb-3">
+                    <i class="fas fa-map-marker-alt mr-3"></i> 123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh
+                </p>
+                <p class="text-gray-300 mb-3">
+                    <i class="fas fa-phone mr-3"></i> (028) 1234 5678
+                </p>
+                <p class="text-gray-300">
+                    <i class="fas fa-envelope mr-3"></i> support@vieclam123.com
+                </p>
+            </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+            <p>© 2023 VieLam123. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </div>
+</footer>
+<div th:replace="~{narbar2 :: aiChatBot}"></div>
+<div th:replace="~{footer :: footer}"></div>
+<script>
+    function changeS(value) {
+        if (value === 0) {
+            window.location.href = "/cv-dagui";
+        } else if (value === 1) {
+            window.location.href = "/cv-dagui?status=1";
+        } else if (value === 2) {
+            window.location.href = "/cv-dagui?status=2";
+        }
+    }
+
+    async function aaa(e) {
+        await fetch(`/recruiter/api/increaseView`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(e.dataset.id)
+        });
+        window.location.href = '/chitiet-cv/' + e.dataset.id;
+    }
+
+    // Highlight active filter button
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>
