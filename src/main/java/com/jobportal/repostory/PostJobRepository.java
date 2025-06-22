@@ -1,5 +1,6 @@
 package com.jobportal.repostory;
 
+import com.jobportal.entity.Company;
 import com.jobportal.entity.Intern;
 import com.jobportal.entity.PostJob;
 import com.jobportal.model.CVStatus;
@@ -174,6 +175,26 @@ public interface PostJobRepository extends JpaRepository<PostJob, Integer> {
 
     @Query("SELECT j FROM PostJob j WHERE j.approved = TRUE AND j.hidden = FALSE  AND j.postingDeadline > ?1")
     List<PostJob> findByApprovedAndPreEndTime(LocalDate date);
+
+
+    @Query("SELECT j FROM PostJob j WHERE j.recruiter.company.id = :id AND " +
+            "j.approved = TRUE AND j.hidden = FALSE  AND j.postingDeadline > :expire")
+    Page<PostJob> findByCompanyIdInCompany(@Param("id") Integer companyId,
+                                  @Param("expire") LocalDate expire,
+                                  Pageable pageable);
+
+    // Giảm dần (DESC)
+    @Query("SELECT j.recruiter.company, COUNT(j) FROM PostJob j " +
+            "WHERE j.recruiter.company IN :companies " +
+            "GROUP BY j.recruiter.company ORDER BY COUNT(j) DESC")
+    List<Object[]> getCompaniesOrderByJobCountDesc(@Param("companies") List<Company> companies);
+
+    // Tăng dần (ASC)
+    @Query("SELECT j.recruiter.company, COUNT(j) FROM PostJob j " +
+            "WHERE j.recruiter.company IN :companies " +
+            "GROUP BY j.recruiter.company ORDER BY COUNT(j) ASC")
+    List<Object[]> getCompaniesOrderByJobCountAsc(@Param("companies") List<Company> companies);
+
 }
 
 

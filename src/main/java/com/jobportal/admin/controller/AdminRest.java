@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/admin/api")
 @FieldDefaults(makeFinal = true,level = AccessLevel.PRIVATE)
@@ -77,4 +79,32 @@ public class AdminRest {
         adminService.approvePostJob(id, status, note);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/get-apikey")
+    public ResponseEntity<?> getApiKey() {
+        return ResponseEntity.ok(adminService.getAisystem().getApiKey());
+    }
+    @PutMapping("/update-apikey")
+    public ResponseEntity<?> updateApikey(@RequestBody String apikey) {
+        adminService.updateApiKey(apikey);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/get-body")
+    public ResponseEntity<?> getBody() {
+        return ResponseEntity.ok(adminService.getAisystem().getBodyContent());
+    }
+    @PutMapping("/update-body")
+    public ResponseEntity<?> updateBody(@RequestBody String body) {
+        adminService.updateBody(body);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/ai-bad")
+    public ResponseEntity<?> getBad() {
+        adminService.aiBad();
+        return ResponseEntity.ok().build();
+    }
+
 }

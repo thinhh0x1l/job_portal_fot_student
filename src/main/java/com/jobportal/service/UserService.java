@@ -2,9 +2,13 @@ package com.jobportal.service;
 
 import com.jobportal.dto.request.CommentDto;
 import com.jobportal.dto.request.CommentUpdate;
+import com.jobportal.dto.request.CompaniesReq;
 import com.jobportal.dto.response.CommentRes;
+import com.jobportal.dto.response.CompaniesRes;
+import com.jobportal.dto.response.JobInCompanyRes;
 import com.jobportal.dto.response.NotificationDTO;
 import com.jobportal.entity.*;
+import com.jobportal.model.District;
 import com.jobportal.model.MailInfo;
 import com.jobportal.model.Role;
 import com.jobportal.repostory.*;
@@ -29,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -53,7 +58,7 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     SimpMessagingTemplate messagingTemplate;
     NotificationService notificationService;
-
+    AiSystemRepository aiSystemRepository;
     PrettyTime p = new PrettyTime(new Locale("vi"));
     private final TagRepository tagRepository;
 
@@ -315,6 +320,137 @@ public class UserService {
     }
     public User getUser(){
         return userRepository.findById(getUserId()).get();
+    }
+
+
+    public AiSystem getAisystem(){
+        return aiSystemRepository.findById(1).get();
+    }
+
+    public static final int JOB_IN_COMPANY = 4;
+
+    public JobInCompanyRes getJobsInCompany(Integer companyId, int page){
+        User user = getUserId() != null
+                ? userRepository.findById(getUserId()).orElse(null)
+                : null;
+
+        Page<PostJob> postJobs = postJobRepository.
+                findByCompanyIdInCompany(companyId, LocalDate.now(),
+                        PageRequest.of(page - 1 ,  JOB_IN_COMPANY,Sort.by("id").descending()));
+
+        JobInCompanyRes resIn = new JobInCompanyRes();
+        if(postJobs.isEmpty())return resIn;
+
+        long startCount =  (page - 1L) * JOB_IN_COMPANY + 1;
+        long endCount = startCount + JOB_IN_COMPANY -1;
+        if(endCount > postJobs.getTotalElements());
+        endCount = postJobs.getTotalElements()  ;
+        resIn.setCurrentPage(page);
+        resIn.setTotalPages(postJobs.getTotalPages());
+        resIn.setElementEnd(endCount);
+        resIn.setElementStart(startCount);
+        resIn.setTotalElements(postJobs.getTotalElements());
+        List<JobInCompanyRes.Job> listRes = new ArrayList<>();
+        for(PostJob p : postJobs.getContent()){
+            JobInCompanyRes.Job res = resIn.new Job();
+            if(user!= null && user.getRole().equals(Role.INTERN))
+                res.setFavorite(p.getInterns().contains((Intern) user));
+            res.setId(p.getId());
+            res.setName(p.getName());
+            res.setCreatedAt(p.getTimePost());
+            res.setViews(p.getView());
+            res.setSalary(p.getSalary() >= 1 ? p.getSalary()+" triệu" :
+                    (p.getSalary()!=0 ?p.getSalary()*1000000 +" nghìn":"Không lương"));
+            for (Tag t : p.getTags())
+                res.getTags().add(
+                        res.new Tags(
+                                t.getId(),
+                                t.getName(),
+                                t.getColorClassV1()
+                        )
+                );
+            listRes.add(res);
+        }
+        resIn.setJobs(listRes);
+        return resIn;
+    }
+
+    public static final int PAGE_COMPANY_SIZE = 9;
+
+    public CompaniesRes companiesRes(CompaniesReq companiesReq){
+
+        Page<Company> companies;
+        if(companiesReq.getDistrictCode().equals("0"))
+            companies = companyRepository.getCompanies(companiesReq.getKeywords(),
+                    PageRequest.of(companiesReq.getPage()-1, PAGE_COMPANY_SIZE));
+        else
+            companies = companyRepository.getCompaniesByDistrict(companiesReq.getKeywords(),
+                    District.valueOf(companiesReq.getDistrictCode()),
+                    PageRequest.of(companiesReq.getPage()-1, PAGE_COMPANY_SIZE));
+
+        long startCount =  (companiesReq.getPage() - 1L) * PAGE_COMPANY_SIZE + 1;
+        long endCount = startCount + PAGE_COMPANY_SIZE -1;
+        if(endCount > companies.getTotalElements());
+        endCount = companies.getTotalElements()  ;
+
+
+        CompaniesRes res = new CompaniesRes(companiesReq.getDistrictCode());
+        res.setCurrentPage(companiesReq.getPage());
+        res.setTotalElements(companies.getTotalElements());
+        res.setTotalPages(companies.getTotalPages());
+        res.setElementEnd(endCount);
+        res.setElementStart(startCount);
+
+        res.setKeywords(companiesReq.getKeywords());
+        res.setFilter(companiesReq.getFilter());
+        for (District d : District.values()){
+            res.getDistricts().add(res.new District(d.getDisplayName()
+                    ,d.name(),companiesReq.getDistrictCode().equals(d.name())));
+        }
+        if(companies.isEmpty())return res;
+        List<Object[]> result;
+        if(companiesReq.getFilter().equals("1")||companiesReq.getFilter().equals("2"))
+            if(companiesReq.getFilter().equals("1"))
+                result = companyRepository.getCompaniesOrderByAverageStarASC(companies.getContent(),
+                        LocalDate.now());
+            else
+                result = companyRepository.getCompaniesOrderByAverageStarDesc(companies.getContent(),
+                        LocalDate.now());
+
+         else if (!companiesReq.getFilter().equals("0"))
+            if(companiesReq.getFilter().equals("3"))
+                 result = companyRepository.getCompaniesWithJobCountAndAverageStarASC(companies.getContent(),
+                         LocalDate.now());
+            else
+                result = companyRepository.getCompaniesWithJobCountAndAverageStarDESC(companies.getContent(),
+                        LocalDate.now());
+
+        else{
+            result = companyRepository.getCompaniesWithoutOrdering(companies.getContent(),
+                    LocalDate.now());
+        }
+        for (Object[] row : result) {
+            Company company = (Company) row[0];
+            Integer jobCount = ((Long) row[1]).intValue();
+
+            Double avgStar = (Double) row[2];
+            CompaniesRes.Company compy = res.new Company();
+
+            compy.setId(company.getId());
+            compy.setCompanyName(company.getCompanyName());
+            compy.setImage("/images/companies/"+company.getId()+"/"+company.getImageUrl());
+            compy.setDistrict(company.getDistrict().getDisplayName()+", TpHCM");
+            String plainText = company.getDescription().replaceAll("<[^>]*>", "");
+            compy.setDescription(plainText.substring(0, Math.min(80,plainText.length())));
+
+            compy.setJobs(jobCount);
+            compy.setAvgStars(avgStar);
+            res.getCompanies().add(compy);
+
+        }
+
+
+        return res;
     }
 }
 

@@ -35,6 +35,7 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.function.Supplier;
 
@@ -59,11 +60,14 @@ public class SecurityConfig {
 
     @Autowired
     private RequestFilter requestFilter;
-
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
     @Bean
     @Order(4)
     public SecurityFilterChain securityFilterChainIntern(HttpSecurity http) throws Exception {
-        System.out.println(3);
+
         http
                 .securityMatcher(new OrRequestMatcher(
                         new AntPathRequestMatcher("/**"),
@@ -88,6 +92,7 @@ public class SecurityConfig {
                                 "/companies",
                                 "/user/api/**",
                                 "/intern/api/**",
+                                "/admin/api/ai-bad",
                                 "/homepage",
                                 "/tim-viec/*",
                                 "/test",
@@ -115,7 +120,7 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain securityFilterChainRecruiter(HttpSecurity http) throws Exception {
-        System.out.println(1);
+
         return http
                 .securityMatcher(new OrRequestMatcher(
                         new AntPathRequestMatcher("/recruiter/**"),
@@ -216,7 +221,7 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain securityFilterChainAdmin (HttpSecurity http,@Qualifier("customAdminDetailsService")UserDetailsService userDetailsService) throws Exception {
-        System.out.println(2);
+
         return http
                 .securityMatcher(new OrRequestMatcher(
                         new AntPathRequestMatcher("/admin/**")
@@ -225,6 +230,7 @@ public class SecurityConfig {
                 .userDetailsService(userDetailsService)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/api/").permitAll()
+                        .requestMatchers("/admin/api/ai-bad").hasRole("INTERN")
                         .anyRequest().hasAnyRole("ADMIN"))
                 .formLogin(login->login
                         .loginPage("/admin/login")

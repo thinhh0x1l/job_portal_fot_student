@@ -535,7 +535,7 @@
                         <button  th:onclick="|checkLevel2(${id},${companyLevel})|" class="dropdown-item">
                             <i class="fas fa-plus"></i> Đăng tin
                         </button>
-                        <a onclick="redirect(this)" th:href="@{/recruiter/quanly-baidang}" class="dropdown-item">
+                        <a  th:href="@{/recruiter/quanly-baidang}" class="dropdown-item">
                             <i class="fas fa-list"></i> Các bài đăng
                         </a>
                     </div>
@@ -565,11 +565,11 @@
                     <span>Duyệt CV</span>
                 </a>
 
-                <!-- Tìm CV -->
-                <a onclick="redirect(this)" th:href="@{/recruiter/tim-cv}" class="nav-link">
-                    <i class="fas fa-search"></i>
-                    <span>Tìm CV</span>
-                </a>
+<!--                &lt;!&ndash; Tìm CV &ndash;&gt;-->
+<!--                <a onclick="redirect(this)" th:href="@{/recruiter/tim-cv}" class="nav-link">-->
+<!--                    <i class="fas fa-search"></i>-->
+<!--                    <span>Tìm CV</span>-->
+<!--                </a>-->
 
                 <!-- Thực tập sinh -->
                 <a onclick="redirect(this)" th:href="@{/recruiter/thuc-tap-sinh}" class="nav-link">

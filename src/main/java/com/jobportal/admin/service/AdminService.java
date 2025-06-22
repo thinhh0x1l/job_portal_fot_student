@@ -6,6 +6,7 @@ import com.jobportal.entity.*;
 import com.jobportal.model.TagType;
 import com.jobportal.repostory.*;
 import com.jobportal.service.MailerService;
+import com.jobportal.service.NotificationService;
 import com.jobportal.service.OnlineService;
 import com.jobportal.service.UserService;
 import lombok.AccessLevel;
@@ -41,6 +42,8 @@ public class AdminService {
     RecruiterRepository recruiterRepository;
     UserService userService;
     InternRepository internRepository;
+    AiSystemRepository aiSystemRepository;
+    NotificationService notificationService;
     public List<Notification> getNotificationByAdmin(){
         return notificationRepository.findByAdmin(LocalDateTime.now().minusWeeks(2));
     }
@@ -153,4 +156,40 @@ public class AdminService {
                 r
         );
     }
+
+    public AiSystem getAisystem(){
+        return aiSystemRepository.findById(1).get();
+    }
+    public void updateApiKey(String apikey){
+        AiSystem ai =  aiSystemRepository.findById(1).get();
+        ai.setApiKey(apikey);
+        ai.setExpire(false);
+    }
+    public void updateBody(String body){
+        AiSystem ai =  aiSystemRepository.findById(1).get();
+        System.out.println(body);
+        ai.setBodyContent(body);
+        ai.setExpire(false);
+    }
+
+    public void aiBad(){
+        AiSystem ai =  aiSystemRepository.findById(1).get();
+
+        if(!ai.isExpire()){
+            ai.setExpire(true);
+            notificationService.notification(
+                "Hệ thống AI của bạn gặp Sự có hãy sữa nó",
+                    "/admin/manage-ai",
+                    "/images/admin/aino1.png",
+                    null,
+                    null
+            );
+        }
+    }
+
+
+//    public void updateAisystem(Object object){
+//        AiSystem system = getAisystem();
+//        AiSystem
+//    }
 }

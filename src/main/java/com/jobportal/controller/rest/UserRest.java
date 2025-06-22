@@ -2,6 +2,7 @@ package com.jobportal.controller.rest;
 
 import com.jobportal.dto.request.CommentDto;
 import com.jobportal.dto.request.CommentUpdate;
+import com.jobportal.dto.request.CompaniesReq;
 import com.jobportal.service.UserService;
 import com.jobportal.service.recruiter.RecruiterService;
 import lombok.AccessLevel;
@@ -63,5 +64,25 @@ public class UserRest {
     public ResponseEntity<?> mark() {
         userService.updateSeen();
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/get-aisystem")
+    public ResponseEntity<?> getAisystem() {
+        return ResponseEntity.ok(userService.getAisystem());
+    }
+
+    @GetMapping("/get-jobInCompany")
+    public ResponseEntity<?> getJobInCompany (@RequestParam("compyId") int compyId,
+                                              @RequestParam(value = "page",defaultValue =  "1") int page){
+        return ResponseEntity.ok(userService.getJobsInCompany(compyId,page));
+    }
+
+    @GetMapping("/get-allCompanies")
+    public ResponseEntity<?> getJobInCompany (
+            @RequestParam(value = "page",defaultValue = "1")int page,
+            @RequestParam(value = "keywords",defaultValue = "")String keywords,
+            @RequestParam(value = "filter",defaultValue = "0")String filter,
+            @RequestParam(value = "districtCode",defaultValue = "0")String districtCode
+            ){
+        return ResponseEntity.ok(userService.companiesRes(new CompaniesReq(page,keywords,filter,districtCode)));
     }
 }

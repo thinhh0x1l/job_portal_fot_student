@@ -1,9 +1,6 @@
 package com.jobportal.controller.intern_controller;
 
-import com.jobportal.dto.request.ProjectInternRequest;
-import com.jobportal.dto.request.SendOutCvDto;
-import com.jobportal.dto.request.TagDetailsRequest;
-import com.jobportal.dto.request.UpdateDescriptionDetailRequest;
+import com.jobportal.dto.request.*;
 import com.jobportal.dto.response.SotResponse;
 import com.jobportal.entity.Notification;
 import com.jobportal.entity.ProjectIntern;
@@ -148,6 +145,8 @@ public class InternRest {
         internService.updateTagDetail(tagDetailsRequest);
         return ResponseEntity.ok().build();
     }
+
+
 
 //    @GetMapping
 //    public ResponseEntity<?> suggestJobsWithMatchCount(){

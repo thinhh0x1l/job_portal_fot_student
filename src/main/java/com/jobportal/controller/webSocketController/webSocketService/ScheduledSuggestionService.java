@@ -25,9 +25,8 @@ public class ScheduledSuggestionService {
     public void sendSuggestionsToOnlineInterns() {
         for (Integer internId : onlineInternTracker.getOnlineInterns()) {
             List<SuggestJobs> suggestions = internService.suggestJobsWithMatchCount(internId);
-            if (!suggestions.isEmpty()) {
-                messagingTemplate.convertAndSend("/topic/suggestions/" + internId, suggestions);
-            }
+            messagingTemplate.convertAndSend("/topic/suggestions/" + internId, suggestions);
+
         }
     }
 }

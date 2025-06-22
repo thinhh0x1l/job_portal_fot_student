@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Inputs with Save/Cancel</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Styles -->
+    <style>
+        .sidebar-item-active {
+            background-color: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            font-weight: 500;
+        }
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar-open {
+                transform: translateX(0);
+            }
+        }
+        .password-input[type="password"]::-ms-reveal,
+        .password-input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        .input-active {
+            @apply border-blue-500 ring-2 ring-blue-200;
+        }
+
+        .main-content {
+            transition: margin-left 0.3s;
+        }
+
+        .sidebar-open .main-content {
+            margin-left: 30rem;
+        }
+    </style>
+
+    <!-- Thymeleaf fragments -->
+    <th:block th:replace="~{narbarAdmin :: narbarStyle}"></th:block>
+</head>
+<body class="bg-gray-50 font-sans">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<th:block th:replace="~{narbarAdmin :: sidebar}"></th:block>
+
+        <div class="flex-1 overflow-auto">
+            <!-- Topbar -->
+            <th:block th:replace="~{narbarAdmin :: topbar}"></th:block>
+
+            <div class="p-10 md:p-20 max-w-screen-2xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-[1600px]">
+                    <h1 class="text-4xl font-bold text-gray-800 mb-10 text-center">Editable Input Form</h1>
+
+                    <!-- API Key Input Group -->
+                    <div class="mb-10 text-xl">
+                        <label for="apiKey" class="block font-semibold text-gray-700 mb-3">API Key:</label>
+                        <div class="relative flex">
+                            <input
+                                    type="password"
+                                    id="apiKey"
+                                    placeholder="Enter your API key"
+                                    class="password-input editable-input w-full px-6 py-5 border border-gray-400 rounded-l-lg focus:outline-none transition-all text-xl"
+                            >
+                            <button
+                                    onclick="togglePasswordVisibility()"
+                                    class="toggle-password px-6 bg-gray-100 border border-l-0 border-gray-400 rounded-r-lg hover:bg-gray-200 focus:outline-none transition-colors text-gray-600 text-xl"
+                            >
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="hidden mt-4 flex justify-end space-x-4" id="apiKeyActions">
+                            <button
+                                    onclick="cancelEdit('apiKey')"
+                                    class="cancel-btn px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors text-xl"
+                            >
+                                <i class="fas fa-times mr-2"></i>Cancel
+                            </button>
+                            <button
+                                    onclick="updateApikey()"
+                                    class="save-btn px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors text-xl"
+                            >
+                                <i class="fas fa-check mr-2"></i>Save
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Content Textarea Group -->
+                    <div class="mb-10 text-xl">
+                        <label for="contentText" class="block font-semibold text-gray-700 mb-3">Content:</label>
+                        <textarea
+                                id="contentText"
+                                placeholder="Enter your content here..."
+                                class="editable-input w-full px-6 py-5 border border-gray-400 rounded-lg focus:outline-none transition-all min-h-[400px] text-xl"
+                        ></textarea>
+                        <div class="hidden mt-4 flex justify-end space-x-4" id="contentTextActions">
+                            <button
+                                    onclick="cancelEdit('contentText')"
+                                    class="cancel-btn px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors text-xl"
+                            >
+                                <i class="fas fa-times mr-2"></i>Cancel
+                            </button>
+                            <button
+                                    onclick="updateBody()"
+                                    class="save-btn px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors text-xl"
+                            >
+                                <i class="fas fa-check mr-2"></i>Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded',()=>{
+        getApikey()
+        getBody()
+    })
+    // Store original values
+    const originalValues = {
+        apiKey: document.getElementById('apiKey')?.value || '',
+        contentText: document.getElementById('contentText')?.value || ''
+    };
+
+    // Toggle password visibility
+    function togglePasswordVisibility() {
+        const apiKeyInput = document.getElementById('apiKey');
+        const toggleButton = document.querySelector('.toggle-password');
+
+        if (apiKeyInput.type === 'password') {
+            apiKeyInput.type = 'text';
+            toggleButton.innerHTML = '<i class="far fa-eye-slash"></i>';
+        } else {
+            apiKeyInput.type = 'password';
+            toggleButton.innerHTML = '<i class="far fa-eye"></i>';
+        }
+    }
+
+    // Show action buttons when input is focused
+    document.querySelectorAll('.editable-input').forEach(input => {
+        input.addEventListener('focus', function() {
+            // Store original value
+            originalValues[this.id] = this.value;
+
+            // Highlight active input
+            this.classList.add('input-active');
+
+            // Show action buttons
+            const actionDiv = document.getElementById(`${this.id}Actions`);
+            actionDiv.classList.remove('hidden');
+        });
+    });
+
+    // Save edit
+    function saveEdit(inputId) {
+        const input = document.getElementById(inputId);
+        const actionDiv = document.getElementById(`${inputId}Actions`);
+
+        // Here you would typically save to server
+        console.log(`Saved ${inputId}:`, input.value);
+
+        // You could add AJAX call to save to server
+        // fetch('/save-endpoint', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //         field: inputId,
+        //         value: input.value
+        //     })
+        // })
+
+        // Hide buttons and remove highlight
+        actionDiv.classList.add('hidden');
+        input.classList.remove('input-active');
+
+        // Visual feedback
+        input.classList.add('border-green-500');
+        setTimeout(() => {
+            input.classList.remove('border-green-500');
+        }, 1000);
+
+        // Update original value
+        originalValues[inputId] = input.value;
+    }
+
+    // Cancel edit
+    function cancelEdit(inputId) {
+        const input = document.getElementById(inputId);
+        const actionDiv = document.getElementById(`${inputId}Actions`);
+
+        // Restore original value
+        input.value = originalValues[inputId];
+
+        // Hide buttons and remove highlight
+        actionDiv.classList.add('hidden');
+        input.classList.remove('input-active');
+    }
+
+    // Hide action buttons when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('editable-input') &&
+            !e.target.closest('.action-buttons') &&
+            e.target.tagName !== 'LABEL') {
+
+            document.querySelectorAll('[id$="Actions"]').forEach(div => {
+                div.classList.add('hidden');
+            });
+
+            document.querySelectorAll('.editable-input').forEach(input => {
+                input.classList.remove('input-active');
+            });
+        }
+    });
+
+    // Lấy API key (text/plain)
+    async function getApikey() {
+        let res = await fetch('/admin/api/get-apikey');
+        if (res.ok) {
+             // DÙNG .text()
+            document.getElementById('apiKey').value = await res.text();
+        }
+    }
+
+    // Lưu lại nội dung body (text/plain)
+    async function updateApikey() {
+        const apikey = document.getElementById('apiKey').value || '';
+        let res = await fetch('/admin/api/update-apikey', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: apikey
+        });
+        if (res.ok) {
+            await getApikey(); // Gọi lại để load lại sau khi lưu xong
+        }
+    }
+
+
+    async function getBody() {
+        let res = await fetch('/admin/api/get-body');
+        if (res.ok) {
+            document.getElementById('contentText').value = await res.text();
+        }
+    }
+
+
+    async function updateBody(){
+        const body = document.getElementById('contentText').value || '';
+
+        let res = await fetch('/admin/api/update-body', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: body
+        });
+        if(res.ok)
+            await getBody()
+
+    }
+</script>
+</body>
+</html>

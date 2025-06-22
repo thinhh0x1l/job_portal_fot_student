@@ -50,6 +50,13 @@
         .filter-chip:hover {
             transform: scale(1.05);
         }
+        .fake-disabled {
+            pointer-events: none;  /* Ngăn tương tác */
+            background-color: #ccc;
+            color: #666;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
         .filter-chip.active {
             background-color: #2b6cb0 !important;
@@ -393,7 +400,7 @@
                              ${salary.toString().equals('0') ? '' : '&salary=' + salary + '&status=' + status} +
                              ${urgent == 0 ? '' : '&urgent=' + urgent} +
                              ${like.toString().equals('')  ? '' : '&like=' + like}}"
-                   th:classappend="${currentPage == 1  ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}"
+                   th:classappend="${currentPage == 1  ? 'opacity-50 cursor-not-allowed fake-disabled' : 'hover:bg-gray-100 '}"
                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700">
                     <i class="fas fa-angle-double-left"></i>
                 </a>
@@ -404,10 +411,26 @@
                              ${salary.toString().equals('0') ? '' : '&salary=' + salary + '&status=' + status} +
                              ${urgent == 0 ? '' : '&urgent=' + urgent} +
                              ${like.toString().equals('')  ? '' : '&like=' + like}}"
-                   th:classappend="${currentPage == 1  ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}"
+                   th:classappend="${currentPage == 1  ? 'opacity-50 cursor-not-allowed fake-disabled' : 'hover:bg-gray-100'}"
                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700">
                     <i class="fas fa-chevron-left"></i>
                 </a>
+
+                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a   th:href="@{'/homepage?page=' + ${i} +
+                              ${major.toString().equals('0') ? '' : '&major=' + major + '&status=' + status} +
+                              ${district.toString().equals('0') ? '' : '&district=' + district + '&status=' + status} +
+                              ${salary.toString().equals('0') ? '' : '&salary=' + salary + '&status=' + status} +
+                              ${urgent == 0 ? '' : '&urgent=' + urgent} +
+                              ${like.toString().equals('') ? '' : '&like=' + like}}"
+                       th:if="${currentPage!=i && i > 0}"
+                       th:text="${i}"
+                       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100">
+                    </a>
+                    <a th:if="${currentPage==i}" th:text="${i}"
+                       class="px-4 py-2 bg-secondary text-white rounded-lg"></a>
+                </th:block>
+
 
 
 
@@ -417,7 +440,7 @@
                              ${salary.toString().equals('0') ? '' : '&salary=' + salary + '&status=' + status} +
                              ${urgent == 0 ? '' : '&urgent=' + urgent} +
                              ${like.toString().equals('')  ? '' : '&like=' + like}}"
-                   th:classappend="${currentPage == totalPages || totalPages <= 1} ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'"
+                   th:classappend="${currentPage == totalPages || totalPages <= 1} ? 'opacity-50 cursor-not-allowed fake-disabled' : 'hover:bg-gray-100'"
                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700">
                     <i class="fas fa-chevron-right"></i>
                 </a>
@@ -428,7 +451,7 @@
                              ${salary.toString().equals('0') ? '' : '&salary=' + salary + '&status=' + status} +
                              ${urgent == 0 ? '' : '&urgent=' + urgent} +
                              ${like.toString().equals('')  ? '' : '&like=' + like}}"
-                   th:classappend="${currentPage == totalPages || totalPages <= 1} ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'"
+                   th:classappend="${currentPage == totalPages || totalPages <= 1} ? 'opacity-50 cursor-not-allowed fake-disabled' : 'hover:bg-gray-100'"
                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700">
                     <i class="fas fa-angle-double-right"></i>
                 </a>

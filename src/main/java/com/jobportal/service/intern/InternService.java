@@ -3,6 +3,7 @@ package com.jobportal.service.intern;
 import com.jobportal.dto.dummy.ScoredJob;
 import com.jobportal.dto.request.*;
 import com.jobportal.dto.response.DetailStudent;
+import com.jobportal.dto.response.JobInCompanyRes;
 import com.jobportal.dto.response.NotificationDTO;
 import com.jobportal.dto.response.UpdateTagsRes;
 import com.jobportal.entity.*;
@@ -447,13 +448,10 @@ public class InternService {
     public List<SuggestJobs> suggestJobsWithMatchCount(Integer id) {
         Intern intern = internRepository.findById(id).orElse(null);
         if (intern == null) return Collections.emptyList();
-
         Set<Tag> internTags = intern.getTags();
         if (internTags == null || internTags.isEmpty())
             return Collections.emptyList();
-
 //        long percentTag = Math.max(Math.round(internTags.size() * 0.3), 1);
-
         List<ScoredJob> scoredJobs = postJobRepository.findByApprovedAndPreEndTime(LocalDate.now()).stream()
                 .map(job -> {
                     Set<Tag> jobTags = new HashSet<>(job.getTags());
@@ -464,10 +462,8 @@ public class InternService {
                 .filter(scored -> scored.getMatchCount() >= 1)
                 .sorted(Comparator.comparingInt(ScoredJob::getMatchCount).reversed())
                 .toList();
-
         int size = scoredJobs.size();
         if (size == 0) return Collections.emptyList();
-
         int to = (int) (Math.random() * (size + 1));
         int from = Math.max(to - 10, 0);
 
@@ -491,4 +487,6 @@ public class InternService {
         jobSkills.retainAll(studentSkills); // giữ lại phần giao
         return jobSkills.size();
     }
+
+
 }

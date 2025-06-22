@@ -59,7 +59,7 @@
             <!-- Search Input -->
             <div class="flex-1">
                 <div class="relative">
-                    <input type="text" placeholder="Tìm kiếm công ty..."
+                    <input type="text" placeholder="Tìm kiếm công ty..." id="keywords"
                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <div class="absolute left-3 top-2.5 text-gray-400">
                         <i class="fas fa-search"></i>
@@ -69,32 +69,29 @@
 
             <!-- Location Filter -->
             <div class="w-full md:w-48">
-                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Tất cả địa điểm</option>
-                    <option>Hà Nội</option>
-                    <option>TP. Hồ Chí Minh</option>
-                    <option>Đà Nẵng</option>
-                    <option>Hải Phòng</option>
-                    <option>Cần Thơ</option>
+                <select id="locationSelect"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
                 </select>
             </div>
 
             <!-- Industry Filter -->
             <div class="w-full md:w-48">
-                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Tất cả ngành nghề</option>
-                    <option>Công nghệ thông tin</option>
-                    <option>Tài chính - Ngân hàng</option>
-                    <option>Bất động sản</option>
-                    <option>Giáo dục</option>
-                    <option>Y tế</option>
+                <select id="filerSelect"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="0">Mặc định</option>
+                    <option value="1">Đánh giá Cao</option>
+                    <option value="2">Đánh gía thấp</option>
+                    <option value="3">Nhiều công việc nhất</option>
+                    <option value="4">Ít công việc nhất</option>
+
                 </select>
             </div>
 
-            <!-- Search Button -->
-            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                <i class="fas fa-filter mr-2"></i> Lọc
-            </button>
+<!--            &lt;!&ndash; Search Button &ndash;&gt;-->
+<!--            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">-->
+<!--                <i class="fas fa-filter mr-2"></i> Lọc-->
+<!--            </button>-->
         </div>
     </div>
 
@@ -104,7 +101,7 @@
             <i class="fas fa-star text-yellow-500 mr-2"></i> Công ty nổi bật
         </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="companiesContainer">
             <!-- Featured Company Card 1 -->
             <div class="company-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 relative">
                 <div class="featured-badge absolute top-4 right-4 bg-yellow-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
@@ -234,70 +231,58 @@
     <div>
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-gray-800">Tất cả công ty</h2>
-            <div class="text-sm text-gray-500">
-                Hiển thị <span class="font-medium">1-12</span> trong tổng số <span class="font-medium">128</span> công ty
+            <div class="text-sm text-gray-500" id="showNumberOfCompanies">
+
             </div>
         </div>
 
-        <!-- Company List -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Dynamic Company Cards (using Thymeleaf) -->
-            <a th:each="company : ${companies}"
-               th:href="@{'/compy/'+${company.id}}"
-               class="company-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
-                <div class="p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 mr-4">
-                            <img th:src="@{'/images/companies/' + ${company.id} + '/' + ${company.imageUrl}}"
-                                 alt="Company Logo" class="w-full h-full object-cover">
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-gray-800" th:text="${company.companyName}"></h3>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="fas fa-map-marker-alt mr-1.5"></i>
-                                <span th:text="${company.district.displayName+', TPHCM'}"></span>
-                            </div>
-                        </div>
-                    </div>
-
-<!--                    <div class="flex flex-wrap gap-2 mb-4">-->
-<!--                        <span th:each="tag : ${company.tags}"-->
-<!--                              th:class="${'bg-' + tag.color + '-100 text-' + tag.color + '-800 text-xs px-2.5 py-0.5 rounded-full'}"-->
-<!--                              th:text="${tag.name}"></span>-->
+<!--        &lt;!&ndash; Company List &ndash;&gt;-->
+<!--        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">-->
+<!--            &lt;!&ndash; Dynamic Company Cards (using Thymeleaf) &ndash;&gt;-->
+<!--            <a th:each="company : ${companies}"-->
+<!--               th:href="@{'/compy/'+${company.id}}"-->
+<!--               class="company-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">-->
+<!--                <div class="p-6">-->
+<!--                    <div class="flex items-center mb-4">-->
+<!--                        <div class="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 mr-4">-->
+<!--                            <img th:src="@{'/images/companies/' + ${company.id} + '/' + ${company.imageUrl}}"-->
+<!--                                 alt="Company Logo" class="w-full h-full object-cover">-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <h3 class="font-bold text-gray-800" th:text="${company.companyName}"></h3>-->
+<!--                            <div class="flex items-center text-sm text-gray-600">-->
+<!--                                <i class="fas fa-map-marker-alt mr-1.5"></i>-->
+<!--                                <span th:text="${company.district.displayName+', TPHCM'}"></span>-->
+<!--                            </div>-->
+<!--                        </div>-->
 <!--                    </div>-->
 
-<!--                    <p class="text-gray-600 text-sm mb-4 line-clamp-2" th:text="${company.shortDescription}"></p>-->
+<!--&lt;!&ndash;                    <div class="flex flex-wrap gap-2 mb-4">&ndash;&gt;-->
+<!--&lt;!&ndash;                        <span th:each="tag : ${company.tags}"&ndash;&gt;-->
+<!--&lt;!&ndash;                              th:class="${'bg-' + tag.color + '-100 text-' + tag.color + '-800 text-xs px-2.5 py-0.5 rounded-full'}"&ndash;&gt;-->
+<!--&lt;!&ndash;                              th:text="${tag.name}"></span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
 
-                    <div class="flex justify-between items-center">
-                        <div class="text-sm">
-                            <span class="text-gray-500">Việc làm đang mở:</span>
-                            <span class="font-medium text-blue-600 ml-1" th:text="${company.recruiter.postJobs.size()}"></span>
-                        </div>
-<!--                        <a th:href="@{'/cong-ty/' + ${company.slug}}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">-->
-<!--                            <span>Xem chi tiết</span>-->
-<!--                            <i class="fas fa-chevron-right ml-1 text-xs"></i>-->
-<!--                        </a>-->
-                    </div>
-                </div>
-            </a>
-        </div>
+<!--&lt;!&ndash;                    <p class="text-gray-600 text-sm mb-4 line-clamp-2" th:text="${company.shortDescription}"></p>&ndash;&gt;-->
+
+<!--                    <div class="flex justify-between items-center">-->
+<!--                        <div class="text-sm">-->
+<!--                            <span class="text-gray-500">Việc làm đang mở:</span>-->
+<!--                            <span class="font-medium text-blue-600 ml-1" th:text="${company.recruiter.postJobs.size()}"></span>-->
+<!--                        </div>-->
+<!--&lt;!&ndash;                        <a th:href="@{'/cong-ty/' + ${company.slug}}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">&ndash;&gt;-->
+<!--&lt;!&ndash;                            <span>Xem chi tiết</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <i class="fas fa-chevron-right ml-1 text-xs"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </a>&ndash;&gt;-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </a>-->
+<!--        </div>-->
 
         <!-- Pagination -->
         <div class="flex justify-center">
-            <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
-                    <span class="sr-only">Previous</span>
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-                <a href="#" class="px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">1</a>
-                <a href="#" class="px-4 py-2 border border-gray-300 bg-blue-50 text-blue-600 hover:bg-blue-100 active">2</a>
-                <a href="#" class="px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">3</a>
-                <span class="px-4 py-2 border border-gray-300 bg-white text-gray-700">...</span>
-                <a href="#" class="px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">8</a>
-                <a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
-                    <span class="sr-only">Next</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
+            <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination" id="Pagination">
+
             </nav>
         </div>
     </div>
@@ -306,13 +291,138 @@
 <div th:replace="~{narbar2 :: aiChatBot}"></div>
 <div th:replace="~{footer :: footer}"></div>
 <script>
+
+    let keywords= document.getElementById('keywords').value ||''
+    let filter
+    let districtCode
+    let locationSelect = document.getElementById('locationSelect')
+    let filerSelect = document.getElementById('filerSelect')
+    let showNumberOfCompanies = document.getElementById('showNumberOfCompanies')
+    let companiesContainer = document.getElementById('companiesContainer')
+    let Pagination = document.getElementById('Pagination')
+    let curPage = 1
+    async function loadCompanies(page){
+        page = page?page:1
+        filter = filerSelect.value || '0'
+        districtCode = locationSelect.value || '0'
+        let res = await fetch('/user/api/get-allCompanies?page='+page
+            +'&keywords='+keywords+'&filter='+filter+'&districtCode='+districtCode)
+
+        if(res.ok){
+            locationSelect.innerHTML = ''
+            let data = await res.json();
+            data.districts.forEach(d=>{
+                const option = document.createElement('option');
+                option.value = d.code;
+                option.textContent = d.name;
+                option.selected=d.selected
+                locationSelect.appendChild(option);
+            })
+            filerSelect.value=data.filter||'0'
+            showNumberOfCompanies.innerHTML = `
+            Hiển thị <span class="font-medium">${data.elementStart} - ${data.elementEnd}</span> trong tổng số <span class="font-medium">${data.totalElements}</span> công ty
+            `
+            let html =''
+                data.companies.forEach(c =>{
+                    html +=
+                        `
+            <div class="company-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 relative">
+                <div class="featured-badge absolute top-4 right-4 bg-black text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+                    Nổi bật ${c.avgStars!=null?`${parseFloat(c.avgStars.toFixed(1))}  <i class="fas fa-star  text-yellow-500 text-lg"></i>`:`Chưa có đánh giá`}
+                </div>
+
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 mr-4">
+                            <img src="${c.image}" alt="Company Logo" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">${c.companyName}</h3>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-map-marker-alt mr-1.5"></i>
+                                <span>${c.district}</span>
+                            </div>
+                        </div>
+                    </div>
+
+<!--                    <div class="flex flex-wrap gap-2 mb-4">-->
+<!--                        <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full">Công nghệ</span>-->
+<!--                        <span class="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full">Top 50</span>-->
+<!--                        <span class="bg-purple-100 text-purple-800 text-xs px-2.5 py-0.5 rounded-full">Đa quốc gia</span>-->
+<!--                    </div>-->
+
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">${c.description}</p>
+
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm">
+                            <span class="text-gray-500">Việc làm đang hoạt động:</span>
+                            <span class="font-medium text-blue-600 ml-1">${c.jobs}</span>
+                        </div>
+                        <a href="/compy/${c.id}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+                            <span>Xem chi tiết</span>
+                            <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            `
+                })
+            if(data.totalElements !==0){
+
+                                        let htmlPagination = `
+                                <button onclick="pageChange(1)" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Previous</span>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                            `;
+
+                            // Vòng lặp trang
+                                        for (let i = 1; i <= data.totalPages; i++) {
+                                            htmlPagination += `
+                                    <button onclick="pageChange(${i})"
+                                        class="px-4 py-2 border ${
+                                                i === data.currentPage
+                                                    ? 'border-blue-500 bg-blue-50 text-blue-600 active'
+                                                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                            }">
+                                        ${i}
+                                    </button>
+                                `;
+                                        }
+
+                                        htmlPagination += `
+                                <button onclick="pageChange(${data.totalPages})" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Next</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            `;
+                Pagination.innerHTML=htmlPagination
+                }
+            curPage = data.currentPage
+
+            companiesContainer.innerHTML = html
+
+        }
+    }
+    document.getElementById("keywords").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault(); // nếu muốn chặn form submit mặc định
+            const value = this.value.trim();
+            console.log("Đã nhấn Enter. Giá trị:", value);
+            loadCompanies(curPage)
+        }
+    });
+    async function pageChange(page){
+        await loadCompanies(page)
+    }
     document.addEventListener('DOMContentLoaded', function() {
+        curPage = 1
         // Initialize tooltips
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-
+        loadCompanies(curPage)
         // Company card click handler
         document.querySelectorAll('.company-card').forEach(card => {
             card.addEventListener('click', function(e) {

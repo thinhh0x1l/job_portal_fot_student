@@ -175,7 +175,8 @@
                                     class="notification-item  px-5 py-4 ">
                                 <a onclick="markOne(this)" th:id="${n.id}"
                                         th:href="@{${n.url}}" class="flex items-start gap-4">
-                                    <img th:src="@{${n.image+n.sender.imageUrl}}" class="w-10 h-10 rounded-full object-cover" />
+                                    <img th:if="${n.sender!=null}" th:src="@{${n.image+n.sender.imageUrl}}" class="w-10 h-10 rounded-full object-cover" />
+                                    <img  th:if="${n.sender==null}" th:src="@{${n.image}}" class="w-10 h-10 rounded-full object-cover" />
                                     <div class="flex-1">
                                         <div class="notification-content text-base text-gray-700" th:utext="${n.content}">Bạn có một đơn ứng tuyển mới</div>
                                         <div class="notification-time text-xs text-gray-400 mt-1" th:text="${p.format(n.created)}">5 phút trước</div>
@@ -298,7 +299,7 @@
                     <div class="dropdown-content pl-8 mt-1 space-y-1 hidden">
                         <a th:href="@{/admin/manage-recruiter/}" class="block p-2 text-sm hover:bg-gray-100 rounded">Danh sách nhà tuyển dụng</a>
                         <a th:href="@{/admin/manage-company}" class="block p-2 text-sm hover:bg-gray-100 rounded">Danh sách công ty</a>
-                        <a th:href="@{/admin/manage-postjob}" class="block p-2 text-sm hover:bg-gray-100 rounded">Quản lý bài tuyển dụng</a>-->
+                        <a th:href="@{/admin/manage-postjob}" class="block p-2 text-sm hover:bg-gray-100 rounded">Quản lý bài tuyển dụng</a>
                     </div>
                 </div>
 
@@ -314,7 +315,7 @@
                     </button>
                     <div class="dropdown-content pl-8 mt-1 space-y-1 hidden">
                         <a th:href="@{/admin/manage-tag}" class="block p-2 text-sm hover:bg-gray-100 rounded">Quản lý tags</a>
-                        <a href="#" class="block p-2 text-sm hover:bg-gray-100 rounded">Thống kê bài viết</a>
+                        <a th:href="@{/admin/manage-ai}" class="block p-2 text-sm hover:bg-gray-100 rounded">Quản lý ai</a>
                     </div>
                 </div>
 
@@ -343,6 +344,7 @@
         </div>
 
         <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
+            <a th:href="@{/admin/logout}">Đăng xuất</a>
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                     <i data-lucide="user"></i>

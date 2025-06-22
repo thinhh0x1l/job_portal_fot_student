@@ -260,180 +260,37 @@
                     <div class="px-6 py-4 border-b border-gray-200">
                         <div class="flex justify-between items-center">
                             <h2 class="text-lg font-semibold text-gray-900">Việc làm đang tuyển</h2>
-                            <span class="text-sm text-gray-500">12 vị trí</span>
+                            <span class="text-sm text-gray-500" id="totalJob">12 vị trí</span>
                         </div>
                     </div>
                     <div class="p-6">
                         <!-- Job Filters -->
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                            <div class="flex-1">
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="fas fa-search text-gray-400"></i>
-                                    </div>
-                                    <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Tìm kiếm việc làm...">
-                                </div>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                                    <option selected>Tất cả địa điểm</option>
-                                    <option>Hà Nội</option>
-                                    <option>Hồ Chí Minh</option>
-                                    <option>Đà Nẵng</option>
-                                </select>
-                            </div>
-                        </div>
+<!--                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">-->
+<!--                            <div class="flex-1">-->
+<!--                                <div class="relative">-->
+<!--                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">-->
+<!--                                        <i class="fas fa-search text-gray-400"></i>-->
+<!--                                    </div>-->
+<!--                                    <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Tìm kiếm việc làm...">-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="flex-shrink-0">-->
+<!--                                <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">-->
+<!--                                    <option selected>Tất cả địa điểm</option>-->
+<!--                                    <option>Hà Nội</option>-->
+<!--                                    <option>Hồ Chí Minh</option>-->
+<!--                                    <option>Đà Nẵng</option>-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--                        </div>-->
 
                         <!-- Job Listings -->
-                        <div class="space-y-4">
-                            <!-- Job 1 -->
-                            <div class="job-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                <div class="p-6">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="text-lg font-semibold text-gray-900 mb-1">Senior Frontend Developer (ReactJS)</h3>
-                                            <p class="text-sm text-gray-500 mb-3">Hà Nội</p>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                <i class="fas fa-code text-gray-400"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex flex-wrap gap-2 mb-4">
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Full-time</span>
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">$2000 - $3000</span>
-                                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full urgent-badge">Gấp</span>
-                                    </div>
-
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-500">Đăng 2 ngày trước</span>
-                                        <a href="#" class="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Job 2 -->
-                            <div class="job-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                <div class="p-6">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="text-lg font-semibold text-gray-900 mb-1">Backend Engineer (Node.js)</h3>
-                                            <p class="text-sm text-gray-500 mb-3">Hồ Chí Minh</p>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                <i class="fas fa-server text-gray-400"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex flex-wrap gap-2 mb-4">
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Full-time</span>
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">$2500 - $3500</span>
-                                    </div>
-
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-500">Đăng 1 tuần trước</span>
-                                        <a href="#" class="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Job 3 -->
-                            <div class="job-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                <div class="p-6">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="text-lg font-semibold text-gray-900 mb-1">UI/UX Designer</h3>
-                                            <p class="text-sm text-gray-500 mb-3">Đà Nẵng</p>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                <i class="fas fa-paint-brush text-gray-400"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex flex-wrap gap-2 mb-4">
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Part-time</span>
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">$1500 - $2000</span>
-                                    </div>
-
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-500">Đăng 3 ngày trước</span>
-                                        <a href="#" class="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Job 4 -->
-                            <div class="job-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                <div class="p-6">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="text-lg font-semibold text-gray-900 mb-1">DevOps Engineer</h3>
-                                            <p class="text-sm text-gray-500 mb-3">Hà Nội</p>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                <i class="fas fa-cloud text-gray-400"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex flex-wrap gap-2 mb-4">
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Full-time</span>
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">$3000 - $4000</span>
-                                    </div>
-
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-500">Đăng 5 ngày trước</span>
-                                        <a href="#" class="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="space-y-4" id="jobListContainer">
                         </div>
 
                         <!-- Pagination -->
-                        <div class="mt-6 flex items-center justify-between">
-                            <div class="flex-1 flex justify-between sm:hidden">
-                                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                    Previous
-                                </a>
-                                <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                    Next
-                                </a>
-                            </div>
-                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-700">
-                                        Showing <span class="font-medium">1</span> to <span class="font-medium">4</span> of <span class="font-medium">12</span> results
-                                    </p>
-                                </div>
-                                <div>
-                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                            <span class="sr-only">Previous</span>
-                                            <i class="fas fa-chevron-left"></i>
-                                        </a>
-                                        <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                            1
-                                        </a>
-                                        <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                            2
-                                        </a>
-                                        <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                            3
-                                        </a>
-                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                            <span class="sr-only">Next</span>
-                                            <i class="fas fa-chevron-right"></i>
-                                        </a>
-                                    </nav>
-                                </div>
-                            </div>
+                        <div class="mt-6 flex items-center justify-between"  id="paginationContainer">
+
                         </div>
                     </div>
                 </div>
@@ -794,10 +651,43 @@
     }
     document.addEventListener('DOMContentLoaded', () => {
         companyId = document.getElementById('companyIdC').value
-
+        console.log('dom log '+companyId)
         initStarFilterEvents(companyId)
         fetchReviews(companyId)
     })
+
+      function favorite (button) {
+         const icon = button.querySelector('i'); // lấy thẻ <i> bên trong button
+         const id = icon.getAttribute('data-id'); // hoặc icon.dataset.id
+
+         console.log("ID sản phẩm:", id);
+
+        if (icon.classList.contains('far')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas', 'text-red-500');
+            fetch(`/intern/api/likeJob`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(id)
+            });
+
+        } else {
+            icon.classList.remove('fas', 'text-red-500');
+            icon.classList.add('far');
+             fetch(`/intern/api/likeJob`, {
+                method: "DELETE",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(id)
+            });
+
+        }
+    }
+
+
 
     let npagee
 
@@ -806,11 +696,12 @@
             page = !page ? '' : page;
             nstar = !nstar ? '' : nstar;
             npagee=page
-
+            console.log("sdfsa "+companyId  )
             const response = await fetch('/user/api/reviews/' + companyId + "?page=" + page+"&star="+nstar);
             if (!response.ok) throw new Error("Lỗi khi lấy đánh giá");
 
             const reviews = await response.json();
+            console.log(reviews)
             const container = document.getElementById("containerComments");
             container.innerHTML = ""; // reset danh sách
 
@@ -825,7 +716,7 @@
 
 
             renderPagination(reviews.currentPage, reviews.numberOfPage)
-            console.log(reviews.image);
+            console.log(reviews.image+'ss');
             reviews.comments.forEach(c => {
                 const reviewHTML = `
                     <div class="review-card bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -1016,13 +907,144 @@
         }
     }
 
+    async function getJobInCompany(page) {
+        console.log(companyId)
+        page = page?page:''
+        console.log(page)
+        let res = await fetch('/user/api/get-jobInCompany?compyId='+companyId+'&page='+page)
+        if(res.ok){
+            let data = await res.json()
+            let container = document.getElementById('jobListContainer')
+            document.getElementById('totalJob').innerText=`${data.totalElements} vị trí `
+            let paginationContainer = document.getElementById('paginationContainer')
+            container.innerHTML = ''
+            paginationContainer.innerHTML = ''
 
+            let html =''
+            let paginationHtml = ''
+            paginationHtml += `
+
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Showing <span class="font-medium">${data.elementStart}</span> đến <span class="font-medium">${data.elementEnd}</span> của
+                        <span class="font-medium"></span> công việc
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <button onclick="pageChange(1)"
+                           class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white
+                      text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Previous</span>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        `;
+
+                        for (let i = 1; i <= data.totalPages; i++) {
+                        paginationHtml += `
+                                <button onclick="pageChange(${i})"
+                                   class="relative inline-flex items-center px-4 py-2 border text-sm font-medium
+                                          ${i === data.currentPage
+                                                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}">
+                                    ${i}
+                                </button>
+                            `;
+                                            }
+
+                        paginationHtml += `
+                        <button onclick="pageChange(${data.totalPages})"
+                           class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white
+                      text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Next</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+                `;
+
+
+            data.jobs.forEach(j =>{
+                html +=
+                    `
+                    <div class="job-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div class="p-6">
+                                    <!-- Tiêu đề + Favorite -->
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <div class="flex justify-between items-start">
+                                                <h3 class="text-lg font-semibold text-gray-900 mb-1">${j.name}</h3>
+                                                <!-- Nút yêu thích -->
+                                                ${j.favorite!=null?`<button onclick="favorite(this)" class="text-gray-400 hover:text-red-500 ml-2">
+                                                 <i data-id="${j.id}" class="${j.favorite?`fas fa-heart text-xl text-red-500`:`far fa-heart text-xl`}"></i>
+                                                </button>`:''}
+                                            </div>
+                                            `;
+                                    j.tags.forEach(tag=>{
+                                        html+=`
+                                                                            <label class="${tag.className}">
+                                                    <input
+                                                        type="checkbox"
+                                                        name="tags"
+                                                        value="${tag.id}"
+                                                        data-id="${tag.id}"
+                                                        data-name="${tag.name}"
+                                                        class="hidden peer"
+
+                                                    />
+                                                        <span>${tag.name}</span>
+
+                                                </label>
+                                        `
+                                    })
+                                html+=  `
+                                        </div>
+
+                                        <!-- Icon -->
+                                        <div class="flex-shrink-0 ml-4">
+                                            <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                <i class="fas fa-code text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Thông tin phụ -->
+                                    <div class="flex flex-wrap gap-2 mb-4 mt-2">
+<!--                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Full-time</span>-->
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">${j.salary}</span>
+<!--                                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full urgent-badge">Gấp</span>-->
+                                    </div>
+
+                                    <!-- Lượt xem + Thời gian đăng + Link -->
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-4 text-xs text-gray-500">
+                                            <span><i class="fas fa-eye mr-1"></i>${j.views} lượt xem</span>
+                                            <span>Đăng ${timeAgo(new Date(j.createdAt))}</span>
+                                        </div>
+                                        <a onclick="increaseview(${j.id},event, this)" href="/tim-viec/${j.id}" target="_blank" class="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
+                                    </div>
+                                </div>
+                            </div>
+                `
+            })
+            container.innerHTML=html
+            paginationContainer.innerHTML=paginationHtml
+        }
+
+    }
+
+    async function pageChange(page){
+        await getJobInCompany(page);
+    }
     document.addEventListener('DOMContentLoaded', function () {
         const tabs = document.querySelectorAll('.company-tab');
         const tabContents = document.querySelectorAll('.tab-content');
-
+        companyId = document.getElementById('companyIdC').value
         const urlParams = new URLSearchParams(window.location.search);
         const activeTab = urlParams.get('tab');
+        getJobInCompany()
 
         // ✅ Nếu có param ?tab=xyz => mở tab đó, ngược lại mở tab đầu tiên
         if (activeTab) {
@@ -1135,6 +1157,22 @@
             console.error(e);
             alert("Có lỗi khi kết nối đến server");
         }
+    }
+    async function increaseview (id,e,anchor) {
+        e.preventDefault();
+
+        let res = await fetch(`/recruiter/api/increaseView`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(id)
+        });
+
+        if (res.ok) {
+            window.open(anchor.href, '_blank');
+        }
+
     }
 
 

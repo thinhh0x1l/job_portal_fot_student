@@ -32,15 +32,18 @@ public class NotificationService {
         notification.setReceiver(receiver);
         notification.setImage(image);
         notificationRepository.save(notification);
-        NotificationDTO dto = new NotificationDTO(
-                notification.getId(),
-                notification.getContent(),
-                imageClear(notification) ,
-                notification.getUrl(),
-                false, notification.getCreated(),
-                notification.getReceiver().getId()
-        );
-        messagingTemplate.convertAndSendToUser(receiver.getId().toString(), "/queue/notify", dto);
+        if(notification.getReceiver()!=null) {
+            NotificationDTO dto = new NotificationDTO(
+                    notification.getId(),
+                    notification.getContent(),
+                    imageClear(notification),
+                    notification.getUrl(),
+                    false, notification.getCreated(),
+                    notification.getReceiver() == null ? null : notification.getReceiver().getId()
+            );
+
+            messagingTemplate.convertAndSendToUser(receiver.getId().toString(), "/queue/notify", dto);
+        }
         return notification;
     }
     private String imageClear(Notification notification){

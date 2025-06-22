@@ -1,6 +1,7 @@
 package com.jobportal.repostory;
 
 import com.jobportal.entity.Comment;
+import com.jobportal.entity.Company;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,6 +30,24 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
             "WHERE c.id = :commentId AND u.id = :userId")
     boolean hasUserLikedComment(@Param("commentId") Integer commentId,
                                 @Param("userId") Integer userId);
+
+
+
+
+
+    @Query("SELECT c.company, AVG(c.star) " +
+            "FROM Comment c " +
+            "WHERE c.company IN :companies " +
+            "GROUP BY c.company " +
+            "ORDER BY AVG(c.star) ASC")
+    List<Object[]> getAverageRatingsAsc(@Param("companies") List<Company> companies);
+
+    @Query("SELECT c.company, AVG(c.star) " +
+            "FROM Comment c " +
+            "WHERE c.company IN :companies " +
+            "GROUP BY c.company " +
+            "ORDER BY AVG(c.star) DESC")
+    List<Object[]> getAverageRatingsDesc(@Param("companies") List<Company> companies);
 
 
 }

@@ -63,6 +63,12 @@ public class AdminController {
         return "admin/companies";
     }
 
+    @GetMapping("/manage-ai")
+    public String manageAi(Model model) {
+        proper(model);
+
+        return "admin/ai_system";
+    }
 
     @GetMapping("/manage-student")
     public String manageStudent(Model model) {

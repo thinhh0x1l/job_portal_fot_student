@@ -20,6 +20,7 @@
                     }
                 }
             }
+
         </script>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -27,7 +28,26 @@
             * {
                 font-family: 'Inter', sans-serif;
             }
+            @keyframes dotFlash {
+                0%, 80%, 100% {
+                    opacity: 0;
+                }
+                40% {
+                    opacity: 1;
+                }
+            }
 
+            .animate-dot-flash {
+                animation: dotFlash 1.4s infinite;
+            }
+
+            .delay-200 {
+                animation-delay: 0.2s;
+            }
+
+            .delay-400 {
+                animation-delay: 0.4s;
+            }
             .navbar {
                 background: linear-gradient(to right, #0f172a, #1e293b);
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -176,38 +196,40 @@
                         </div>
                     </div>
 
-                    <!-- CV của tôi -->
-                    <div class="relative group">
-                        <button class="nav-link flex items-center text-gray-300 hover:text-white font-medium py-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            CV của tôi
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div class="dropdown-menu absolute left-0 w-64 bg-dark rounded-lg py-2 shadow-xl z-50 hidden group-hover:block">
-                            <a th:href="@{/dang-cv}" class="block px-5 py-3 text-gray-300 hover:bg-slate-800 hover:text-white text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                </svg>
-                                Đăng CV
-                            </a>
-                            <a href="#" class="block px-5 py-3 text-gray-300 hover:bg-slate-800 hover:text-white text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Chỉnh sửa
-                            </a>
-                            <a href="#" class="block px-5 py-3 text-gray-300 hover:bg-slate-800 hover:text-white text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Thông tin
-                            </a>
-                        </div>
-                    </div>
+<!--                    &lt;!&ndash; CV của tôi &ndash;&gt;-->
+<!--                    <div class="relative group">-->
+<!--                        <button class="nav-link flex items-center text-gray-300 hover:text-white font-medium py-2">-->
+<!--                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">-->
+<!--                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />-->
+<!--                            </svg>-->
+<!--                            CV của tôi-->
+<!--                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">-->
+<!--                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />-->
+<!--                            </svg>-->
+<!--                        </button>-->
+<!--                        <div class="dropdown-menu absolute left-0 w-64 bg-dark rounded-lg py-2 shadow-xl z-50 hidden group-hover:block">-->
+<!--                            <a th:href="@{/dang-cv}" class="block px-5 py-3 text-gray-300 hover:bg-slate-800 hover:text-white text-sm">-->
+<!--                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">-->
+<!--                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />-->
+<!--                                </svg>-->
+<!--                                Đăng CV-->
+<!--                            </a>-->
+<!--                            <a href="#" class="block px-5 py-3 text-gray-300 hover:bg-slate-800 hover:text-white text-sm">-->
+<!--                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">-->
+<!--                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />-->
+<!--                                </svg>-->
+<!--                                Chỉnh sửa-->
+<!--                            </a>-->
+<!--                            <a href="#" class="block px-5 py-3 text-gray-300 hover:bg-slate-800 hover:text-white text-sm">-->
+<!--                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">-->
+<!--                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />-->
+<!--                                </svg>-->
+<!--                                Thông tin-->
+<!--                            </a>-->
+
+
+<!--                        </div>-->
+<!--                    </div>-->
 
                     <!-- Thực tập -->
                     <div class="relative group">
@@ -229,12 +251,12 @@
                                 </svg>
                                 Nhiệm vụ
                             </a>
-                            <a href="#" class="block px-5 py-3 text-gray-300 hover:bg-slate-800 hover:text-white text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                Giảng viên
-                            </a>
+<!--                            <a href="#" class="block px-5 py-3 text-gray-300 hover:bg-slate-800 hover:text-white text-sm">-->
+<!--                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">-->
+<!--                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />-->
+<!--                                </svg>-->
+<!--                                Giảng viên-->
+<!--                            </a>-->
                         </div>
                     </div>
                     </th:block>
@@ -300,8 +322,16 @@
                             let notificationCount = 0;
                             let stompClientt = null;
                             const userId = document.getElementById('internId').value
+                            let apikey
+                            let bodyAisystem
 
-                            document.addEventListener('DOMContentLoaded', () => {
+                            document.addEventListener('DOMContentLoaded', async () => {
+                                let res = await fetch('/user/api/get-aisystem')
+                                if(res.ok){
+                                    let data = await res.json()
+                                    apikey = data.apiKey
+                                    bodyAisystem = data.bodyContent
+                                }
                                 // Kết nối WebSocket
                                 const socket = new SockJS('/ws-notify');
                                 stompClientt = Stomp.over(socket);
@@ -522,19 +552,19 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <button class="w-full flex justify-between items-center text-gray-300 py-3">
-                            <span>CV của tôi</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div class="pl-4 space-y-2">
-                            <a th:href="@{/dang-cv}" class="block py-2 text-gray-300 text-sm">Đăng CV</a>
-                            <a href="#" class="block py-2 text-gray-300 text-sm">Chỉnh sửa</a>
-                            <a href="#" class="block py-2 text-gray-300 text-sm">Thông tin</a>
-                        </div>
-                    </div>
+<!--                    <div class="mb-3">-->
+<!--                        <button class="w-full flex justify-between items-center text-gray-300 py-3">-->
+<!--                            <span>CV của tôi</span>-->
+<!--                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">-->
+<!--                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />-->
+<!--                            </svg>-->
+<!--                        </button>-->
+<!--                        <div class="pl-4 space-y-2">-->
+<!--                            <a th:href="@{/dang-cv}" class="block py-2 text-gray-300 text-sm">Đăng CV</a>-->
+<!--                            <a href="#" class="block py-2 text-gray-300 text-sm">Chỉnh sửa</a>-->
+<!--                            <a href="#" class="block py-2 text-gray-300 text-sm">Thông tin</a>-->
+<!--                        </div>-->
+<!--                    </div>-->
 
                     <div class="mb-3">
                         <button class="w-full flex justify-between items-center text-gray-300 py-3">
@@ -545,7 +575,7 @@
                         </button>
                         <div class="pl-4 space-y-2">
                             <a th:href="@{/nhiem-vu}" class="block py-2 text-gray-300 text-sm">Nhiệm vụ</a>
-                            <a href="#" class="block py-2 text-gray-300 text-sm">Giảng viên</a>
+<!--                            <a href="#" class="block py-2 text-gray-300 text-sm">Giảng viên</a>-->
                         </div>
                     </div>
                 </div>
@@ -621,7 +651,34 @@
             </p>
         </div>
     </div>
+    <div id="aiChat1" th:if="${idi!=null}"
+         class="hidden fixed bottom-28 right-8 w-[640px] max-h-[700px]
+            bg-white border border-gray-200 rounded-2xl shadow-2xl
+            flex flex-col z-50 overflow-hidden transition-all duration-300 ease-in-out">
 
+        <!-- Header -->
+        <div class="p-5 border-b bg-white text-indigo-700 font-semibold text-xl flex justify-between items-center">
+            🤖 Trợ lý Việc Làm
+            <button onclick="closeChat1()" class="text-gray-400 hover:text-red-500 text-2xl font-bold transition-colors">
+                ×
+            </button>
+        </div>
+
+        <!-- Nội dung tin nhắn -->
+        <div id="chatContent1"
+             class="flex-1 px-6 py-4 space-y-4 overflow-y-auto text-base bg-gray-50 scroll-smooth custom-scrollbar">
+            <!-- Tin nhắn sẽ được thêm ở đây -->
+        </div>
+
+        <!-- Ô nhập văn bản -->
+        <div class="border-t bg-white p-4">
+            <input id="messagee"onk
+                   type="text"
+                   placeholder="Nhập gì đódddddd..."
+                   class="w-full p-3 border border-gray-300 rounded-md text-base
+                              focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm" />
+        </div>
+    </div>
     <!-- Modal đổi mật khẩu -->
     <div id="changePasswordModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
@@ -667,6 +724,68 @@
                 icon.classList.add("fa-eye");
             }
         }
+
+        // Gửi tin nhắn người dùng (nếu có xử lý phía server sau này)
+        document.getElementById("messagee").addEventListener("keydown", async (e) => {
+            if (e.key === "Enter"&& !e.shiftKey) {
+                const message = e.target.value.trim();
+                console.log(message)
+                if (message) {
+
+                    appendUserMessage1(message);
+                    const div = document.createElement("div");
+                    div.className = "bg-gray-100 p-3 rounded-md text-gray-800";
+                    div.innerHTML=`
+                            <div class="flex items-center gap-1 text-gray-700">
+                              <span>🤖:Đang tìm dữ liệu</span>
+                              <span class="animate-dot-flash">.</span>
+                              <span class="animate-dot-flash delay-200">.</span>
+                              <span class="animate-dot-flash delay-400">.</span>
+                            </div>
+
+                            `
+                    document.getElementById("chatContent1").appendChild(div);
+                    scrollToBottom1();
+                    e.target.value = "";
+                    let body = bodyAisystem.replace('${message}',message)
+                    console.log(body)
+                    let res = await fetch('https://openrouter.ai/api/v1/chat/completions',{
+                        method :'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apikey}` // ✅ KHÔNG có dấu +
+                        },
+                        body: body
+                    })
+
+                    if(res.ok){
+                        div.innerHTML=`
+                            <div class="flex items-center gap-1 text-black">
+                              <span >🤖: Đang soạn </span>
+                              <span class="animate-dot-flash " >tin</span>
+                              <span class="animate-dot-flash delay-2005" > nhắn</span>
+                              <span class="animate-dot-flash">.</span>
+                              <span class="animate-dot-flash delay-200">.</span>
+                              <span class="animate-dot-flash delay-400">.</span>
+                            </div>
+
+                            `
+                        let data = await  res.json()
+
+                        appendAIMessage1(div,data.choices[0].message.content)
+                    }else{
+                        div.innerHTML=`
+                            <div class="flex items-center gap-1 text-black">
+                              <span >🤖: Tôi đỏ bị hỏng huhu </span>
+                            </div>
+
+                            `
+                        await sendNotificationForAdmin()
+                    }
+
+                }
+            }
+        });
 
         function openPasswordModal() {
             document.getElementById('changePasswordModal').classList.remove('hidden');
@@ -746,6 +865,12 @@
             window.location.reload()
         }
 
+        async function sendNotificationForAdmin(){
+            let res = await fetch('/admin/api/ai-bad')
+
+        }
+
+
         async function showthongBao(e) {
             const originalHref = e.getAttribute('href');
             e.removeAttribute('href');
@@ -812,6 +937,8 @@
 <th:block th:fragment="aiChatBot">
 
 
+
+
     <!-- Nút Trợ lý AI ở góc phải dưới màn hình -->
     <button id="aiToggle" th:if="${idi!=null}"
             class="fixed bottom-6 right-6 w-14 h-14 flex items-center justify-center
@@ -834,7 +961,7 @@
     </span>
     </button>
 
-    <!-- Hộp thoại Trợ lý AI (To 2.5 lần) -->
+    <!-- đề xuất -->
     <div id="aiChat" th:if="${idi!=null}"
          class="hidden fixed bottom-28 right-8 w-[640px] max-h-[700px]
             bg-white border border-gray-200 rounded-2xl shadow-2xl
@@ -842,7 +969,7 @@
 
         <!-- Header -->
         <div class="p-5 border-b bg-white text-indigo-700 font-semibold text-xl flex justify-between items-center">
-            🤖 Trợ lý Việc Làm
+            📓 Đề xuất việc làm
             <button onclick="closeChat()" class="text-gray-400 hover:text-red-500 text-2xl font-bold transition-colors">
                 ×
             </button>
@@ -869,6 +996,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
+<!--ai systeam-->
+    <button id="aiToggle1" th:if="${idi!=null}"
+            style="bottom: 112px"
+            class="fixed right-6 w-14 h-14 flex items-center justify-center
+           bg-white/80 backdrop-blur-md border border-gray-200 shadow-xl
+           hover:bg-white/90 text-blue-600 hover:text-blue-700
+           rounded-full transition-all duration-200 z-50">
+        <!-- Icon SVG dạng Robot AI -->
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2a1 1 0 011 1v1.07A8.001 8.001 0 0120 12v5a3 3 0 01-3 3h-1a3 3 0 01-6 0H7a3 3 0 01-3-3v-5a8.001 8.001 0 017-7.93V3a1 1 0 011-1zm-3 9a1 1 0 100 2 1 1 0 000-2zm6 0a1 1 0 100 2 1 1 0 000-2z"/>
+        </svg>
+    </button>
+
+
+
+    <!--          aiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii>-->
     <script th:if="${idi!=null}">
         let stompClient = null;
         const internId = 24; // Nên lấy từ session hoặc Thymeleaf
@@ -887,12 +1031,13 @@
             const socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
             stompClient.debug = null;
+
             stompClient.connect({ internId: internId }, () => {
                 isConnected = true;
-
+                console.log('incon')
                 stompClient.subscribe('/topic/suggestions/' + internId, (msg) => {
                     const jobs = JSON.parse(msg.body);
-                    console.log()
+                    console.log('aâ')
                     if (!chatOpen) {
                         unreadCount++;
                         updateBadge();
@@ -926,6 +1071,7 @@
             }
         }
         function getChatAi(){
+            console.log('123456')
             const chat = document.getElementById("aiChat");
             const isHidden = chat.classList.contains("hidden");
 
@@ -945,23 +1091,27 @@
         }
         document.getElementById("aiToggle").addEventListener("click", () => {
             getChatAi()
+
+        })
+        document.getElementById("aiToggle1").addEventListener("click", () => {
+            document.getElementById("aiChat1").classList.remove('hidden');
         })
 
         function appendAIMessage(text) {
             const div = document.createElement("div");
             div.className = "bg-gray-100 p-3 rounded-md text-gray-800";
-            div.innerHTML = `<strong>🤖:</strong> ${text}`;
+            div.innerHTML = `<strong>📓:</strong> ${text}`;
             document.getElementById("chatContent").appendChild(div);
             scrollToBottom();
         }
 
-        function appendUserMessage(text) {
-            const div = document.createElement("div");
-            div.className = "text-right text-white bg-indigo-500 p-3 rounded-md ml-auto w-fit";
-            div.innerText = text;
-            document.getElementById("chatContent").appendChild(div);
-            scrollToBottom();
-        }
+        // function appendUserMessage(text) {
+        //     const div = document.createElement("div");
+        //     div.className = "text-right text-white bg-indigo-500 p-3 rounded-md ml-auto w-fit";
+        //     div.innerText = text;
+        //     document.getElementById("chatContent").appendChild(div);
+        //     scrollToBottom();
+        // }
 
         function scrollToBottom() {
             const chat = document.getElementById("chatContent");
@@ -973,19 +1123,32 @@
             chatOpen = false;
         }
 
-        // // Gửi tin nhắn người dùng (nếu có xử lý phía server sau này)
-        // document.getElementById("userInput").addEventListener("keydown", (e) => {
-        //     if (e.key === "Enter") {
-        //         const text = e.target.value.trim();
-        //         if (text) {
-        //             appendUserMessage(text);
-        //             e.target.value = "";
-        //
-        //             // Có thể gửi tới AI thật nếu muốn
-        //             // stompClient.send("/app/ai-response", {}, JSON.stringify({ internId, message: text }));
-        //         }
-        //     }
-        // });
+        // -----------------------------------------------AI
+        function closeChat1() {
+            document.getElementById("aiChat1").classList.add("hidden");
+            chatOpen = false;
+        }
+
+        function scrollToBottom1() {
+            const chat = document.getElementById("chatContent1");
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+
+
+        function appendUserMessage1(text) {
+            const div = document.createElement("div");
+            div.className = "text-right text-white bg-indigo-500 p-3 rounded-md ml-auto w-fit";
+            div.innerText = text;
+            document.getElementById("chatContent1").appendChild(div);
+            scrollToBottom1();
+        }
+        function appendAIMessage1(div,text) {
+            div.innerHTML = `<strong>🤖:</strong> ${text.replace(/\n/g, '<br>')}`;
+            scrollToBottom1();
+        }
+
+
     </script>
 
 </th:block>

@@ -13,4 +13,5 @@ public class AdminProperties {
     private String username;
     private String password;
     private String role;
+    private Integer id ;
 }
