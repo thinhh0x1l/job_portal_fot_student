@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: springboot-jobportal
+    env: java
+    buildCommand: "./mvnw clean install -DskipTests"
+    startCommand: "java --enable-preview -jar target/JobPortal-0.0.1-SNAPSHOT.jar"
+    envVars:
+      - key: DB_URL
+        value: jdbc:mysql://dpg-d1c01uodl3ps73f4cp30-a:5432/jobportal_db_24uo?useSSL=false&allowPublicKeyRetrieval=true
+      - key: DB_USER
+        value: jobportal_db_24uo_user
+      - key: DB_PASS
+        value: EnCl9lZNjOBYVAP6CeLE5y8gZKdgzN4Z
