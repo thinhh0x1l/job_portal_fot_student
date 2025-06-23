@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY pom.xml .
 COPY src ./src
+COPY photos /app/photos
 
 # Chắc chắn Maven build với UTF-8
 ENV MAVEN_OPTS="-Dfile.encoding=UTF-8"
