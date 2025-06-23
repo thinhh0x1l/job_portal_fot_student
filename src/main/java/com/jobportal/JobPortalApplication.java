@@ -14,7 +14,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableScheduling
 @EnableEncryptableProperties
 @EncryptablePropertySource(name = "EncryptedProperties", value = "classpath:application.properties")
-@FeignClient
 public class JobPortalApplication {
 
     public static void main(String[] args) {
