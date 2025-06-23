@@ -18,8 +18,8 @@ WORKDIR /app
 # Copy file jar từ stage build
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose port app
-EXPOSE 8080
+
+
 
 # Lệnh chạy app
 CMD ["java", "-jar", "app.jar"]
