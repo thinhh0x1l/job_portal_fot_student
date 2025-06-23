@@ -1,6 +1,7 @@
 package com.jobportal;
 
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
+import com.ulisesbocchio.jasyptspringboot.annotation.EncryptablePropertySource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @SpringBootApplication
 @EnableScheduling
 @EnableEncryptableProperties
+@EncryptablePropertySource(name = "EncryptedProperties", value = "classpath:application.properties")
 @FeignClient
 public class JobPortalApplication {
 
