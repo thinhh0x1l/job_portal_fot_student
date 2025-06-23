@@ -12,14 +12,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class JasyptEncryptorConfig {
 
-    @Value("${JASYPT_ENCRYPTOR_PASSWORD}")
-    private String jasyptPassword;
+
 
     @Bean("jasyptStringEncryptor")
     public StringEncryptor stringEncryptor() {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
         SimpleStringPBEConfig config = new SimpleStringPBEConfig();
-        config.setPassword(jasyptPassword);
+        config.setPassword("password");
         config.setAlgorithm("PBEWITHHMACSHA512ANDAES_256");
         config.setKeyObtentionIterations("1000");
         config.setPoolSize("1");
