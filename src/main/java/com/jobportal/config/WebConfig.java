@@ -1,6 +1,7 @@
 package com.jobportal.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -12,12 +13,14 @@ import java.nio.file.Paths;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+    @Value("${app.upload.dir}")
+    private String uploadDir;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path uploadDir = Paths.get("photos");
-        String uploadPath = uploadDir.toAbsolutePath().toString();
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + uploadPath+"/");
+                .addResourceLocations("file:" + uploadPath + "/");
     }
 
     @Override
