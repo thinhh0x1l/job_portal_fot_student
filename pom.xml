@@ -27,7 +27,7 @@
         <url/>
     </scm>
     <properties>
-        <java.version>21</java.version>
+        <java.version>22</java.version>
         <spring-cloud.version>2024.0.1</spring-cloud.version>
     </properties>
     <dependencies>
@@ -151,8 +151,8 @@
                             <version>1.18.38</version>
                         </path>
                     </annotationProcessorPaths>
-                    <source>21</source>
-                    <target>21</target>
+                    <source>22</source>
+                    <target>22</target>
                     <compilerArgs>--enable-preview</compilerArgs>
                     <!--                    <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
                 </configuration>

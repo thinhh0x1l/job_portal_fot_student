@@ -149,7 +149,6 @@
                                th:field="*{postingDeadline}"
                                id="application-deadline"
                                th:min="${T(java.time.LocalDate).now().plusDays(3)}"
-                               th:max="${T(java.time.LocalDate).now().plusMonths(2)}"
                                class="w-full pl-10 py-3 rounded-lg border border-gray-200 input-focus focus:outline-none transition duration-200 bg-gray-50">
                     </div>
                 </div>
