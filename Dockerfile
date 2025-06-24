@@ -12,7 +12,7 @@ RUN mvn clean package -DskipTests
 
 
 FROM eclipse-temurin:22-jdk
-
+ENV TZ=Asia/Ho_Chi_Minh
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar

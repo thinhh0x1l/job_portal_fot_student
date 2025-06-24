@@ -194,6 +194,13 @@ public class PostJob {
         return 0;
     }
 
+    public String formatSalary(){
+        if(salary>=1)
+            return salary + " triệu";
+        else if(salary!=0)
+            return salary*1000000 + " nghìn";
+        return "Không lương";
+    }
 
     @Override
     public boolean equals(Object o) {

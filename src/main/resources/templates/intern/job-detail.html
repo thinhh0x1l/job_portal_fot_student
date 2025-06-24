@@ -101,7 +101,7 @@
                             <div class="flex flex-wrap items-center gap-2 mb-4">
                                 <span class="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full" th:text="${jopPost.major.getLabel()}">IT</span>
                                 <span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full" th:text="${#temporals.format(jopPost.postingDeadline, 'dd/MM/yyyy')}">Hết hạn: 15/06</span>
-                                <span class="px-3 py-1 bg-green-50 text-green-700 text-sm font-medium rounded-full" th:text="${jopPost.salary==0?'Không lương' :jopPost.salary+' triệu'}">15-20 triệu</span>
+                                <span class="px-3 py-1 bg-green-50 text-green-700 text-sm font-medium rounded-full" th:text="${j.formatSalary()}">15-20 triệu</span>
                             </div>
                             <div class="flex flex-wrap items-center gap-3 mb-6" id="preloaded-tags" >
                                 <label th:each="tag :${jopPost.getTags()}"  th:attr="data-id=${tag.id}, data-name=${tag.name}"
