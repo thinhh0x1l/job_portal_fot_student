@@ -59,6 +59,8 @@ public class RecruiterService {
     TaskRepository taskRepository;
     TagRepository tagRepository;
     NotificationService notificationService;
+    LecturerRepository lecturerRepository;
+
     public Recruiter register(RegisterRecruiter r1, String url, Map<String, byte[]> files,String fileName) throws MessagingException, IOException {
         Recruiter recruiter = new Recruiter();
         String[] fullname = r1.getFullName().split(" ");
@@ -241,6 +243,29 @@ public class RecruiterService {
         return recruiterRepository.findById(((CustomDefaultOidcUser) principal).getUser().getId()).get();
     }
 
+    public Intern completeInternShip(int internId, String fileNameReviewOfRecruiter){
+        Intern intern = internRepository.findById(internId).get();
+        intern.setReportOfRecruiter(fileNameReviewOfRecruiter);
+        Recruiter recruiter = recruiterRepository.findById(getRecruiter().getId()).get();
+        Lecturer lecturer = lecturerRepository.findById(intern.getLecturer().getId()).get();
+        intern.setStatus(InternshipStatus.COMPLETED);
+        notificationService.notification(
+                "Nhà tuyển dụng đã xác nhận bạn hành thành kỳ thực tập" +
+                        "Nhấn vào để xem phiếu đánh giá Thực tập",
+                "/images/reviewOfRecruiter/"+internId+"/"+intern.getReportOfRecruiter(),
+                "/images/user-photos/"+recruiter.getId()+"/",
+                recruiter,
+                intern
+        );
+        notificationService.notification(
+                "Sinh viên <strong>" +intern.getFirstName() +" " +intern.getLastName()+"</strong> đã hoàn thành kỳ thực tập" ,
+                "/lecturer/student/"+internId,
+                "/images/user-photos/"+intern.getId()+"/",
+                recruiter,
+                lecturer
+        );
+        return intern;
+    }
     private CustomDefaultOidcUser getOidcUser() {
         return (CustomDefaultOidcUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
@@ -402,6 +427,22 @@ public class RecruiterService {
         return internRepository.findInternsByCompany(getRecruiter().getId(),internshipStatuses,keyword,pageable);
     }
 
+    public Map<String, Integer> findInternsByCompany(){
+        List<Intern > list = internRepository.findInternsByCompany(getRecruiter().getId());
+        Map<String, Integer> map = new HashMap<>();
+        map.put("allStatus",list.size());
+        map.put("completedStatus",0);
+        map.put("isPracticingStatus",0);
+        if(list.isEmpty()) return map;
+        int completedStatus =0;
+        for (Intern intern : list)
+            if (InternshipStatus.COMPLETED.equals(intern.getStatus())) {
+                ++completedStatus;
+        }
+        map.put("completedStatus",completedStatus);
+        map.put("isPracticingStatus",list.size() - completedStatus);
+        return map;
+    }
 
     public List<Intern> getInterns(){
         return internRepository.getInternsByIn(getRecruiter().getId(),InternshipStatus.IS_PRACTICING);

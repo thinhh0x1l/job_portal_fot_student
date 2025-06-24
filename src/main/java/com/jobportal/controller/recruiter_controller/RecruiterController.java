@@ -281,7 +281,7 @@ public class RecruiterController {
             if (endCount > sendPage.getTotalElements()) {
                 endCount = sendPage.getTotalElements();
             }
-
+            model.addAllAttributes(recruiterService.findInternsByCompany());
             model.addAttribute("sendPage", sendPage.getContent());
             model.addAttribute("currentPage", page);
             model.addAttribute("startCount", startCount);
@@ -365,6 +365,16 @@ public class RecruiterController {
         }
         System.out.println(updateCompany.getCompanySize());
         return "redirect:/recruiter/setting?tab="+tab;
+    }
+    @PostMapping("/completeIntern")
+    public String completeIntern(@RequestParam("reviewOfRecruiter") MultipartFile multipartFile,
+                                 @RequestParam(value = "internId")int internId){
+
+        String filename = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+        String uploadDir = "photos/reviewOfRecruiter/"+recruiterService.completeInternShip(internId,filename).getId();
+        FileUploadUtil.saveFile(uploadDir,filename,multipartFile);
+
+        return "redirect:/recruiter/thuc-tap-sinh/"+internId ;
     }
 
     @GetMapping("/thong-ke")

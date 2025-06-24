@@ -45,5 +45,7 @@ public interface InternRepository extends JpaRepository<Intern, Integer> {
     @Query("SELECT i FROM Intern i WHERE i.lecturer.id = :id")
     List<Intern> getAllInternsByLecturerId(@Param("id")Integer lecturerId);
 
+    @Query("SELECT i FROM Intern i WHERE i.company.id = :id ")
+    List<Intern> findInternsByCompany(@Param("id") Integer companyId);
 
 }

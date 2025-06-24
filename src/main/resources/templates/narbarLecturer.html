@@ -176,10 +176,10 @@
                 <div class="nav-item relative">
                     <div class="nav-link notification-toggle cursor-pointer p-2">
                         <i class="fas fa-bell text-gray-600 text-xl"></i>
-<!--                        <div th:if="${countNotSeen!=0}" th:text="${countNotSeen}"-->
-<!--                                class="notification-badge absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">-->
-<!--                            3-->
-<!--                        </div>-->
+                        <div th:if="${countNotSeen!=0}" th:text="${countNotSeen}"
+                             class="notification-badge absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                            3
+                        </div>
                     </div>
 
                     <!-- Dropdown thông báo -->
@@ -188,23 +188,24 @@
                         <div class="notification-header flex justify-between items-center px-5 py-3 border-b">
                             <div class="notification-title font-semibold text-gray-800 text-lg">Thông báo</div>
                             <div onclick="markAll()"
-                                    class="mark-all-read text-sm text-blue-600 hover:underline cursor-pointer">Đánh dấu đã đọc tất cả</div>
+                                 class="mark-all-read text-sm text-blue-600 hover:underline cursor-pointer" th:text="${'Đánh dấu tất cả đã đọc ' + '('+countNotSeen+')'}">Đánh dấu đã đọc tất cả</div>
                         </div>
 
-<!--                        <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">-->
-<!--                            <div th:each="n : ${notification}"-->
-<!--                                    class="notification-item unread px-5 py-4 hover:bg-gray-50">-->
-<!--                                <a onclick="markOne(this)" th:id="${n.id}"-->
-<!--                                        th:href="@{${n.url}}" class="flex items-start gap-4">-->
-<!--                                    <img th:src="@{${n.image+n.sender.imageUrl}}" class="w-10 h-10 rounded-full object-cover" />-->
-<!--                                    <div class="flex-1">-->
-<!--                                        <div class="notification-content text-base text-gray-700" th:utext="${n.content}">Bạn có một đơn ứng tuyển mới.</div>-->
-<!--                                        <div class="notification-time text-xs text-gray-400 mt-1" th:text="${p.format(n.created)}">5 phút trước</div>-->
-<!--                                    </div>-->
-<!--                                    <div th:unless="${n.seen}" class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>-->
-<!--                                </a>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                            <div th:each="n : ${notification}" th:classappend="${n.seen ? '' : 'unread'}"
+                                 class="notification-item  px-5 py-4 ">
+                                <a onclick="markOne(this)" th:id="${n.id}"
+                                   th:href="@{${n.url}}" class="flex items-start gap-4">
+                                    <img th:if="${n.sender!=null}"  th:src="@{'/images/' + ${n.getImageee()}}" class="w-10 h-10 rounded-full object-cover" />
+                                    <img  th:if="${n.sender==null}" th:src="@{${n.image}}" class="w-10 h-10 rounded-full object-cover" />
+                                    <div class="flex-1">
+                                        <div class="notification-content text-base text-gray-700" th:utext="${n.content}">Bạn có một đơn ứng tuyển mới</div>
+                                        <div class="notification-time text-xs text-gray-400 mt-1" th:text="${p.format(n.created)}">5 phút trước</div>
+                                    </div>
+                                    <div th:unless="${n.seen}" class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                                </a>
+                            </div>
+                        </div>
                         <div class="notification-footer p-4 text-center border-t">
                             <a href="#" class="text-sm text-blue-600 font-medium hover:underline">Xem tất cả</a>
                         </div>
@@ -216,17 +217,7 @@
         </div>
     </header>
     <script>
-        async function markOne(e) {
-            let response = await fetch('/admin/api/mark/' + e.id, {
-                method: 'PUT'
-            });
-        }
 
-         async function markAll(){
-             let response = await fetch('/admin/api/mark', {
-                 method: 'PUT'
-             });
-         }
 
         const toggleBtn = document.querySelector('.notification-toggle');
         const dropdown = document.querySelector('.notification-menu');
@@ -264,12 +255,12 @@
 
         <div class="p-4">
             <div class="space-y-2">
-                <!-- Main Menu Items -->
-                <a th:href="@{/lecturer/dashboard}" th:classappend="${s==1?'sidebar-item-active':''}"
-                   class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition">
-                    <i data-lucide="home"></i>
-                    <span>Trang chủ</span>
-                </a>
+<!--                &lt;!&ndash; Main Menu Items &ndash;&gt;-->
+<!--                <a th:href="@{/lecturer/dashboard}" th:classappend="${s==1?'sidebar-item-active':''}"-->
+<!--                   class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition">-->
+<!--                    <i data-lucide="home"></i>-->
+<!--                    <span>Trang chủ</span>-->
+<!--                </a>-->
 
                 <!-- Student Management -->
                 <div class="mt-4">
@@ -359,6 +350,7 @@
         </div>
 
         <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
+            <a th:href="@{/lecturer/logout}">Đăng xuất</a>
             <div class="flex items-center space-x-3">
                 <img th:src="${'/images/user-photos/'+auth.getUser().id +'/'+auth.getUser().imageUrl}" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
 
@@ -372,4 +364,18 @@
     </div>
 </th:block>
 </body>
+<script>
+    function markAll() {
+        fetch('/api/notifications/read-all', { method: 'POST' }).then(() => {
+
+        });
+    }
+
+    function markOne(el) {
+        const id = el.id;
+        fetch(`/api/notifications/read/${id}`, { method: 'POST' }).then(() => {
+
+        });
+    }
+</script>
 </html>

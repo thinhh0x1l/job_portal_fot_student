@@ -148,7 +148,8 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button th:onclick="'openStudentDetailFetch(' + ${i.id} + ')'" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">
+<!--                                <button th:onclick="'openStudentDetailFetch(' + ${i.id} + ')'" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">-->
+                                <button class="text-blue-500 hover:text-blue-700 mr-3 action-btn">
                                     <i data-lucide="eye" class="w-4 h-4"></i>
                                 </button>
                                 <button th:onclick="|openStudentModalFetch('edit', ${i.id})|" class="text-yellow-500 hover:text-yellow-700 mr-3 action-btn">
@@ -159,28 +160,7 @@
                                 </button>
                             </td>
                         </tr>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">SV2021002</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">Trần Thị B</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">tranthib@student.hocvien.edu.vn</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">AT21</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">An toàn thông tin</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">PGS. Nguyễn Thị C</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium internship-status-completed">Đã tốt nghiệp</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button onclick="openStudentDetail('SV2021002')" class="text-blue-500 hover:text-blue-700 mr-3 action-btn">
-                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                </button>
-                                <button onclick="openStudentModal('edit', 'SV2021002')" class="text-yellow-500 hover:text-yellow-700 mr-3 action-btn">
-                                    <i data-lucide="edit" class="w-4 h-4"></i>
-                                </button>
-                                <button onclick="confirmDeleteStudent('SV2021002', 'Trần Thị B')" class="text-red-500 hover:text-red-700 action-btn">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </td>
-                        </tr>
+
                         </tbody>
                     </table>
                 </div>
@@ -553,36 +533,36 @@
     }
 
 
-    async function openStudentDetailFetch(studentId) {
-        // In a real app, fetch student details based on ID
-        let response = await fetch('/admin/api/student-detail/'+studentId)
-        let data = await response.json()
-        if(data){
-            document.getElementById('detail-id').textContent = data.mssv ? data.mssv : '----';
-            document.getElementById('detail-name').textContent = data.fullname ? data.fullname : '----';
-            document.getElementById('detail-class').textContent = data.classAndFaculty ? data.classAndFaculty : '----';
-            document.getElementById('detail-email').textContent = data.email ? data.email : '----';
-            document.getElementById('detail-phone').textContent = data.phone ? data.phone : '----';
-
-
-            document.getElementById('detail-advisor').textContent = data.lecturerName ? data.lecturerName : '----';
-            document.getElementById('detail-status').textContent = data.statusInternShip ? data.statusInternShip : '----';
-            document.getElementById('detail-status').className =
-                'px-2 py-1 rounded-full+'+ (data.statusInternShip==='Đang thực tập'?' internship-status-active':
-                    (data.statusInternShip==='Chưa thực tập'?' internship-status-inactive':'internship-status-completed'));
-
-            document.getElementById('detail-note').textContent = 'Sinh viên xuất sắc, đạt học bổng toàn phần năm 2022';
-            document.getElementById('detail-avatar').src = data.image ? data.image : '----';
-            document.getElementById('companyName').textContent = data.companyName ? data.companyName : '----';
-            document.getElementById('applyFor').textContent = data.positionApplied ? data.positionApplied : '----';
-            document.getElementById('diemDetail').textContent = data.pointInternShip ? data.pointInternShip : 'Chưa có điểm';
-            document.getElementById('reviewDetail').textContent =data.reviewOfLecturer;
-
-            document.getElementById('student-detail-modal').classList.remove('hidden');
-        }
-
-
-    }
+    // async function openStudentDetailFetch(studentId) {
+    //     // In a real app, fetch student details based on ID
+    //     let response = await fetch('/admin/api/student-detail/'+studentId)
+    //     let data = await response.json()
+    //     if(data){
+    //         document.getElementById('detail-id').textContent = data.mssv ? data.mssv : '----';
+    //         document.getElementById('detail-name').textContent = data.fullname ? data.fullname : '----';
+    //         document.getElementById('detail-class').textContent = data.classAndFaculty ? data.classAndFaculty : '----';
+    //         document.getElementById('detail-email').textContent = data.email ? data.email : '----';
+    //         document.getElementById('detail-phone').textContent = data.phone ? data.phone : '----';
+    //
+    //
+    //         document.getElementById('detail-advisor').textContent = data.lecturerName ? data.lecturerName : '----';
+    //         document.getElementById('detail-status').textContent = data.statusInternShip ? data.statusInternShip : '----';
+    //         document.getElementById('detail-status').className =
+    //             'px-2 py-1 rounded-full+'+ (data.statusInternShip==='Đang thực tập'?' internship-status-active':
+    //                 (data.statusInternShip==='Chưa thực tập'?' internship-status-inactive':'internship-status-completed'));
+    //
+    //         document.getElementById('detail-note').textContent = 'Sinh viên xuất sắc, đạt học bổng toàn phần năm 2022';
+    //         document.getElementById('detail-avatar').src = data.image ? data.image : '----';
+    //         document.getElementById('companyName').textContent = data.companyName ? data.companyName : '----';
+    //         document.getElementById('applyFor').textContent = data.positionApplied ? data.positionApplied : '----';
+    //         document.getElementById('diemDetail').textContent = data.pointInternShip ? data.pointInternShip : 'Chưa có điểm';
+    //         document.getElementById('reviewDetail').textContent =data.reviewOfLecturer;
+    //
+    //         document.getElementById('student-detail-modal').classList.remove('hidden');
+    //     }
+    //
+    //
+    // }
 
 
     function openStudentDetail(studentId) {

@@ -163,6 +163,12 @@
                     </div>
                 </div>
                 <div class="ml-auto flex items-center gap-3">
+                    <a target="_blank" th:if="${iD.reviewOfRecruiter!= null }"
+                       th:href="@{${iD.reviewOfRecruiter}}"
+                       class="px-4 py-2 rounded-lg transition-colors bg-blue-200 flex items-center gap-2">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Xem phiếu đánh giá </span>
+                    </a>
                     <span class="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 flex items-center gap-1" th:text="${iD.statusIntern}">
                         <i data-lucide="clock" class="w-4 h-4"></i> Đang thực tập
                     </span>
@@ -300,77 +306,59 @@
     </div>
 </div>
 
-<!-- Week Detail Modal -->
 <div id="week-modal" class="modal-overlay hidden">
-    <div class="modal-container">
-        <div class="p-6">
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h3 class="text-xl font-bold text-gray-800">Chi tiết tuần <span id="modal-week-number">1</span></h3>
-                    <div class="flex items-center gap-3 mt-1">
-                        <span id="modal-week-date" class="text-sm text-gray-500">05/06 - 11/06</span>
-                        <span id="modal-week-status" class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Đã hoàn thành</span>
-                    </div>
+    <div class="modal-container p-6">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h3 class="text-xl font-bold text-gray-800">Chi tiết tuần <span id="modal-week-number">1</span></h3>
+                <div class="flex items-center gap-3 mt-1">
+                    <span id="modal-week-date" class="text-sm text-gray-500">05/06 - 11/06</span>
+                    <span id="modal-week-status" class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Đã hoàn thành</span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-lg font-semibold text-gray-700">Nhiệm vụ: </span>
-                    <span id="modal-week-score" class="px-3 py-1 rounded-lg text-lg font-bold bg-blue-100 text-blue-800">8.5/10</span>
-                    <button onclick="closeWeekModal()" class="text-gray-500 hover:text-gray-700 ml-2" >
-                        <i data-lucide="x" class="w-6 h-6"></i>
-                    </button>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-lg font-semibold text-gray-700">Nhiệm vụ: </span>
+                <span id="modal-week-score" class="px-3 py-1 rounded-lg text-lg font-bold bg-blue-100 text-blue-800">8.5/10</span>
+                <button onclick="closeWeekModal()" class="text-gray-500 hover:text-gray-700 ml-2">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
 
+        <!-- Evaluation Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 justify-center items-start">
+            <!-- Company Evaluation -->
+            <div class="evaluation-card bg-blue-50 p-5 rounded-xl border border-blue-100 flex flex-col justify-between">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-2 bg-blue-100 rounded-lg">
+                        <i data-lucide="building" class="w-5 h-5 text-blue-600"></i>
+                    </div>
+                    <h4 class="font-medium text-blue-800">Đánh giá từ công ty</h4>
+                </div>
+                <p class="text-sm text-gray-700 mb-4 flex-grow" id="modal-company-evaluation">Sinh viên tiếp thu nhanh, hòa đồng với team. Đã hoàn thành tốt các task được giao trong tuần.</p>
+                <div class="mt-auto">
+                    <span class="text-sm font-medium text-gray-600">Điểm: </span>
+                    <span class="text-blue-600 font-bold" id="modal-company-score">8.5/10</span>
                 </div>
             </div>
 
-            <!-- Evaluation Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-                <!-- Company Evaluation -->
-                <div class="evaluation-card bg-blue-50 p-5 rounded-xl border border-blue-100">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="p-2 bg-blue-100 rounded-lg">
-                            <i data-lucide="building" class="w-5 h-5 text-blue-600"></i>
-                        </div>
-                        <h4 class="font-medium text-blue-800">Đánh giá từ công ty</h4>
+            <!-- Student Report -->
+            <div class="evaluation-card bg-green-50 p-5 rounded-xl border border-green-100 flex flex-col justify-between">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-2 bg-green-100 rounded-lg">
+                        <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
                     </div>
-                    <p class="text-sm text-gray-700 mb-4 flex-grow" id="modal-company-evaluation">Sinh viên tiếp thu nhanh, hòa đồng với team. Đã hoàn thành tốt các task được giao trong tuần.</p>
-                    <div class="mt-auto" >
-                        <span class="text-sm font-medium text-gray-600">Điểm: </span>
-                        <span class="text-blue-600 font-bold" id="modal-company-score">8.5/10</span>
-                    </div>
+                    <h4 class="font-medium text-green-800">Báo cáo sinh viên</h4>
                 </div>
-
-                <!-- Student Report -->
-                <div class="evaluation-card bg-green-50 p-5 rounded-xl border border-green-100">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="p-2 bg-green-100 rounded-lg">
-                            <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
-                        </div>
-                        <h4 class="font-medium text-green-800">Báo cáo sinh viên</h4>
-                    </div>
-                    <p class="text-sm text-gray-700 mb-4 flex-grow" id="modal-student-report">Đã làm quen với môi trường làm việc, học được quy trình phát triển phần mềm Agile. Hoàn thành 3 task nhỏ.</p>
-                    <div class="mt-auto">
-                        <a id="fileBaoCao" target="_blank" href="#" class="text-sm text-green-600 hover:text-green-800 flex items-center gap-1">
-                            <i data-lucide="download" class="w-4 h-4"></i> Xem file báo cáo
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Lecturer Comment -->
-                <div class="evaluation-card bg-purple-50 p-5 rounded-xl border border-purple-100">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="p-2 bg-purple-100 rounded-lg">
-                            <i data-lucide="graduation-cap" class="w-5 h-5 text-purple-600"></i>
-                        </div>
-                        <h4 class="font-medium text-purple-800">Nhận xét giảng viên</h4>
-                    </div>
-                    <p class="text-sm text-gray-700 mb-4 flex-grow" id="modal-lecturer-comment">Sinh viên có tiến bộ tốt, báo cáo chi tiết. Cần chú ý hơn về quản lý thời gian.</p>
-                    <div class="mt-auto">
-                        <span class="text-sm font-medium text-gray-600">Điểm: </span>
-                        <span class="text-purple-600 font-bold" id="modal-lecturer-score">8.0/10</span>
-                    </div>
+                <p class="text-sm text-gray-700 mb-4 flex-grow" id="modal-student-report">Đã làm quen với môi trường làm việc, học được quy trình phát triển phần mềm Agile. Hoàn thành 3 task nhỏ.</p>
+                <div class="mt-auto">
+                    <a id="fileBaoCao" target="_blank" href="#" class="text-sm text-green-600 hover:text-green-800 flex items-center gap-1">
+                        <i data-lucide="download" class="w-4 h-4"></i> Xem file báo cáo
+                    </a>
                 </div>
             </div>
+        </div>
 
             <!-- Week Navigation -->
             <div class="mb-8">
@@ -694,8 +682,8 @@
 
         document.getElementById('modal-student-report').textContent = task.description || '-----';
         document.getElementById('fileBaoCao').href =task.report
-        document.getElementById('modal-lecturer-comment').textContent =""
-        document.getElementById('modal-lecturer-score').textContent = ""
+        // document.getElementById('modal-lecturer-comment').textContent =""
+        // document.getElementById('modal-lecturer-score').textContent = ""
 
         // Update tasks list
         const tasksList = document.getElementById('modal-week-tasks');

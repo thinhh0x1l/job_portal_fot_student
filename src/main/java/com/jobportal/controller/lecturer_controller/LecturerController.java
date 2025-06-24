@@ -42,8 +42,8 @@ public class LecturerController {
     PrettyTime p = new PrettyTime(new Locale("vi"));
     private void proper(Model model ,Authentication auth) {
         model.addAttribute("p",p);
-//        model.addAttribute("notification",adminService.getNotificationByAdmin());
-//        model.addAttribute("countNotSeen",adminService.countNotSeenByAdmin());
+        model.addAttribute("notification",userService.findByReceiverId());
+        model.addAttribute("countNotSeen",userService.countNotSeen());
         model.addAttribute("viLocale", new Locale("vi", "VN"));
         model.addAttribute("auth",(CustomUserDetails)auth.getPrincipal() );
     }

@@ -353,7 +353,21 @@
     function backe() {
         window.location.href = "/homepage";
     }
+    const uploadBox = document.getElementById('box-upload');
+    const inputFile = document.getElementById('upload-cv');
+    const fileNameDisplay = document.getElementById('fileName');
 
+    // Khi click vào box thì click input
+    uploadBox.addEventListener('click', () => {
+        inputFile.click();
+    });
+
+    // Hiển thị tên file khi chọn
+    inputFile.addEventListener('change', () => {
+        if (inputFile.files.length > 0) {
+            fileNameDisplay.textContent = `Đã chọn: ${inputFile.files[0].name}`;
+        }
+    });
     document.addEventListener("DOMContentLoaded", () => {
         // File upload handling
         const fileInput = document.getElementById('upload-cv');

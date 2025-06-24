@@ -266,9 +266,9 @@
             <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-2">Bảng điều khiển</h1>
             <p class="text-slate-600">Chào mừng trở lại, <span th:text="${fullname}"></span>!</p>
         </div>
-        <button class="btn btn-primary">
-            <i class="fas fa-plus mr-2"></i> Đăng tin mới
-        </button>
+<!--        <a th:href="@{/recruiter/}" class="btn btn-primary">-->
+<!--            <i class="fas fa-plus mr-2"></i> Đăng tin mới-->
+<!--        </a>-->
     </div>
 
     <!-- Stats Cards -->
@@ -292,51 +292,51 @@
             </div>
         </div>
 
-        <!-- New Candidates Card -->
-        <div class="card stat-card">
-            <div class="p-6 flex items-center">
-                <div class="icon-wrapper bg-green-100 text-green-600">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div>
-                    <div class="text-slate-500 text-sm mb-1">Ứng viên mới</div>
-                    <div class="text-2xl font-bold text-slate-800 mb-1">24</div>
-                    <div class="stat-change up">
-                        <i class="fas fa-arrow-up"></i> 8 từ hôm qua
-                    </div>
-                </div>
-            </div>
-        </div>
+<!--        &lt;!&ndash; New Candidates Card &ndash;&gt;-->
+<!--        <div class="card stat-card">-->
+<!--            <div class="p-6 flex items-center">-->
+<!--                <div class="icon-wrapper bg-green-100 text-green-600">-->
+<!--                    <i class="fas fa-users"></i>-->
+<!--                </div>-->
+<!--                <div>-->
+<!--                    <div class="text-slate-500 text-sm mb-1">Ứng viên mới</div>-->
+<!--                    <div class="text-2xl font-bold text-slate-800 mb-1">24</div>-->
+<!--                    <div class="stat-change up">-->
+<!--                        <i class="fas fa-arrow-up"></i> 8 từ hôm qua-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
 
-        <!-- Pending CVs Card -->
-        <div class="card stat-card">
-            <div class="p-6 flex items-center">
-                <div class="icon-wrapper bg-amber-100 text-amber-600">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div>
-                    <div class="text-slate-500 text-sm mb-1">CV chờ duyệt</div>
-                    <div class="text-2xl font-bold text-slate-800 mb-1">7</div>
-                    <div class="stat-change down">
-                        <i class="fas fa-exclamation-circle"></i> 3 quá hạn
-                    </div>
-                </div>
-            </div>
-        </div>
+<!--        &lt;!&ndash; Pending CVs Card &ndash;&gt;-->
+<!--        <div class="card stat-card">-->
+<!--            <div class="p-6 flex items-center">-->
+<!--                <div class="icon-wrapper bg-amber-100 text-amber-600">-->
+<!--                    <i class="fas fa-clock"></i>-->
+<!--                </div>-->
+<!--                <div>-->
+<!--                    <div class="text-slate-500 text-sm mb-1">CV chờ duyệt</div>-->
+<!--                    <div class="text-2xl font-bold text-slate-800 mb-1">7</div>-->
+<!--                    <div class="stat-change down">-->
+<!--                        <i class="fas fa-exclamation-circle"></i> 3 quá hạn-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
 
-        <!-- Company Profile Card -->
-        <div class="card stat-card">
-            <div class="p-6 flex items-center">
-                <div class="icon-wrapper bg-indigo-100 text-indigo-600">
-                    <i class="fas fa-building"></i>
-                </div>
-                <div>
-                    <div class="text-slate-500 text-sm mb-1">Hồ sơ công ty</div>
-                    <div class="text-2xl font-bold text-slate-800 mb-1">85%</div>
-                    <div class="text-slate-500 text-sm">Hoàn thiện hồ sơ để tăng hiển thị</div>
-                </div>
-            </div>
-        </div>
+<!--        &lt;!&ndash; Company Profile Card &ndash;&gt;-->
+<!--        <div class="card stat-card">-->
+<!--            <div class="p-6 flex items-center">-->
+<!--                <div class="icon-wrapper bg-indigo-100 text-indigo-600">-->
+<!--                    <i class="fas fa-building"></i>-->
+<!--                </div>-->
+<!--                <div>-->
+<!--                    <div class="text-slate-500 text-sm mb-1">Hồ sơ công ty</div>-->
+<!--                    <div class="text-2xl font-bold text-slate-800 mb-1">85%</div>-->
+<!--                    <div class="text-slate-500 text-sm">Hoàn thiện hồ sơ để tăng hiển thị</div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
     </div>
 
     <!-- Main Content Grid -->
@@ -376,17 +376,17 @@
             </div>
 
             <div class="p-4">
-                <div class="quick-action">
-                    <div class="quick-action-icon" style="background-color: #3b82f6;">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div>
-                        <div class="font-medium text-slate-800">Tìm kiếm CV</div>
-                        <div class="text-sm text-slate-500 mt-1">Tìm ứng viên phù hợp</div>
-                    </div>
-                </div>
+<!--                <div class="quick-action">-->
+<!--                    <div class="quick-action-icon" style="background-color: #3b82f6;">-->
+<!--                        <i class="fas fa-search"></i>-->
+<!--                    </div>-->
+<!--                    <div>-->
+<!--                        <div class="font-medium text-slate-800">Tìm kiếm CV</div>-->
+<!--                        <div class="text-sm text-slate-500 mt-1">Tìm ứng viên phù hợp</div>-->
+<!--                    </div>-->
+<!--                </div>-->
 
-                <div class="quick-action">
+                <a th:href="@{'/recruiter/setting?tab=tab4'}" class="quick-action">
                     <div class="quick-action-icon" style="background-color: #10b981;">
                         <i class="fas fa-building"></i>
                     </div>
@@ -394,7 +394,7 @@
                         <div class="font-medium text-slate-800">Chỉnh sửa công ty</div>
                         <div class="text-sm text-slate-500 mt-1">Cập nhật thông tin công ty</div>
                     </div>
-                </div>
+                </a>
 
                 <div class="quick-action">
                     <div class="quick-action-icon" style="background-color: #8b5cf6;">
@@ -406,25 +406,25 @@
                     </div>
                 </div>
 
-                <div class="quick-action">
-                    <div class="quick-action-icon" style="background-color: #ec4899;">
-                        <i class="fas fa-user-graduate"></i>
-                    </div>
-                    <div>
-                        <div class="font-medium text-slate-800">Xem thực tập sinh</div>
-                        <div class="text-sm text-slate-500 mt-1">Tìm kiếm thực tập sinh</div>
-                    </div>
-                </div>
+<!--                <div class="quick-action">-->
+<!--                    <div class="quick-action-icon" style="background-color: #ec4899;">-->
+<!--                        <i class="fas fa-user-graduate"></i>-->
+<!--                    </div>-->
+<!--                    <div>-->
+<!--                        <div class="font-medium text-slate-800">Xem thực tập sinh</div>-->
+<!--                        <div class="text-sm text-slate-500 mt-1">Tìm kiếm thực tập sinh</div>-->
+<!--                    </div>-->
+<!--                </div>-->
 
-                <div class="quick-action">
+                <a th:href="@{/recruiter/thong-ke}" class="quick-action">
                     <div class="quick-action-icon" style="background-color: #f59e0b;">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <div>
+                    <div >
                         <div class="font-medium text-slate-800">Xem báo cáo</div>
                         <div class="text-sm text-slate-500 mt-1">Thống kê hiệu suất</div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>

@@ -91,7 +91,7 @@ public class InternService {
             return I;
         }
         lecturer.addIntern(intern);
-
+        intern.setEnabled(true);
         intern.setStatus(InternshipStatus.NOT_PRACTICED);
         intern.setPassword(encoder.encode(intern.getPassword()));
         intern.setProvider(AuthProvider.DATABASE);

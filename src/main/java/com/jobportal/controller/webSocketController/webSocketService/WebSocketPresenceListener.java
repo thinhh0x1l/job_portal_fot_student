@@ -21,7 +21,6 @@ public class WebSocketPresenceListener {
     @EventListener
     public void handleSessionConnected(SessionConnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        System.out.println("1Dangone");
         // Lấy internId từ header custom
         String internIdStr = accessor.getFirstNativeHeader("internId");
         if (internIdStr != null) {

@@ -55,6 +55,7 @@ public class LecturerService {
         lecturer.setProvider(AuthProvider.DATABASE);
         lecturer.setRole(Role.RECRUITER);
         lecturer.setPassword(passwordEncoder.encode(lecturer.getPassword()));
+        lecturer.setEnabled(true);
         return lecturerRepository.save(lecturer);
     }
 
@@ -180,6 +181,8 @@ public class LecturerService {
             d.setTimeTT(i.getDateToInternShip().format(formatter) +" - " + i.getDateToInternShip().plusWeeks(10).format(formatter) +" (10 tuần)");
             d.setLinkCompany("/compy/"+company.getId());
             d.setEmailCompany(company.getEmail());
+            if(i.getReportOfRecruiter()!=null && !i.getReportOfRecruiter().isEmpty())
+                d.setReviewOfRecruiter("/images/reviewOfRecruiter/"+i.getId()+"/"+i.getReportOfRecruiter());
         }
         return d;
     }

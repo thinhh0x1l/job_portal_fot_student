@@ -4,7 +4,7 @@ package com.jobportal.model;
 public enum InternshipStatus {
     NOT_PRACTICED("Chưa thực tập"),
     IS_PRACTICING("Đang thực tập"),
-    COMPLETED("Hoàng thành thực tập");
+    COMPLETED("Hoàn thành thực tập");
 
     private final String label;
 

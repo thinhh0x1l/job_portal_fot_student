@@ -10,6 +10,8 @@ import lombok.experimental.FieldDefaults;
 public class DetailStudent {
     String statusIntern;
 
+    String reviewOfRecruiter;
+
     String studentName;
     String image;
     String mssv;

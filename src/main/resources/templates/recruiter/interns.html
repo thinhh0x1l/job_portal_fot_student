@@ -197,7 +197,7 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Tổng số sinh viên</p>
-                        <p class="text-2xl font-bold text-gray-800">24</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${allStatus}"></p>
                     </div>
                 </div>
             </div>
@@ -210,7 +210,7 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Đang thực tập</p>
-                        <p class="text-2xl font-bold text-gray-800">18</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${isPracticingStatus}">18</p>
                     </div>
                 </div>
             </div>
@@ -223,7 +223,7 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Đã hoàn thành</p>
-                        <p class="text-2xl font-bold text-gray-800">6</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${completedStatus}">6</p>
                     </div>
                 </div>
             </div>
@@ -287,8 +287,8 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center">
                                 <p class="text-sm font-medium text-gray-500 mb-1" th:text="${'ID: '+so.id}">ID: 123</p>
-                                <span th:if="${internStatus.equals('1')}" class="status-badge bg-green-100 text-green-800">Đang thực tập</span>
-                                <span th:if="${internStatus.equals('2')}" class="status-badge bg-blue-100 text-blue-800">Đã hoàn thành</span>
+                                <span th:if="${so.status.name().equals('IS_PRACTICING')}" class="status-badge bg-blue-100 text-blue-800">Đang thực tập</span>
+                                <span th:if="${so.status.name().equals('COMPLETED')}" class="status-badge bg-green-100 text-green-800">Đã hoàn thành</span>
                             </div>
                             <h4 class="text-xl font-bold text-gray-900 truncate" th:text="${so.firstName+' '+so.lastName}">Nguyễn Văn A</h4>
                             <div class="flex items-center text-sm text-gray-500 mt-1">

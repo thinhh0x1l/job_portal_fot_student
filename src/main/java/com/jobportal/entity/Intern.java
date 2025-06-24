@@ -30,6 +30,7 @@ public class Intern extends User {
     String imageCover;
     LocalDate dateToInternShip;
 
+    String reportOfRecruiter;
 
     @Lob
     String description;
