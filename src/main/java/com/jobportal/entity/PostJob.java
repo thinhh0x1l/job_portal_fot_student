@@ -198,7 +198,7 @@ public class PostJob {
         if(salary>=1)
             return salary + " triệu";
         else if(salary!=0)
-            return salary*1000000 + " nghìn";
+            return (long)salary*1000 + " nghìn";
         return "Không lương";
     }
 
